@@ -1,5 +1,0 @@
-﻿  Application.cpp
-c:\users\james\dev\cpp\desktop\infinit\infinit\src\core\application.cpp(20): fatal error C1010: Unerwartetes Dateiende während der Suche nach dem vorkompilierten Header. Haben Sie möglicherweise vergessen, im Quellcode "#include "inpch.h"" einzufügen?
-  inpch.cpp
-c:\users\james\dev\cpp\desktop\infinit\infinit\src\inpch.cpp(1): fatal error C1083: Datei (Vorkompilierte Headerdatei) kann nicht geöffnet werden: "..\bin-int\Debug-${cfg.system}-x86_64\Infinit\Infinit.pch": No such file or directory
-  Code wird generiert...

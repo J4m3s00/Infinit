@@ -1,8 +1,0 @@
-﻿  SandboxApplication.cpp
-c:\users\james\dev\cpp\desktop\infinit\infinit\src\core\entrypoint.h(10): error C2248: "Infinit::Application::Run": Kein Zugriff auf protected Member, dessen Deklaration in der Infinit::Application-Klasse erfolgte.
-  c:\users\james\dev\cpp\desktop\infinit\infinit\src\core\application.h(19): note: Siehe Deklaration von "Infinit::Application::Run"
-  c:\users\james\dev\cpp\desktop\infinit\infinit\src\core\application.h(8): note: Siehe Deklaration von "Infinit::Application"
-c:\users\james\dev\cpp\desktop\infinit\infinit\src\core\entrypoint.h(11): error C2248: "Infinit::Application::~Application": Kein Zugriff auf protected Member, dessen Deklaration in der Infinit::Application-Klasse erfolgte.
-  c:\users\james\dev\cpp\desktop\infinit\infinit\src\core\application.h(20): note: Compiler hat hier "Infinit::Application::~Application" generiert
-  c:\users\james\dev\cpp\desktop\infinit\infinit\src\core\application.h(8): note: Siehe Deklaration von "Infinit::Application"
-c:\users\james\dev\cpp\desktop\infinit\sandbox\src\sandboxapplication.cpp(10): error C2243: "Typumwandlung": Konvertierung von "Sandbox *" zu "Infinit::Application *" ist bereits vorhanden, aber es kann nicht darauf zugegriffen werden.

@@ -1,3 +1,4 @@
 .vs
 .git
-Infinit/vendor/GLFW/*
+bin/
+bin-int/

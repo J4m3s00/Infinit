@@ -1,12 +1,13 @@
 #pragma once
 
-#include <Infinit.h>
-#include <string>
+#include "Core.h"
 
 namespace Infinit {
 
 	class INFINIT_API Application 
 	{
+	private:
+		bool m_Running;
 	protected:
 		Application(const std::string& name);
 	public:

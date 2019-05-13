@@ -1,15 +1,15 @@
 #pragma once
 
-/*#ifdef IN_PLATFORM_WINDOWS
+#ifdef IN_PLATFORM_WINDOWS
 
-//extern Infinit::Application* Infinit::CreateApplication();
+extern Infinit::Application* Infinit::CreateApplication();
 
 int main(int argc, char** argv)
 {
-	//auto app = Infinit::CreateApplication();
-	//app->Run();
-	//delete app;
+	auto app = Infinit::CreateApplication();
+	app->Run();
+	delete app;
 	return 0;
 }
 
-#endif*/
+#endif

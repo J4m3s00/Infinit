@@ -15,6 +15,9 @@
     <ClInclude Include="src\Core\EntryPoint.h">
       <Filter>Core</Filter>
     </ClInclude>
+    <ClInclude Include="src\Core\Window.h">
+      <Filter>Core</Filter>
+    </ClInclude>
     <ClInclude Include="src\Infinit.h" />
     <ClInclude Include="src\inpch.h" />
   </ItemGroup>

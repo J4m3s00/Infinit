@@ -1,7 +1,6 @@
 #include <inpch.h>
 #include "Application.h"
 
-#include <iostream>
 
 namespace Infinit {
 
@@ -17,6 +16,10 @@ namespace Infinit {
 
 	void Application::Run()
 	{
-		while (true);
+		m_Running = true;
+		while (m_Running)
+		{
+
+		}
 	}
 }

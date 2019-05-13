@@ -12,10 +12,3 @@ Infinit::Application* Infinit::CreateApplication()
 {
 	return new Sandbox();
 }
-
-int main()
-{
-	Infinit::Application* app = Infinit::CreateApplication();
-	app->Run();
-	delete app;
-}

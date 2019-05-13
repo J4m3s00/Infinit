@@ -1,5 +1,8 @@
 #pragma once
 
+typedef std::string string;
+typedef unsigned int uint;
+typedef unsigned char byte;
 
 #ifdef IN_PLATFORM_WINDOWS
 	#ifdef IN_BUILD_DLL

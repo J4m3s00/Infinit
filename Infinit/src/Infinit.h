@@ -1,5 +1,7 @@
 #pragma once
 
+#include "inpch.h"
+
 #include "Core/Core.h"
 #include "Core/Application.h"
 

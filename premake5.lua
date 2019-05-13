@@ -34,6 +34,12 @@ project "Infinit"
 		"opengl32.lib"
 	}
 
+	
+	postbuildcommands
+	{
+		("{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputdir .. "/Sandbox/")
+	}
+
 	filter "system:windows"
 		cppdialect "C++17"
 		systemversion "latest"
@@ -44,10 +50,6 @@ project "Infinit"
 			"IN_BUILD_DLL"
 		}
 
-		postbuildcommands
-		{
-			("{COPY} %{cfg.buildtarget.relpath} \"../bin/" .. outputdir .. "/Sandbox/\"")
-		}
 
 	filter "configurations:Debug"
 		defines "IN_DEBUG"

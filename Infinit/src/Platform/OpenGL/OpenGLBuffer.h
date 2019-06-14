@@ -13,8 +13,12 @@ namespace Infinit {
 
 		virtual void Bind() const override;
 		virtual void Unbind() const override;
+
+		virtual const BufferLayout& GetLayout() const override { return m_Layout; }
+		virtual void SetLayout(const BufferLayout& layout) override { m_Layout = layout; }
 	private:
 		uint m_RendererID = 0;
+		BufferLayout m_Layout;
 	};
 
 	class INFINIT_API OpenGLIndexBuffer : public IndexBuffer
@@ -25,8 +29,11 @@ namespace Infinit {
 
 		virtual void Bind() const override;
 		virtual void Unbind() const override;
+
+		virtual uint GetCount() const override { return m_Count; }
 	private:
 		uint m_RendererID = 0;
+		uint m_Count;
 	};
 
 }

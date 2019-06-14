@@ -22,7 +22,7 @@ typedef unsigned char byte;
 
 #ifdef IN_ENABLE_ASSERT
 #define IN_ASSERT(x, ...) { if(!(x)) { IN_ERROR("Assertion Failed {0}", __VA_ARGS__); __debugbreak(); } }
-#define IN_CORE_ASSERT(x, ...) { if(!(x)) { IN_ERROR("Assertion Failed {0}", __VA_ARGS__); __debugbreak(); } }
+#define IN_CORE_ASSERT(x, ...) { if(!(x)) { IN_CORE_ERROR("Assertion Failed {0}", __VA_ARGS__); __debugbreak(); } }
 #else
 	#define IN_ASSERT(x, ...)
 	#define IN_CORE_ASSERT(x, ...)

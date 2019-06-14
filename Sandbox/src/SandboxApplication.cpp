@@ -35,9 +35,6 @@ public:
 
 	virtual void OnImGuiRender() override
 	{
-		ImGui::Begin("TestAsd");
-		ImGui::Text("Hello World");
-		ImGui::End();
 	}
 
 	virtual void OnEvent(Infinit::Event& e) override

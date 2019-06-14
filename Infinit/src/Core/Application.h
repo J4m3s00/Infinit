@@ -43,10 +43,9 @@ namespace Infinit {
 		string m_Name;
 		std::unique_ptr<Window> m_Window;
 
-		Shader* m_Shader;
-		VertexArray* m_VAO;
-		IndexBuffer* m_IBO;
-		VertexBuffer* m_VBO;
+		std::shared_ptr<Shader> m_Shader;
+		std::unique_ptr<VertexArray> m_VAO;
+		uint m_VAOID;
 	private:
 		static Application* s_Instance;
 	};

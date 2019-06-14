@@ -8,12 +8,13 @@ namespace Infinit {
 	OpenGLVertexBuffer::OpenGLVertexBuffer(const void* data, uint size)
 	{
 		glGenBuffers(1, &m_RendererID);
-		Bind();
+		glBindBuffer(GL_ARRAY_BUFFER, m_RendererID);
 		glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
 	}
 
 	OpenGLVertexBuffer::~OpenGLVertexBuffer()
 	{
+		IN_CORE_INFO("VertexBuffer Deleted!");
 		glDeleteBuffers(1, &m_RendererID);
 	}
 
@@ -30,14 +31,16 @@ namespace Infinit {
 	}
 
 	OpenGLIndexBuffer::OpenGLIndexBuffer(const uint* data, uint count)
+		: m_Count(count)
 	{
 		glGenBuffers(1, &m_RendererID);
-		Bind();
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_RendererID);
 		glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * sizeof(uint), data, GL_STATIC_DRAW);
 	}
 
 	OpenGLIndexBuffer::~OpenGLIndexBuffer()
 	{
+		IN_CORE_INFO("IndexBuffer Deleted!");
 		glDeleteBuffers(1, &m_RendererID);
 	}
 

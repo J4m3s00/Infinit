@@ -5,9 +5,9 @@
 
 namespace Infinit {
 
-	Shader* Shader::Create(const string& vertexSource, const string& fragmentSource)
+	std::shared_ptr<Shader> Shader::Create(const string& vertexSource, const string& fragmentSource)
 	{
-		return new OpenGLShader(vertexSource, fragmentSource);
+		return std::make_shared<OpenGLShader>(OpenGLShader(vertexSource, fragmentSource));
 
 	}
 

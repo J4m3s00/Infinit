@@ -9,7 +9,15 @@
 #include <graphics/VertexArray.h>
 #include <graphics/Buffer.h>
 
+#include <glm/glm.hpp>
+
 namespace Infinit {
+
+	struct Vertex
+	{
+		glm::vec3 position;
+		uint color;
+	};
 
 	Application* Application::s_Instance = nullptr;
 
@@ -74,11 +82,9 @@ namespace Infinit {
 			//TEST RENDER
 			m_Shader->Bind();
 			m_VAO->Bind();
-			m_IBO->Bind();
 
 			glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, NULL);
 
-			m_IBO->Unbind();
 			m_VAO->Unbind();
 			m_Shader->Unbind();
 
@@ -107,9 +113,13 @@ namespace Infinit {
 			#version 330 core
 			
 			layout (location = 0) in vec3 position;
+			layout (location = 1) in vec4 color;
+
+			out vec4 vColor;
 
 			void main()
 			{
+				vColor = color;
 				gl_Position = vec4(position, 1.0);
 			}
 			)",
@@ -119,31 +129,36 @@ namespace Infinit {
 
 			layout (location = 0) out vec4 fragColor;
 
+			in vec4 vColor;
+
 			void main()
 			{
-				fragColor = vec4(1.0, 0.0, 0.0, 1.0);
+				fragColor = vColor;
 			}
 )"
 );
-		float vertices[] = {
-			-0.5f, -0.5f, 0.0f,
-			0.0f, 0.5f, 0.0f,
-			0.5f, -0.5f, 0.0f
+
+		Vertex vertices[] = {
+			{{-0.5f, -0.5f, 0.0f}, 0xff0000ff },
+			{{ 0.0f,  0.5f, 0.0f}, 0xff00ffff},
+			{{ 0.5f, -0.5f, 0.0f}, 0xffff00ff}
 		};
 
 		uint indices[] = {
 			0, 1, 2
 		};
 
-		m_VAO = VertexArray::Create();
+		m_VAO.reset(VertexArray::Create());
+		std::shared_ptr<VertexBuffer> vertexBuffer;
+		vertexBuffer.reset(VertexBuffer::Create(vertices, 3 * sizeof(Vertex)));
+		
+		vertexBuffer->SetLayout({ {ShaderDataType::Float3, "position"},
+									{ShaderDataType::Byte4, "color", true} });
+		m_VAO->AddVertexBuffer(vertexBuffer);
 
-		m_VBO = VertexBuffer::Create(vertices, 9 * sizeof(float));
-
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), 0);
-
-		m_IBO = IndexBuffer::Create(indices, 3);
-
+		std::shared_ptr<IndexBuffer> indexBuffer;
+		indexBuffer.reset(IndexBuffer::Create(indices, 3));
+		m_VAO->SetIndexBuffer(indexBuffer);
 
 		return true;
 	}

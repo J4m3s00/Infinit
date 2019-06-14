@@ -6,6 +6,9 @@ extern Infinit::Application* Infinit::CreateApplication();
 
 int main(int argc, char** argv)
 {
+	Infinit::Log::Init();
+	IN_CORE_TRACE("Log initialized!");
+
 	auto app = Infinit::CreateApplication();
 	app->Run();
 	delete app;

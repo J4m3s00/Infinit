@@ -1,0 +1,12 @@
+[submodule "Infinit/vendor/GLFW"]
+	path = Infinit/vendor/GLFW
+	url = https://github.com/J4m3s00/glfw
+[submodule "Infinit/vendor/spdlog"]
+	path = Infinit/vendor/spdlog
+	url = https://github.com/gabime/spdlog
+[submodule "Infinit/vendor/glm"]
+	path = Infinit/vendor/glm
+	url = https://github.com/g-truc/glm
+[submodule "Infinit/vendor/ImGui"]
+	path = Infinit/vendor/ImGui
+	url = https://github.com/J4m3s00/imgui

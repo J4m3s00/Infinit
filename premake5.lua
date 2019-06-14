@@ -1,14 +1,26 @@
 workspace "Infinit"
 	architecture "x64"
+	startproject "Sandbox"
 
 	configurations { "Debug", "Release"}
 
 
 outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 
+IncludeDir = {}
+IncludeDir["GLFW"] = "Infinit/vendor/GLFW/include"
+IncludeDir["Glad"] = "Infinit/vendor/Glad/include"
+IncludeDir["spdlog"] = "Infinit/vendor/spdlog/include"
+IncludeDir["glm"] = "Infinit/vendor/glm"
+IncludeDir["imgui"] = "Infinit/vendor/imgui"
+
+include "Infinit/vendor/GLFW"
+include "Infinit/vendor/Glad"
+include "Infinit/vendor/imgui"
+
 project "Infinit"
 	location "Infinit"
-	kind "SharedLib"
+	kind "StaticLib"
 	language "C++"
 	staticruntime "off"
 
@@ -26,18 +38,20 @@ project "Infinit"
 
 	includedirs
 	{
-		"%{prj.name}/src/"
+		"%{prj.name}/src/",
+		"%{IncludeDir.GLFW}",
+		"%{IncludeDir.Glad}",
+		"%{IncludeDir.spdlog}",
+		"%{IncludeDir.glm}",
+		"%{IncludeDir.imgui}"
 	}
 
 	links
 	{
+		"GLFW",
+		"Glad",
+		"imgui",
 		"opengl32.lib"
-	}
-
-	
-	postbuildcommands
-	{
-		("{COPY} %{cfg.buildtarget.relpath} ../bin/" .. outputdir .. "/Sandbox/")
 	}
 
 	filter "system:windows"
@@ -49,6 +63,11 @@ project "Infinit"
 			"IN_PLATFORM_WINDOWS",
 			"IN_BUILD_DLL"
 		}
+
+--		postbuildcommands
+--		{
+--			("{COPY} %{cfg.buildtarget.relpath} \"../bin/" .. outputdir .. "/Sandbox/\"")
+--		}
 
 
 	filter "configurations:Debug"
@@ -69,6 +88,7 @@ project "Sandbox"
 	language "C++"
 	staticruntime "off"
 
+--	targetdir ("bin/" .. outputdir .. "/Infinit")
 	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
 
@@ -81,12 +101,16 @@ project "Sandbox"
 	includedirs
 	{
 		"Infinit/src/",
-		"%{prj.name}/src/"
+		"%{prj.name}/src/",
+		"%{IncludeDir.spdlog}",
+		"%{IncludeDir.imgui}",
+		"%{IncludeDir.glm}"
 	}
 
 	links
 	{
-		"Infinit"
+		"Infinit",
+		"imgui"
 	}
 
 	filter "system:windows"

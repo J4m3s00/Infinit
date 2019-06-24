@@ -3,12 +3,21 @@
 
 #include "Platform/OpenGL/OpenGLShader.h"
 
+#include <graphics/RendererAPI.h>
+#include "Core/Log.h"
+
+
 namespace Infinit {
 
-	std::shared_ptr<Shader> Shader::Create(const string& vertexSource, const string& fragmentSource)
+	Shader* Shader::Create(const string& vertexSource, const string& fragmentSource)
 	{
-		return std::make_shared<OpenGLShader>(OpenGLShader(vertexSource, fragmentSource));
+		IN_CORE_ASSERT((bool)RendererAPI::Renderer, "No RenderAPI selected");
+		switch (RendererAPI::Renderer)
+		{
+		case RendererAPI::Type::OpenGL:return new OpenGLShader(vertexSource, fragmentSource);
+		}
 
+		return nullptr;
 	}
 
 }

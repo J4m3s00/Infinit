@@ -14,3 +14,7 @@
 #include "Core/KeyCodes.h"
 
 #include "Core/EntryPoint.h"
+
+#include "graphics/RendererAPI.h"
+#include "graphics/Renderer.h"
+#include "graphics/Mesh.h"

@@ -70,6 +70,9 @@
     <ClInclude Include="src\graphics\Buffer.h">
       <Filter>graphics</Filter>
     </ClInclude>
+    <ClInclude Include="src\graphics\Mesh.h">
+      <Filter>graphics</Filter>
+    </ClInclude>
     <ClInclude Include="src\graphics\RenderContext.h">
       <Filter>graphics</Filter>
     </ClInclude>
@@ -83,6 +86,11 @@
       <Filter>graphics</Filter>
     </ClInclude>
     <ClInclude Include="src\inpch.h" />
+    <ClInclude Include="src\graphics\Renderer.h" />
+    <ClInclude Include="src\graphics\RendererAPI.h" />
+    <ClInclude Include="src\Platform\OpenGL\OpenGLRendererAPI.h" />
+    <ClInclude Include="src\graphics\Camera.h" />
+    <ClInclude Include="src\Core\Input.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Core\Application.cpp">
@@ -125,5 +133,11 @@
       <Filter>graphics</Filter>
     </ClCompile>
     <ClCompile Include="src\inpch.cpp" />
+    <ClCompile Include="src\graphics\Mesh.cpp" />
+    <ClCompile Include="src\graphics\Renderer.cpp" />
+    <ClCompile Include="src\graphics\RendererAPI.cpp" />
+    <ClCompile Include="src\Platform\OpenGL\OpenGLRendererAPI.cpp" />
+    <ClCompile Include="src\graphics\Camera.cpp" />
+    <ClCompile Include="src\Core\Input.cpp" />
   </ItemGroup>
 </Project>

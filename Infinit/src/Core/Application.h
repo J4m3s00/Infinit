@@ -6,6 +6,7 @@
 #include "Events/WindowEvent.h"
 #include "Layer/LayerStack.h"
 #include "Layer/ImGuiLayer.h"
+#include "graphics/RendererAPI.h"
 
 namespace Infinit {
 
@@ -17,7 +18,7 @@ namespace Infinit {
 	class INFINIT_API Application 
 	{
 	protected:
-		Application(const std::string& name);
+		Application(const std::string& name, RendererAPI::Type renderer);
 	public:
 		virtual ~Application();
 
@@ -42,10 +43,6 @@ namespace Infinit {
 		bool m_Running;
 		string m_Name;
 		std::unique_ptr<Window> m_Window;
-
-		std::shared_ptr<Shader> m_Shader;
-		std::unique_ptr<VertexArray> m_VAO;
-		uint m_VAOID;
 	private:
 		static Application* s_Instance;
 	};

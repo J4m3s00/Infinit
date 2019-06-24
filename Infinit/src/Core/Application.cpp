@@ -10,6 +10,7 @@
 #include <graphics/Buffer.h>
 
 #include <glm/glm.hpp>
+#include <graphics/Renderer.h>
 
 namespace Infinit {
 
@@ -21,10 +22,12 @@ namespace Infinit {
 
 	Application* Application::s_Instance = nullptr;
 
-	Application::Application(const std::string& name) 
+	Application::Application(const std::string& name, RendererAPI::Type renderer) 
 		: m_Name(name), m_LayerStack()
 	{
+		RendererAPI::Renderer = renderer;
 		s_Instance = this;
+		m_Running = Init();
 	}
 
 	Application::~Application()
@@ -71,7 +74,6 @@ namespace Infinit {
 
 	void Application::Run()
 	{
-		m_Running = Init();
 		while (m_Running)
 		{
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -79,14 +81,9 @@ namespace Infinit {
 			for (Layer* layer : m_LayerStack)
 				layer->OnUpdate();
 
-			//TEST RENDER
-			m_Shader->Bind();
-			m_VAO->Bind();
-
-			glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, NULL);
-
-			m_VAO->Unbind();
-			m_Shader->Unbind();
+			for (Layer* layer : m_LayerStack)
+				layer->OnRender();
+			
 
 			ImGuiLayer::Begin();
 			for (Layer* layer : m_LayerStack)
@@ -103,63 +100,12 @@ namespace Infinit {
 		if (!m_Window) return false;
 		m_Window->SetEventCallback(IN_BIND_EVENT_FN(Application::OnEvent));
 
+		RendererAPI::Init();
+		Renderer::Init();
+
 		m_ImGuiLayer = new ImGuiLayer();
 		PushLayer(m_ImGuiLayer);
-
-
-
-		m_Shader = Shader::Create(
-			R"(
-			#version 330 core
-			
-			layout (location = 0) in vec3 position;
-			layout (location = 1) in vec4 color;
-
-			out vec4 vColor;
-
-			void main()
-			{
-				vColor = color;
-				gl_Position = vec4(position, 1.0);
-			}
-			)",
-
-			R"(
-			#version 330 core
-
-			layout (location = 0) out vec4 fragColor;
-
-			in vec4 vColor;
-
-			void main()
-			{
-				fragColor = vColor;
-			}
-)"
-);
-
-		Vertex vertices[] = {
-			{{-0.5f, -0.5f, 0.0f}, 0xff0000ff },
-			{{ 0.0f,  0.5f, 0.0f}, 0xff00ffff},
-			{{ 0.5f, -0.5f, 0.0f}, 0xffff00ff}
-		};
-
-		uint indices[] = {
-			0, 1, 2
-		};
-
-		m_VAO.reset(VertexArray::Create());
-		std::shared_ptr<VertexBuffer> vertexBuffer;
-		vertexBuffer.reset(VertexBuffer::Create(vertices, 3 * sizeof(Vertex)));
 		
-		vertexBuffer->SetLayout({ {ShaderDataType::Float3, "position"},
-									{ShaderDataType::Byte4, "color", true} });
-		m_VAO->AddVertexBuffer(vertexBuffer);
-
-		std::shared_ptr<IndexBuffer> indexBuffer;
-		indexBuffer.reset(IndexBuffer::Create(indices, 3));
-		m_VAO->SetIndexBuffer(indexBuffer);
-
 		return true;
 	}
 

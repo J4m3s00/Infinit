@@ -6,6 +6,7 @@
 #include <GLFW/glfw3.h>
 #include "Events/WindowEvent.h"
 #include "Events/InputEvent.h"
+#include "Core/KeyCodes.h"
 
 namespace Infinit {
 
@@ -111,6 +112,8 @@ namespace Infinit {
 			MouseScrolledEvent event(xOffset, yOffset);
 			data.callback(event);
 		});
+
+		
 	}
 
 	Window::~Window()

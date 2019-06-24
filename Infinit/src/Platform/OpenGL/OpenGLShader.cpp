@@ -126,4 +126,36 @@ namespace Infinit {
 #endif
 	}
 
+	int OpenGLShader::GetUniformLocation(const string& name)
+	{
+		int result = glGetUniformLocation(m_RendererID, name.c_str());
+		if (result == -1)
+			IN_CORE_WARN("Could not find Uniform {0}", name);
+		return result;
+	}
+
+	void OpenGLShader::SetUniform1f(const string& name, const float& value)
+	{
+		glUniform1f(GetUniformLocation(name), value);
+	}
+
+	void OpenGLShader::SetUniform2f(const string& name, const glm::vec2& value)
+	{
+		glUniform2f(GetUniformLocation(name), value.x, value.y);
+	}
+
+	void OpenGLShader::SetUniform3f(const string& name, const glm::vec3& value)
+	{
+		glUniform3f(GetUniformLocation(name), value.x, value.y, value.z);
+	}
+
+	void OpenGLShader::SetUniform4f(const string& name, const glm::vec4& value)
+	{
+		glUniform4f(GetUniformLocation(name), value.x, value.y, value.z, value.w);
+	}
+
+	void OpenGLShader::SetUniformMat4(const string& name, const glm::mat4& value)
+	{
+		glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, &value[0][0]);
+	}
 }

@@ -11,7 +11,7 @@ namespace Infinit {
 		enum class Type 
 		{
 			None = 0,
-			OpenGL
+			OpenGL = 1
 		};
 
 		virtual void Clear() const = 0;

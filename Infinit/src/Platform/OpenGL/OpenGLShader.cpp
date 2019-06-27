@@ -4,15 +4,56 @@
 #include <glad/glad.h>
 #include "Core/Log.h"
 
+#include <Util/StringUtil.h>
+
 namespace Infinit {
 
-	OpenGLShader::OpenGLShader(const string& vertexSource, const string& fragmentSource)
+	OpenGLShader::OpenGLShader(const string& path)
+		: m_FilePath(path), m_RendererID(0)
 	{
+		CompileShader();
+	}
+
+	OpenGLShader::~OpenGLShader()
+	{
+		IN_CORE_INFO("OpenGL Shader {0} destroyed!", m_RendererID);
+		glDeleteProgram(m_RendererID);
+	}
+
+	void OpenGLShader::Reload()
+	{
+		if (m_RendererID) glDeleteProgram(m_RendererID);
+		CompileShader();
+	}
+
+	void OpenGLShader::CompileShader()
+	{
+		LoadShaderFromFile(m_FilePath);
+		string* shaderSources = new string[2];
+
+		const char* typeToken = "#shader";
+		size_t typeTokenLength = strlen(typeToken);
+		size_t pos = m_ShaderSource.find(typeToken, 0);
+		while (pos != std::string::npos)
+		{
+			size_t eol = m_ShaderSource.find_first_of("\r\n", pos);
+			IN_CORE_ASSERT(eol != std::string::npos, "Syntax error");
+			size_t begin = pos + typeTokenLength + 1;
+			std::string type = m_ShaderSource.substr(begin, eol - begin);
+			IN_CORE_ASSERT(type == "vertex" || type == "fragment", "Invalid shader type specified");
+
+			size_t nextLinePos = m_ShaderSource.find_first_not_of("\r\n", eol);
+			pos = m_ShaderSource.find(typeToken, nextLinePos);
+			shaderSources[ShaderTypeFromString(type)] = m_ShaderSource.substr(nextLinePos, pos - (nextLinePos == std::string::npos ? m_ShaderSource.size() - 1 : nextLinePos));
+		}
+
+		ProcessResources();
+
 		GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
 
 		// Send the vertex shader source code to GL
 		// Note that std::string's .c_str is NULL character terminated.
-		const GLchar *source = (const GLchar *)vertexSource.c_str();
+		const GLchar *source = (const GLchar *)shaderSources[0].c_str();
 		glShaderSource(vertexShader, 1, &source, 0);
 
 		// Compile the vertex shader
@@ -44,7 +85,7 @@ namespace Infinit {
 
 		// Send the fragment shader source code to GL
 		// Note that std::string's .c_str is NULL character terminated.
-		source = (const GLchar *)fragmentSource.c_str();
+		source = (const GLchar *)shaderSources[1].c_str();
 		glShaderSource(fragmentShader, 1, &source, 0);
 
 		// Compile the fragment shader
@@ -114,6 +155,44 @@ namespace Infinit {
 		glDetachShader(m_RendererID, fragmentShader);
 	}
 
+
+	void OpenGLShader::LoadShaderFromFile(const string& path)
+	{
+		std::ifstream in(path, std::ios::in | std::ios::binary);
+		if (in)
+		{
+			in.seekg(0, std::ios::end);
+			m_ShaderSource.resize(in.tellg());
+			in.seekg(0, std::ios::beg);
+			in.read(&m_ShaderSource[0], m_ShaderSource.size());
+			in.close();
+		}
+		else
+			IN_CORE_WARN("Could not read sahder file {0}", path);
+	}
+
+	void OpenGLShader::ProcessResources()
+	{
+		const char* token;
+		const char* source = m_ShaderSource.c_str();
+
+		while (token = FindToken(source, "uniform"))
+			ParseUniform(GetStatement(token, &source));
+	}
+
+	void OpenGLShader::ParseUniform(const string& statement)
+	{
+		std::vector<string> tokens = Tokenize(statement);
+
+		if (tokens[1] == "smapler2D" || tokens[1] == "samplerCube");
+
+		string name = tokens[2];
+		if (const char* s = std::strstr(name.c_str(), ";"))
+			name = string(name.c_str(), s - name.c_str());
+
+		m_Resources.push_back(name);
+	}
+
 	void OpenGLShader::Bind() const
 	{
 		glUseProgram(m_RendererID);
@@ -126,12 +205,32 @@ namespace Infinit {
 #endif
 	}
 
+	uint OpenGLShader::ShaderTypeFromString(const string& type)
+	{
+		if (type == "vertex")
+			return 0;
+		else if (type == "fragment")
+			return 1;
+		IN_CORE_WARN("Shader type unknown!");
+		return -1;
+	}
+
 	int OpenGLShader::GetUniformLocation(const string& name)
 	{
+		if (m_UniformBuffer.find(name) != m_UniformBuffer.end())
+			return m_UniformBuffer[name];
+
 		int result = glGetUniformLocation(m_RendererID, name.c_str());
 		if (result == -1)
 			IN_CORE_WARN("Could not find Uniform {0}", name);
+		else
+			m_UniformBuffer[name] = result;
 		return result;
+	}
+
+	void OpenGLShader::SetUniform1i(const string& name, const int& value)
+	{
+		glUniform1i(GetUniformLocation(name), value);
 	}
 
 	void OpenGLShader::SetUniform1f(const string& name, const float& value)
@@ -157,5 +256,13 @@ namespace Infinit {
 	void OpenGLShader::SetUniformMat4(const string& name, const glm::mat4& value)
 	{
 		glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, &value[0][0]);
+	}
+
+	int OpenGLShader::GetResourceSlot(const string& name) const
+	{
+		auto it = std::find(m_Resources.begin(), m_Resources.end(), name);
+		if (it == m_Resources.end())
+			return -1;
+		return std::distance(m_Resources.begin(), it) - 1;
 	}
 }

@@ -45,6 +45,7 @@ project "Infinit"
 		"%{IncludeDir.spdlog}",
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.imgui}",
+		"Infinit/vendor/stb/",
 		"%{IncludeDir.Assimp}"
 	}
 

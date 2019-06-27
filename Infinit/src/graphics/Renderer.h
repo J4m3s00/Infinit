@@ -5,6 +5,7 @@
 //TEMP
 #include "Shader.h"
 #include "Camera.h"
+#include "Core/Light.h"
 
 namespace Infinit {
 
@@ -13,13 +14,15 @@ namespace Infinit {
 	public:
 		static void Init();
 
-		static void Begin(std::shared_ptr<Camera> camera);
-		static void Draw(Mesh* mesh);
+		static void Begin(std::shared_ptr<Camera> camera, const LightMap& lights);
+		static void Draw(MeshInstance* mesh);
 		static void End();
 	private:
 		static Renderer* s_Instance;
 		//TEMP
-		static std::unique_ptr<Shader> m_Shader;
+		glm::mat4 m_ViewProjectionMatrix;
+		glm::vec3 m_CameraPosition;
+		LightMap m_LightMap;
 	};
 
 }

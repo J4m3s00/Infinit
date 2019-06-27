@@ -6,67 +6,41 @@
 namespace Infinit {
 
 	Renderer* Renderer::s_Instance = nullptr;
-	std::unique_ptr<Shader> Renderer::m_Shader;
 
 	void Renderer::Init()
 	{
 		s_Instance = new Renderer();
-		m_Shader.reset(Shader::Create(
-			R"(
-			#version 330 core
-			
-			layout (location = 0) in vec3 position;
-			layout (location = 1) in vec3 normal;
-			layout (location = 2) in vec2 texCoords;
-			layout (location = 3) in vec3 tangent;
-			layout (location = 4) in vec3 binormal;
-
-			out vec4 vColor;
-
-			uniform mat4 pr_matrix;
-			uniform mat4 vw_matrix;
-
-			void main()
-			{
-				vColor = vec4(0.3f, 0.4f, 0.8f, 1.0f);
-				gl_Position = pr_matrix * vw_matrix * vec4(position, 1.0);
-			}
-			)",
-
-			R"(
-			#version 330 core
-
-			layout (location = 0) out vec4 fragColor;
-
-			in vec4 vColor;
-
-			void main()
-			{
-				fragColor = vColor;
-			}
-)"
-));
 	}
 
-	void Renderer::Begin(std::shared_ptr<Camera> camera)
+	void Renderer::Begin(std::shared_ptr<Camera> camera, const LightMap& lightMap)
 	{
 		RendererAPI::s_Instance->Clear();
-		m_Shader->Bind();
-		m_Shader->SetUniformMat4("pr_matrix", camera->GetProjectionMatrix());
-		m_Shader->SetUniformMat4("vw_matrix", camera->GetViewMatrix());
+		s_Instance->m_ViewProjectionMatrix = camera->GetProjectionMatrix() * camera->GetViewMatrix();
+		s_Instance->m_CameraPosition = camera->GetPosition();
+		s_Instance->m_LightMap.clear();
+		s_Instance->m_LightMap = lightMap;
 	}
 
 	void Renderer::End()
 	{
-		m_Shader->Unbind();
 	}
 
-	void Renderer::Draw(Mesh* mesh)
+	void Renderer::Draw(MeshInstance* mesh)
 	{
+		IN_CORE_ASSERT(s_Instance, "No Renderer instance set!"); //Forgot to call Renderer::Init(); ?
 		IN_CORE_ASSERT(mesh, "Mesh not valid");
-		mesh->GetVertexArray()->Bind();
+		IN_CORE_ASSERT(s_Instance->m_LightMap.size() > 0, "No lights set for the scene!");
+		IN_CORE_ASSERT(mesh->Material, "Pls provide a Material for the model!");
+		mesh->Material->Bind();
+		std::weak_ptr<Shader> shader = mesh->Material->ShaderProgram;
+		shader.lock()->SetUniformMat4("u_ViewProjectionMatrix", s_Instance->m_ViewProjectionMatrix);
+		shader.lock()->SetUniformMat4("u_ModelMatrix", glm::mat4(1.0f));
+		shader.lock()->SetUniform3f("lights.Direction", s_Instance->m_LightMap[0].Direction);
+		shader.lock()->SetUniform3f("lights.Radiance", s_Instance->m_LightMap[0].Radiance);
+		shader.lock()->SetUniform3f("u_CameraPosition", s_Instance->m_CameraPosition);
 
-		RendererAPI::s_Instance->DrawIndexed(mesh->GetVertexArray()->GetIndexBuffer()->GetCount());
+		mesh->GetVertexArray()->Bind();
+		RendererAPI::s_Instance->DrawIndexed(mesh->GetVertexCount());
 	}
 
 }

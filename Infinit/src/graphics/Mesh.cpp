@@ -101,7 +101,7 @@ namespace Infinit {
 
 
 		std::shared_ptr<IndexBuffer> indexBuffer;
-		indexBuffer.reset(IndexBuffer::Create((const uint*)m_Indices.data(), m_Indices.size()));
+		indexBuffer.reset(IndexBuffer::Create((const uint*)&m_Indices[0], m_Indices.size() * 3));
 		m_VertexArray->SetIndexBuffer(indexBuffer);
 	}
 
@@ -129,9 +129,10 @@ namespace Infinit {
 
 	}
 
-	void Mesh::Render()
+	MeshInstance::MeshInstance(std::shared_ptr<Mesh> instance)
 	{
-		Renderer::Draw(this);
+		m_VertexArray = instance->GetVertexArray();
+		m_VertexCount = m_VertexArray->GetIndexBuffer()->GetCount();
 	}
 
 }

@@ -18,3 +18,5 @@
 #include "graphics/RendererAPI.h"
 #include "graphics/Renderer.h"
 #include "graphics/Mesh.h"
+#include "Core/Material.h"
+#include "Core/Light.h"

@@ -14,7 +14,7 @@ namespace Infinit {
 
 	OpenGLVertexBuffer::~OpenGLVertexBuffer()
 	{
-		IN_CORE_INFO("VertexBuffer Deleted!");
+		IN_CORE_INFO("OpenGLVertexBuffer {0} Deleted!", m_RendererID);
 		glDeleteBuffers(1, &m_RendererID);
 	}
 
@@ -40,7 +40,7 @@ namespace Infinit {
 
 	OpenGLIndexBuffer::~OpenGLIndexBuffer()
 	{
-		IN_CORE_INFO("IndexBuffer Deleted!");
+		IN_CORE_INFO("OpenGLIndexBuffer {0} Deleted!", m_RendererID);
 		glDeleteBuffers(1, &m_RendererID);
 	}
 

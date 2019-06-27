@@ -36,7 +36,7 @@ namespace Infinit {
 
 	OpenGLVertexArray::~OpenGLVertexArray()
 	{
-		IN_CORE_INFO("VertexArray Deleted!");
+		IN_CORE_INFO("OpenGLVertexArray {0} Destroyed!", m_RendererID);
 		glDeleteVertexArrays(1, &m_RendererID);
 	}
 

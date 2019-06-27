@@ -4,6 +4,8 @@
 #include "inpch.h"
 #include "glm/glm.hpp"
 #include "graphics/VertexArray.h"
+#include "graphics/Texture.h"
+#include "Core/Material.h"
 
 namespace Infinit {
 
@@ -28,9 +30,6 @@ namespace Infinit {
 		Mesh(const std::vector<Vertex>& vertices, const std::vector<Index>& indices);
 		~Mesh();
 
-		//CREATE MESH INSTANCE TO RENDER MESH WITH TRANSFORM
-		void Render();
-
 		inline const string& GetFilePath() const { return m_FilePath; }
 		std::shared_ptr<VertexArray> GetVertexArray() const { return m_VertexArray; }
 	private:
@@ -40,6 +39,20 @@ namespace Infinit {
 		std::shared_ptr<VertexArray> m_VertexArray;
 
 		string m_FilePath;
+	};
+
+	class MeshInstance
+	{
+	public:
+		MeshInstance(std::shared_ptr<Mesh> instance);
+
+		inline std::shared_ptr<VertexArray> GetVertexArray() const { return m_VertexArray; }
+		inline uint GetVertexCount() const { return m_VertexCount; }
+	public:
+		std::shared_ptr<Material> Material;
+	private:
+		std::shared_ptr<VertexArray> m_VertexArray;
+		uint m_VertexCount;
 	};
 
 }

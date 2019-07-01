@@ -110,6 +110,7 @@
     <ClInclude Include="src\Core\Material.h" />
     <ClInclude Include="src\Util\StringUtil.h" />
     <ClInclude Include="src\Core\Light.h" />
+    <ClInclude Include="src\Core\ECS\Scene.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Core\Application.cpp">
@@ -178,5 +179,6 @@
     <ClCompile Include="src\inpch.cpp" />
     <ClCompile Include="src\Core\Material.cpp" />
     <ClCompile Include="src\Util\StringUtil.cpp" />
+    <ClCompile Include="src\Core\ECS\Scene.cpp" />
   </ItemGroup>
 </Project>

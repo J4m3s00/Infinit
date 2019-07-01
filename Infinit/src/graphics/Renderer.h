@@ -14,7 +14,7 @@ namespace Infinit {
 	public:
 		static void Init();
 
-		static void Begin(std::shared_ptr<Camera> camera, const LightMap& lights);
+		static void Begin(Camera* camera, const LightMap& lights);
 		static void Draw(MeshInstance* mesh);
 		static void End();
 	private:

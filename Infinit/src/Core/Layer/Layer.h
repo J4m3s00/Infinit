@@ -4,6 +4,7 @@
 #include "Events/Event.h"
 
 namespace Infinit {
+	class Scene;
 
 	class INFINIT_API Layer
 	{
@@ -19,6 +20,8 @@ namespace Infinit {
 		virtual void OnEvent(Event& e) {}
 
 		const string& GetName() const { return m_Name; }
+	public:
+		Scene* Scene;
 	private:
 		string m_Name;
 	};

@@ -7,7 +7,7 @@ class TestLayer : public Infinit::Layer
 private:
 	std::shared_ptr<Infinit::Mesh> m_Mesh;
 	std::unique_ptr<Infinit::MeshInstance> m_Instance;
-	std::shared_ptr<Infinit::Camera> m_Camera;
+	Infinit::Camera* m_Camera;
 	
 	std::shared_ptr<Infinit::Shader> m_Shader;
 
@@ -29,7 +29,9 @@ public:
 
 	virtual void OnAttach() override
 	{
-		m_Camera.reset(new Infinit::Camera(glm::perspective(65.0f, 16.0f / 9.0f, 0.0001f, 10000.0f)));
+		m_Camera = new Infinit::Camera(glm::perspective(65.0f, 16.0f / 9.0f, 0.0001f, 10000.0f));
+		Scene->SetActiveCamera(m_Camera);
+		Scene->SetLightMap(m_LightMap);
 		m_Shader = Infinit::Shader::Create("pbr.shader");
 		m_Mesh.reset(new Infinit::Mesh("cerberus.fbx"));
 
@@ -61,9 +63,7 @@ public:
 
 	virtual void OnRender() override
 	{
-		Infinit::Renderer::Begin(m_Camera, m_LightMap);
 		Infinit::Renderer::Draw(m_Instance.get());
-		Infinit::Renderer::End();
 	}
 
 	virtual void OnImGuiRender() override
@@ -98,11 +98,14 @@ public:
 
 class Sandbox : public Infinit::Application
 {
+private:
+	Infinit::Scene scene;
 public:
 	Sandbox()
-		: Application("Hello World", Infinit::RendererAPI::Type::OpenGL)
+		: Application("Hello World", Infinit::RendererAPI::Type::OpenGL), scene("Test Scene")
 	{
-		PushLayer(new TestLayer());
+		scene.PushLayer(new TestLayer());
+		SetActiveScene(&scene);
 	}
 };
 

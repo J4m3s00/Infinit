@@ -5,7 +5,7 @@
 #include "Events/Event.h"
 #include "Events/WindowEvent.h"
 #include "Layer/LayerStack.h"
-#include "Layer/ImGuiLayer.h"
+#include "ECS/Scene.h"
 #include "graphics/RendererAPI.h"
 
 namespace Infinit {
@@ -24,10 +24,7 @@ namespace Infinit {
 
 		void OnEvent(Event& event);
 
-		void PushLayer(Layer* layer);
-		void PushOverlay(Layer* layer);
-		void PopLayer(Layer* layer);
-		void PopOverlay(Layer* layer);
+		void SetActiveScene(Scene* scene);
 
 		void Run();
 
@@ -36,9 +33,13 @@ namespace Infinit {
 	private:
 		bool Init();
 		bool OnWindowClose(WindowCloseEvent& e);
+
+		void ImGuiInit();
+		void ImGuiDestroy();
+		void ImGuiBegin();
+		void ImGuiEnd();
 	private:
-		LayerStack m_LayerStack;
-		ImGuiLayer* m_ImGuiLayer;
+		Scene* m_ActiveScene;
 
 		bool m_Running;
 		string m_Name;

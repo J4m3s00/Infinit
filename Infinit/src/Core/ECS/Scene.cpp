@@ -29,14 +29,14 @@ namespace Infinit {
 
 	void Scene::PopLayer(Layer* layer)
 	{
-		layer->OnDetach();
+		layer->Detach();
 		layer->Scene = nullptr;
 		m_LayerStack.PopLayer(layer);
 	}
 
 	void Scene::PopOverlay(Layer* layer)
 	{
-		layer->OnDetach();
+		layer->Detach();
 		layer->Scene = nullptr;
 		m_LayerStack.PopOverlay(layer);
 	}
@@ -54,7 +54,7 @@ namespace Infinit {
 	void Scene::Attach()
 	{
 		for (Layer* layer : m_LayerStack)
-			layer->OnAttach();
+			layer->Attach();
 	}
 
 	void Scene::Detach()
@@ -65,14 +65,14 @@ namespace Infinit {
 	void Scene::Update()
 	{
 		for (Layer* layer : m_LayerStack)
-			layer->OnUpdate();
+			layer->Update();
 	}
 
 	void Scene::Render()
 	{
 		Infinit::Renderer::Begin(m_ActiveCamera, m_LightMap);
 		for (Layer* layer : m_LayerStack)
-			layer->OnRender();
+			layer->Render();
 		Infinit::Renderer::End();
 	}
 
@@ -84,7 +84,7 @@ namespace Infinit {
 	void Scene::ImGuiRender()
 	{
 		for (Layer* layer : m_LayerStack)
-			layer->OnImGuiRender();
+			layer->ImGuiRender();
 	}
 
 }

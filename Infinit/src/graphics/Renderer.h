@@ -15,7 +15,7 @@ namespace Infinit {
 		static void Init();
 
 		static void Begin(Camera* camera, const LightMap& lights);
-		static void Draw(MeshInstance* mesh);
+		static void Draw(MeshInstance* mesh, const glm::mat4& modelMatrix = glm::mat4(1.0f));
 		static void End();
 	private:
 		static Renderer* s_Instance;

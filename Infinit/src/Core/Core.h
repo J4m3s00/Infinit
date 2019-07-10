@@ -4,6 +4,8 @@ typedef std::string string;
 typedef unsigned int uint;
 typedef unsigned char byte;
 
+#define IN_ENABLE_ASSERT
+
 #if 0
 	#ifdef IN_PLATFORM_WINDOWS
 		#ifdef IN_BUILD_DLL

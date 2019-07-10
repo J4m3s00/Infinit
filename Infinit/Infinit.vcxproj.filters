@@ -111,6 +111,8 @@
     <ClInclude Include="src\Util\StringUtil.h" />
     <ClInclude Include="src\Core\Light.h" />
     <ClInclude Include="src\Core\ECS\Scene.h" />
+    <ClInclude Include="src\Core\ECS\GameObject.h" />
+    <ClInclude Include="src\Core\Transform.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Core\Application.cpp">
@@ -180,5 +182,7 @@
     <ClCompile Include="src\Core\Material.cpp" />
     <ClCompile Include="src\Util\StringUtil.cpp" />
     <ClCompile Include="src\Core\ECS\Scene.cpp" />
+    <ClCompile Include="src\Core\ECS\GameObject.cpp" />
+    <ClCompile Include="src\Core\Transform.cpp" />
   </ItemGroup>
 </Project>

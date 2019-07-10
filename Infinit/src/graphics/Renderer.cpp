@@ -35,7 +35,7 @@ namespace Infinit {
 	{
 	}
 
-	void Renderer::Draw(MeshInstance* mesh)
+	void Renderer::Draw(MeshInstance* mesh, const glm::mat4& modelMatrix)
 	{
 		IN_CORE_ASSERT(s_Instance, "No Renderer instance set!"); //Forgot to call Renderer::Init(); ?
 		IN_CORE_ASSERT(mesh, "Mesh not valid");
@@ -45,7 +45,7 @@ namespace Infinit {
 		mesh->Material->Bind();
 		std::weak_ptr<Shader> shader = mesh->Material->ShaderProgram;
 		shader.lock()->SetUniformMat4("u_ViewProjectionMatrix", s_Instance->m_ViewProjectionMatrix);
-		shader.lock()->SetUniformMat4("u_ModelMatrix", glm::mat4(1.0f));
+		shader.lock()->SetUniformMat4("u_ModelMatrix", modelMatrix);
 		shader.lock()->SetUniform3f("lights.Direction", s_Instance->m_LightMap[0].Direction);
 		shader.lock()->SetUniform3f("lights.Radiance", s_Instance->m_LightMap[0].Radiance);
 		shader.lock()->SetUniform3f("u_CameraPosition", s_Instance->m_CameraPosition);

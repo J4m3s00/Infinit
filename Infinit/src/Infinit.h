@@ -20,3 +20,5 @@
 #include "graphics/Mesh.h"
 #include "Core/Material.h"
 #include "Core/Light.h"
+
+#include "Core/ECS/GameObject.h"

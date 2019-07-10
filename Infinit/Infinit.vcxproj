@@ -99,6 +99,7 @@
   <ItemGroup>
     <ClInclude Include="src\Core\Application.h" />
     <ClInclude Include="src\Core\Core.h" />
+    <ClInclude Include="src\Core\ECS\GameObject.h" />
     <ClInclude Include="src\Core\ECS\Scene.h" />
     <ClInclude Include="src\Core\EntryPoint.h" />
     <ClInclude Include="src\Core\Input.h" />
@@ -109,6 +110,7 @@
     <ClInclude Include="src\Core\Light.h" />
     <ClInclude Include="src\Core\Log.h" />
     <ClInclude Include="src\Core\Material.h" />
+    <ClInclude Include="src\Core\Transform.h" />
     <ClInclude Include="src\Events\Event.h" />
     <ClInclude Include="src\Events\InputEvent.h" />
     <ClInclude Include="src\Events\WindowEvent.h" />
@@ -133,6 +135,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Core\Application.cpp" />
+    <ClCompile Include="src\Core\ECS\GameObject.cpp" />
     <ClCompile Include="src\Core\ECS\Scene.cpp" />
     <ClCompile Include="src\Core\ImGui\ImGuiBuild.cpp" />
     <ClCompile Include="src\Core\Input.cpp" />
@@ -141,6 +144,7 @@
     <ClCompile Include="src\Core\Layer\LayerStack.cpp" />
     <ClCompile Include="src\Core\Log.cpp" />
     <ClCompile Include="src\Core\Material.cpp" />
+    <ClCompile Include="src\Core\Transform.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLBuffer.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLRendererAPI.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLShader.cpp" />

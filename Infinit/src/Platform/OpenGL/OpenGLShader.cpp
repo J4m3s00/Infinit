@@ -22,7 +22,7 @@ namespace Infinit {
 
 	void OpenGLShader::Reload()
 	{
-		if (m_RendererID) glDeleteProgram(m_RendererID);
+		if (m_RendererID != 0) glDeleteProgram(m_RendererID);
 		CompileShader();
 	}
 

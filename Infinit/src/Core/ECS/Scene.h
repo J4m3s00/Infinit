@@ -25,12 +25,10 @@ namespace Infinit {
 		void Update();
 		void Render();
 		void ImGuiRender();
-
-		void SetActiveCamera(Camera* activeCamera);
-		void SetLightMap(LightMap lightMap) { m_LightMap = lightMap; }
+	public:
+		LightMap LightMap;
+		Camera*  ActiveCamera;
 	private:
-		LightMap m_LightMap;
-		Camera*  m_ActiveCamera;
 		LayerStack m_LayerStack;
 		//maybe offline cameras for effects
 		//std::vector<std::shared_ptr<Camera>> m_OfflineCameras;

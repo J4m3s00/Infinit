@@ -16,10 +16,11 @@ private:
 	bool m_UseNormal = false;
 	bool m_UseRoughness = false;
 	float m_RadianceFilter = 0.0f;
+	float m_EnvMapRotation = 0.0f;
 	glm::vec3 m_AlbedoColor = {0.5f, 0.5f, 0.5f};
 	float m_Metalness = 0.5f;
 	float m_Roughness = 0.5f;
-	Infinit::LightMap m_LightMap{ {{0.0f, 0.0f, 0.0f }, {1.0f, 1.0f, 1.0f}} };
+	Infinit::Light* m_Light;
 public:
 	TestLayer()
 		: Infinit::Layer("Test Layer")
@@ -32,28 +33,30 @@ public:
 	virtual void OnAttach() override
 	{
 		m_Camera = new Infinit::Camera(glm::perspective(65.0f, 16.0f / 9.0f, 0.0001f, 10000.0f));
-		Scene->SetActiveCamera(m_Camera);
-		Scene->SetLightMap(m_LightMap);
+		Scene->ActiveCamera = m_Camera;
+		Scene->LightMap.push_back({ { 0.2f, 0.34f, 0.5f }, { 1.0f, 1.0f, 1.0f } });
+		m_Light = &Scene->LightMap[0];
 		m_Shader = Infinit::Shader::Create("pbr.shader");
 		m_Mesh.reset(new Infinit::Mesh("cerberus.fbx"));
 
 		m_Instance.reset(new Infinit::MeshInstance(m_Mesh));
 		std::shared_ptr<Infinit::Material> mat = std::make_shared<Infinit::Material>(Infinit::Material(m_Shader));
 		mat->AddTexture("u_AlbedoTexture", Infinit::Texture2D::Create(Infinit::TextureFormat::RGB, 1, 1));
+		mat->AddParameter(new Infinit::MaterialParameter("u_AlbedoTexToggle", Infinit::MaterialParameterType::Bool, &m_UseAlbedo));
+		mat->AddParameter(new Infinit::MaterialParameter("u_AlbedoColor", Infinit::MaterialParameterType::Color3, &m_AlbedoColor));
 		mat->AddTexture("u_NormalTexture", Infinit::Texture2D::Create(Infinit::TextureFormat::RGB, 1, 1));
+		mat->AddParameter(new Infinit::MaterialParameter("u_NormalTexToggle", Infinit::MaterialParameterType::Bool, &m_UseNormal));
 		mat->AddTexture("u_MetalnessTexture", Infinit::Texture2D::Create(Infinit::TextureFormat::RGB, 1, 1));
+		mat->AddParameter(new Infinit::MaterialParameter("u_MetalnessTexToggle", Infinit::MaterialParameterType::Bool, &m_UseMetalness));
+		mat->AddParameter(new Infinit::MaterialParameter("u_Metalness", Infinit::MaterialParameterType::Float, &m_Metalness));
 		mat->AddTexture("u_RoughnessTexture", Infinit::Texture2D::Create(Infinit::TextureFormat::RGB, 1, 1));
+		mat->AddParameter(new Infinit::MaterialParameter("u_RoughnessTexToggle", Infinit::MaterialParameterType::Bool, &m_UseRoughness));
+		mat->AddParameter(new Infinit::MaterialParameter("u_Roughness", Infinit::MaterialParameterType::Float, &m_Roughness));
 		mat->AddTexture("u_EnvRadianceTex", Infinit::TextureCube::Create("Arches_E_PineTree_Radiance.tga"));
 		mat->AddTexture("u_EnvIrradianceTex", Infinit::TextureCube::Create("Arches_E_PineTree_Irradiance.tga"));
 		mat->AddTexture("u_BRDFLUTTexture", Infinit::Texture2D::Create("BRDF_LUT.tga"));
-		mat->AddParameter(new Infinit::MaterialParameter("u_AlbedoTexToggle", Infinit::MaterialParameterType::Bool, &m_UseAlbedo));
-		mat->AddParameter(new Infinit::MaterialParameter("u_MetalnessTexToggle", Infinit::MaterialParameterType::Bool, &m_UseMetalness));
-		mat->AddParameter(new Infinit::MaterialParameter("u_RoughnessTexToggle", Infinit::MaterialParameterType::Bool, &m_UseRoughness));
-		mat->AddParameter(new Infinit::MaterialParameter("u_NormalTexToggle", Infinit::MaterialParameterType::Bool, &m_UseNormal));
 		mat->AddParameter(new Infinit::MaterialParameter("u_RadiancePrefilter", Infinit::MaterialParameterType::Float, &m_RadianceFilter));
-		mat->AddParameter(new Infinit::MaterialParameter("u_AlbedoColor", Infinit::MaterialParameterType::Color3, &m_AlbedoColor));
-		mat->AddParameter(new Infinit::MaterialParameter("u_Metalness", Infinit::MaterialParameterType::Float, &m_Metalness));
-		mat->AddParameter(new Infinit::MaterialParameter("u_Roughness", Infinit::MaterialParameterType::Float, &m_Roughness));
+		mat->AddParameter(new Infinit::MaterialParameter("u_EnvMapRotation", Infinit::MaterialParameterType::Float, &m_EnvMapRotation));
 		m_Instance->Material = mat;
 
 		Infinit::GameObject* go = new Infinit::GameObject("Test Go", Infinit::Transform({0.0f, 4.0f, 0.0f}));
@@ -77,8 +80,8 @@ public:
 	virtual void OnImGuiRender() override
 	{
 		ImGui::Begin("Light");
-		ImGui::SliderFloat3("Direction", &m_LightMap[0].Direction[0], -1.0f, 1.0f, "%.0025f", 0.1f);
-		ImGui::SliderFloat3("Radiance", &m_LightMap[0].Radiance[0], 0.0f, 1.0f, "%.0025f", 0.1f);
+		ImGui::SliderFloat3("Direction", &m_Light->Direction[0], -360.0f, 360.0f);
+		ImGui::SliderFloat3("Radiance", &m_Light->Radiance[0], 0.0f, 1.0f);
 		ImGui::End();
 
 		ImGui::Begin("Material");

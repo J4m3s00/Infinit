@@ -70,15 +70,10 @@ namespace Infinit {
 
 	void Scene::Render()
 	{
-		Infinit::Renderer::Begin(m_ActiveCamera, m_LightMap);
+		Infinit::Renderer::Begin(ActiveCamera, LightMap);
 		for (Layer* layer : m_LayerStack)
 			layer->Render();
 		Infinit::Renderer::End();
-	}
-
-	void Scene::SetActiveCamera(Camera* camera)
-	{
-		m_ActiveCamera = camera;
 	}
 
 	void Scene::ImGuiRender()

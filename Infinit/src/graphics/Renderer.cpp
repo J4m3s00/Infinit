@@ -46,7 +46,7 @@ namespace Infinit {
 		std::weak_ptr<Shader> shader = mesh->Material->ShaderProgram;
 		shader.lock()->SetUniformMat4("u_ViewProjectionMatrix", s_Instance->m_ViewProjectionMatrix);
 		shader.lock()->SetUniformMat4("u_ModelMatrix", modelMatrix);
-		shader.lock()->SetUniform3f("lights.Direction", s_Instance->m_LightMap[0].Direction);
+		shader.lock()->SetUniform3f("lights.Direction", s_Instance->m_LightMap[0].Direction * TO_RADIANS);
 		shader.lock()->SetUniform3f("lights.Radiance", s_Instance->m_LightMap[0].Radiance);
 		shader.lock()->SetUniform3f("u_CameraPosition", s_Instance->m_CameraPosition);
 

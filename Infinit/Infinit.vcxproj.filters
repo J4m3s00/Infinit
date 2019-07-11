@@ -113,6 +113,7 @@
     <ClInclude Include="src\Core\ECS\Scene.h" />
     <ClInclude Include="src\Core\ECS\GameObject.h" />
     <ClInclude Include="src\Core\Transform.h" />
+    <ClInclude Include="src\Core\ImGui\ImGuiHelper.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Core\Application.cpp">
@@ -184,5 +185,6 @@
     <ClCompile Include="src\Core\ECS\Scene.cpp" />
     <ClCompile Include="src\Core\ECS\GameObject.cpp" />
     <ClCompile Include="src\Core\Transform.cpp" />
+    <ClCompile Include="src\Core\ImGui\ImGuiHelper.cpp" />
   </ItemGroup>
 </Project>

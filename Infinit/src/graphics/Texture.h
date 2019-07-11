@@ -17,11 +17,14 @@ namespace Infinit {
 		virtual ~Texture() {  }
 
 		virtual void Bind(uint slot) const = 0;
+
+		virtual void Reload(const string& filePath, bool srgb = false) = 0;
 		
 		virtual TextureFormat GetFormat() const = 0;
 		virtual uint GetWidth() const = 0;
 		virtual uint GetHeight() const = 0;
-
+		virtual uint GetRendererID() const = 0;
+		
 		virtual const string& GetPath() const = 0;
 	};
 

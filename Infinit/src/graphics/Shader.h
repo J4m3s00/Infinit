@@ -24,6 +24,8 @@ namespace Infinit {
 
 		virtual void Reload() = 0;
 
+		virtual const string& GetFilePath() const = 0;
+
 		static std::shared_ptr<Shader> Create(const string& filePath);
 	};
 

@@ -28,6 +28,8 @@ namespace Infinit {
 
 		void Run();
 
+		string OpenFile(const std::string& filter) const;
+
 		inline Window& GetWindow() { return *m_Window; }
 		inline static Application& Get() { return *s_Instance; }
 	private:

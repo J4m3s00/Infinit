@@ -22,6 +22,8 @@ namespace Infinit {
 
 		virtual int GetResourceSlot(const string& name) const override;
 
+		const string& GetFilePath() const { return m_FilePath; }
+
 		virtual void Reload() override;
 	private:
 		int GetUniformLocation(const string& name);

@@ -9,6 +9,7 @@
 
 #include <Core/Log.h>
 #include "graphics/Renderer.h"
+#include "Core/ImGui/ImGuiHelper.h"
 
 namespace Infinit {
 
@@ -133,6 +134,10 @@ namespace Infinit {
 	{
 		m_VertexArray = instance->GetVertexArray();
 		m_VertexCount = m_VertexArray->GetIndexBuffer()->GetCount();
+	}
+
+	void MeshInstance::DrawImGui()
+	{
 	}
 
 }

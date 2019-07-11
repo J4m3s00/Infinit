@@ -48,6 +48,8 @@ namespace Infinit {
 
 		inline std::shared_ptr<VertexArray> GetVertexArray() const { return m_VertexArray; }
 		inline uint GetVertexCount() const { return m_VertexCount; }
+
+		void DrawImGui();
 	public:
 		std::shared_ptr<Material> Material;
 	private:

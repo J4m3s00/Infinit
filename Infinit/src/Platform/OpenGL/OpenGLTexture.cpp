@@ -30,16 +30,6 @@ namespace Infinit {
 	OpenGLTexture2D::OpenGLTexture2D(const string& path, bool srgb)
 		: m_FilePath(path)
 	{
-		int width, height, channels;
-		IN_CORE_INFO("Loading texture {0}, srgb={1}", path, srgb);
-		stbi_set_flip_vertically_on_load(false);
-		m_ImageData = stbi_load(path.c_str(), &width, &height, &channels, STBI_rgb_alpha);
-		IN_CORE_INFO("Ready reading data");
-
-		m_Width = width;
-		m_Height = height;
-		m_Format = TextureFormat::RGBA;
-
 		glGenTextures(1, &m_RendererID);
 		glBindTexture(GL_TEXTURE_2D, m_RendererID);
 
@@ -48,10 +38,9 @@ namespace Infinit {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-		glTexImage2D(GL_TEXTURE_2D, 0, InfinitToOpenGLTextureFormat(m_Format), m_Width, m_Height, 0, InfinitToOpenGLTextureFormat(m_Format), GL_UNSIGNED_BYTE, m_ImageData);
-		glGenerateMipmap(GL_TEXTURE_2D);
-
 		glBindTexture(GL_TEXTURE_2D, 0);
+
+		Reload(path, srgb);
 	}
 
 	OpenGLTexture2D::OpenGLTexture2D(TextureFormat format, uint width, uint height)
@@ -82,15 +71,61 @@ namespace Infinit {
 		glBindTextureUnit(slot, m_RendererID);
 	}
 
-	OpenGLTextureCube::OpenGLTextureCube(const string& path, bool srgb)
+	void OpenGLTexture2D::Reload(const string& filePath, bool srgb)
 	{
 		int width, height, channels;
+		IN_CORE_INFO("Loading texture {0}, srgb={1}", filePath, srgb);
 		stbi_set_flip_vertically_on_load(false);
-		m_ImageData = stbi_load(path.c_str(), &width, &height, &channels, STBI_rgb);
+		m_ImageData = stbi_load(filePath.c_str(), &width, &height, &channels, STBI_rgb_alpha);
+
+		m_Width = width;
+		m_Height = height;
+		m_Format = TextureFormat::RGBA;
+		m_FilePath = filePath;
+
+		glBindTexture(GL_TEXTURE_2D, m_RendererID);
+		glTexImage2D(GL_TEXTURE_2D, 0, InfinitToOpenGLTextureFormat(m_Format), m_Width, m_Height, 0, InfinitToOpenGLTextureFormat(m_Format), GL_UNSIGNED_BYTE, m_ImageData);
+		glGenerateMipmap(GL_TEXTURE_2D);
+		glBindTexture(GL_TEXTURE_2D, 0);
+	}
+
+	OpenGLTextureCube::OpenGLTextureCube(const string& path, bool srgb)
+	{
+		glGenTextures(1, &m_RendererID);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, m_RendererID);
+
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+		Reload(path, srgb);
+	}
+
+	OpenGLTextureCube::~OpenGLTextureCube()
+	{
+		IN_CORE_INFO("OpenGLTextureCube detroyed!");
+		glDeleteTextures(1, &m_RendererID);
+	}
+
+	void OpenGLTextureCube::Bind(uint slot) const
+	{
+		glActiveTexture(GL_TEXTURE0 + slot);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, m_RendererID);
+	}
+
+	void OpenGLTextureCube::Reload(const string& filePath, bool srgb)
+	{
+		IN_CORE_INFO("Loading CubeMap {0}, srgb={1}", filePath, srgb);
+		int width, height, channels;
+		stbi_set_flip_vertically_on_load(false);
+		m_ImageData = stbi_load(filePath.c_str(), &width, &height, &channels, STBI_rgb);
 
 		m_Width = width;
 		m_Height = height;
 		m_Format = TextureFormat::RGB;
+		m_FilePath = filePath;
 
 		unsigned int faceWidth = m_Width / 4;
 		unsigned int faceHeight = m_Height / 3;
@@ -138,15 +173,8 @@ namespace Infinit {
 			faceIndex++;
 		}
 
-		
-		glGenTextures(1, &m_RendererID);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, m_RendererID);
-
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
+		
 		auto format = InfinitToOpenGLTextureFormat(m_Format);
 		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, format, faceWidth, faceHeight, 0, format, GL_UNSIGNED_BYTE, faces[2]);
 		glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, format, faceWidth, faceHeight, 0, format, GL_UNSIGNED_BYTE, faces[0]);
@@ -161,22 +189,11 @@ namespace Infinit {
 
 		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 
+
 		for (size_t i = 0; i < faces.size(); i++)
 			delete[] faces[i];
 
 		stbi_image_free(m_ImageData);
-	}
-
-	OpenGLTextureCube::~OpenGLTextureCube()
-	{
-		IN_CORE_INFO("OpenGLTextureCube detroyed!");
-		glDeleteTextures(1, &m_RendererID);
-	}
-
-	void OpenGLTextureCube::Bind(uint slot) const
-	{
-		glActiveTexture(GL_TEXTURE0 + slot);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, m_RendererID);
 	}
 
 }

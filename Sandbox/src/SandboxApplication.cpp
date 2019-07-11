@@ -39,21 +39,21 @@ public:
 
 		m_Instance.reset(new Infinit::MeshInstance(m_Mesh));
 		std::shared_ptr<Infinit::Material> mat = std::make_shared<Infinit::Material>(Infinit::Material(m_Shader));
-		//mat->AddTexture("u_AlbedoTexture", Infinit::Texture2D::Create("cerberus_A.png"));
-		//mat->AddTexture("u_NormalTexture", Infinit::Texture2D::Create("cerberus_N.png"));
-		//mat->AddTexture("u_MetalnessTexture", Infinit::Texture2D::Create("cerberus_M.png"));
-		//mat->AddTexture("u_RoughnessTexture", Infinit::Texture2D::Create("cerberus_R.png"));
+		mat->AddTexture("u_AlbedoTexture", Infinit::Texture2D::Create(Infinit::TextureFormat::RGB, 1, 1));
+		mat->AddTexture("u_NormalTexture", Infinit::Texture2D::Create(Infinit::TextureFormat::RGB, 1, 1));
+		mat->AddTexture("u_MetalnessTexture", Infinit::Texture2D::Create(Infinit::TextureFormat::RGB, 1, 1));
+		mat->AddTexture("u_RoughnessTexture", Infinit::Texture2D::Create(Infinit::TextureFormat::RGB, 1, 1));
 		mat->AddTexture("u_EnvRadianceTex", Infinit::TextureCube::Create("Arches_E_PineTree_Radiance.tga"));
 		mat->AddTexture("u_EnvIrradianceTex", Infinit::TextureCube::Create("Arches_E_PineTree_Irradiance.tga"));
 		mat->AddTexture("u_BRDFLUTTexture", Infinit::Texture2D::Create("BRDF_LUT.tga"));
-		mat->AddParameter(new Infinit::MaterialParameter("u_AlbedoTexToggle", Infinit::ShaderDataType::Bool, &m_UseAlbedo));
-		mat->AddParameter(new Infinit::MaterialParameter("u_MetalnessTexToggle", Infinit::ShaderDataType::Bool, &m_UseMetalness));
-		mat->AddParameter(new Infinit::MaterialParameter("u_RoughnessTexToggle", Infinit::ShaderDataType::Bool, &m_UseRoughness));
-		mat->AddParameter(new Infinit::MaterialParameter("u_NormalTexToggle", Infinit::ShaderDataType::Bool, &m_UseNormal));
-		mat->AddParameter(new Infinit::MaterialParameter("u_RadiancePrefilter", Infinit::ShaderDataType::Float, &m_RadianceFilter));
-		mat->AddParameter(new Infinit::MaterialParameter("u_AlbedoColor", Infinit::ShaderDataType::Float3, &m_AlbedoColor));
-		mat->AddParameter(new Infinit::MaterialParameter("u_Metalness", Infinit::ShaderDataType::Float, &m_Metalness));
-		mat->AddParameter(new Infinit::MaterialParameter("u_Roughness", Infinit::ShaderDataType::Float, &m_Roughness));
+		mat->AddParameter(new Infinit::MaterialParameter("u_AlbedoTexToggle", Infinit::MaterialParameterType::Bool, &m_UseAlbedo));
+		mat->AddParameter(new Infinit::MaterialParameter("u_MetalnessTexToggle", Infinit::MaterialParameterType::Bool, &m_UseMetalness));
+		mat->AddParameter(new Infinit::MaterialParameter("u_RoughnessTexToggle", Infinit::MaterialParameterType::Bool, &m_UseRoughness));
+		mat->AddParameter(new Infinit::MaterialParameter("u_NormalTexToggle", Infinit::MaterialParameterType::Bool, &m_UseNormal));
+		mat->AddParameter(new Infinit::MaterialParameter("u_RadiancePrefilter", Infinit::MaterialParameterType::Float, &m_RadianceFilter));
+		mat->AddParameter(new Infinit::MaterialParameter("u_AlbedoColor", Infinit::MaterialParameterType::Color3, &m_AlbedoColor));
+		mat->AddParameter(new Infinit::MaterialParameter("u_Metalness", Infinit::MaterialParameterType::Float, &m_Metalness));
+		mat->AddParameter(new Infinit::MaterialParameter("u_Roughness", Infinit::MaterialParameterType::Float, &m_Roughness));
 		m_Instance->Material = mat;
 
 		Infinit::GameObject* go = new Infinit::GameObject("Test Go", Infinit::Transform({0.0f, 4.0f, 0.0f}));
@@ -82,14 +82,7 @@ public:
 		ImGui::End();
 
 		ImGui::Begin("Material");
-		ImGui::Checkbox("Use Albedo", &m_UseAlbedo);
-		ImGui::Checkbox("Use Normal", &m_UseNormal);
-		ImGui::Checkbox("Use Metalness", &m_UseMetalness);
-		ImGui::Checkbox("Use Roughness", &m_UseRoughness);
-		ImGui::SliderFloat("Radiance Filter", &m_RadianceFilter, 0.0f, 1.0f);
-		ImGui::ColorEdit3("Albedo Color", &m_AlbedoColor[0]);
-		ImGui::SliderFloat("Metalness", &m_Metalness, 0.0f, 1.0f);
-		ImGui::SliderFloat("Roughness", &m_Roughness, 0.0f, 1.0f);
+		m_Instance->Material->DrawImGui();
 		ImGui::End();
 		
 		ImGui::Begin("GameObject");

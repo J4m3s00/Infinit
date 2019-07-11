@@ -306,4 +306,5 @@ void main()
 	//color = vec4(texture(u_AlbedoTexture, vs_Input.TexCoord));
 	//color = vec4(m_Params.Metalness , m_Params.Roughness, 0.0, 1.0);
 	color = vec4(lightContribution + iblContribution, 1.0);
+	//color = vec4(m_Params.Albedo, 1.0);
 }

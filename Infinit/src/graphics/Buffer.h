@@ -7,7 +7,7 @@ namespace Infinit {
 
 	enum class ShaderDataType
 	{
-		None = 0, Float, Float2, Float3, Float4, Matrix3, Matrix4, Int, Int2, Int3, Int4, UInt, Byte4, Bool
+		None = 0, Float, Float2, Float3, Float4, Matrix3, Matrix4, Int, Int2, Int3, Int4, UInt, Byte4, Bool, Texture2D, TextureCube
 	};
 
 	static uint ShaderDataTypeSize(ShaderDataType type)

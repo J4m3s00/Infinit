@@ -32,3 +32,7 @@ typedef unsigned char byte;
 
 #define BIT(x) (1 << x)
 #define IN_BIND_EVENT_FN(fn) std::bind(&fn, this, std::placeholders::_1)
+
+#define M_PI 3.1415f
+#define TO_RADIANS (M_PI / 180.0f)
+#define TO_DEGREES (180.0f / M_PI)

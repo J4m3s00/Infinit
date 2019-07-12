@@ -23,6 +23,9 @@ namespace Infinit {
 		Transform& GetLocalTransform() { return m_LocalTransform; }
 		const Transform& GetWorldTransform() const { return m_Transform; }
 
+		std::vector<GameObject*> GetChilds() { return m_Childs; }
+		GameObject* AddChild(GameObject* child) { m_Childs.push_back(child); return this; }
+
 		void DrawImGui();
 	private:
 		string m_Name;

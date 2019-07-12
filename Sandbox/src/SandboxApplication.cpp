@@ -61,7 +61,9 @@ public:
 
 		Infinit::GameObject* go = new Infinit::GameObject("Test Go", Infinit::Transform({0.0f, 4.0f, 0.0f}));
 		go->StaticMesh = m_Instance;
+		go->AddChild((new Infinit::GameObject("Child"))->AddChild(new Infinit::GameObject("Child 3")))->AddChild(new Infinit::GameObject("Child 2"));
 		AddGameObject(go);
+		
 	}
 
 	virtual void OnDetach() override
@@ -92,6 +94,8 @@ public:
 		for (Infinit::GameObject* go : m_GameObjects)
 			go->DrawImGui();
 		ImGui::End();
+
+		Scene->DrawImGui();
 	}
 
 	virtual void OnEvent(Infinit::Event& e) override

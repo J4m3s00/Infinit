@@ -2,6 +2,7 @@
 #include "Scene.h"
 #include "Core/Layer/Layer.h"
 #include "graphics/Renderer.h"
+#include <imgui.h>
 
 namespace Infinit {
 
@@ -80,6 +81,16 @@ namespace Infinit {
 	{
 		for (Layer* layer : m_LayerStack)
 			layer->ImGuiRender();
+	}
+
+	void Scene::DrawImGui()
+	{
+		ImGui::Begin(("Scene " + m_Name).c_str());
+		for (Layer* layer : m_LayerStack)
+		{
+			layer->DrawImGui();
+		}
+		ImGui::End();
 	}
 
 }

@@ -114,6 +114,7 @@
     <ClInclude Include="src\Core\ECS\GameObject.h" />
     <ClInclude Include="src\Core\Transform.h" />
     <ClInclude Include="src\Core\ImGui\ImGuiHelper.h" />
+    <ClInclude Include="src\Core\ECS\Component.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Core\Application.cpp">

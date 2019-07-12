@@ -18,6 +18,7 @@ namespace Infinit {
 		void Update();
 		void Render();
 		void ImGuiRender();
+		void DrawImGui();
 
 		virtual void OnEvent(Event& e) {}
 	protected:
@@ -30,6 +31,8 @@ namespace Infinit {
 		const string& GetName() const { return m_Name; }
 		
 		void AddGameObject(GameObject* gameObject);
+	private:
+		void DrawGameObjectImGui(GameObject* gameObject);
 	public:
 		Scene* Scene;
 	protected:

@@ -2,6 +2,7 @@
 #include "Layer.h"
 
 #include "Core/ECS/GameObject.h"
+#include <imgui.h>
 
 namespace Infinit {
 
@@ -49,6 +50,32 @@ namespace Infinit {
 	{
 		go->OnInit();
 		m_GameObjects.push_back(go);
+	}
+
+	void Layer::DrawImGui()
+	{
+		for (GameObject* go : m_GameObjects)
+		{
+			if (ImGui::CollapsingHeader(go->GetName().c_str()))
+			{
+				for (GameObject* child : go->GetChilds())
+				{
+					DrawGameObjectImGui(child);
+				}
+			}
+		}
+	}
+
+	void Layer::DrawGameObjectImGui(GameObject* go)
+	{
+		if (ImGui::TreeNode(go->GetName().c_str()))
+		{
+			for (GameObject* child : go->GetChilds())
+			{
+				DrawGameObjectImGui(child);
+			}
+			ImGui::TreePop();
+		}
 	}
 
 }

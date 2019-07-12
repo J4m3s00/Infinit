@@ -29,7 +29,7 @@ namespace Infinit {
 	void GameObject::OnRender(const Transform& parentTransform)
 	{
 		m_Transform = m_LocalTransform + parentTransform;
-		Renderer::Draw(StaticMesh.get(), m_Transform.GetTransformMatrix());
+		if (StaticMesh) Renderer::Draw(StaticMesh.get(), m_Transform.GetTransformMatrix());
 		for (GameObject* go : m_Childs)
 			go->OnRender(m_Transform);
 	}

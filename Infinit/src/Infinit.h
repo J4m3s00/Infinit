@@ -9,8 +9,7 @@
 
 #include "Core/Layer/Layer.h"
 #include "Core/Layer/ImGuiLayer.h"
-#include "Events/Event.h"
-#include "Events/InputEvent.h"
+#include "Events/Events.h"
 #include "Core/KeyCodes.h"
 
 #include "Core/EntryPoint.h"
@@ -22,3 +21,4 @@
 #include "Core/Light.h"
 
 #include "Core/ECS/GameObject.h"
+#include "Core/ECS/Component/Components.h"

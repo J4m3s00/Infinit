@@ -52,6 +52,23 @@ namespace Infinit {
 		}
 	}
 
+	void Scene::Update()
+	{
+		OnEvent(AppUpdateEvent(0.0f));
+	}
+
+	void Scene::Render()
+	{
+		Renderer::Begin(ActiveCamera, LightMap);
+		OnEvent(AppRenderEvent(Transform()));
+		Renderer::End();
+	}
+
+	void Scene::ImGuiRender()
+	{
+		OnEvent(AppImGuiRenderEvent());
+	}
+
 	void Scene::Attach()
 	{
 		for (Layer* layer : m_LayerStack)
@@ -63,7 +80,7 @@ namespace Infinit {
 
 	}
 
-	void Scene::Update()
+	/*void Scene::Update()
 	{
 		for (Layer* layer : m_LayerStack)
 			layer->Update();
@@ -81,7 +98,7 @@ namespace Infinit {
 	{
 		for (Layer* layer : m_LayerStack)
 			layer->ImGuiRender();
-	}
+	}*/
 
 	void Scene::DrawImGui()
 	{
@@ -91,6 +108,7 @@ namespace Infinit {
 			layer->DrawImGui();
 		}
 		ImGui::End();
+
 	}
 
 }

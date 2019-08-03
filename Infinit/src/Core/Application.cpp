@@ -26,6 +26,7 @@
 #include "examples/imgui_impl_opengl3.h"
 
 #include "Transform.h"
+#include "Events/AppEvents.h"
 
 namespace Infinit {
 
@@ -73,12 +74,15 @@ namespace Infinit {
 
 			IN_CORE_ASSERT(m_ActiveScene, "No ActiveScene Set!"); //Forgot to call Application::SetActiveScene();
 
+			//OnEvent(AppUpdateEvent(0.0f));
 			m_ActiveScene->Update();
 
+			//OnEvent(AppRenderEvent());
 			m_ActiveScene->Render();
 			
 
 			ImGuiBegin();
+			//OnEvent(AppImGuiRenderEvent());
 			m_ActiveScene->ImGuiRender();
 			ImGuiEnd();
 

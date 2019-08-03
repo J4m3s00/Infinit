@@ -11,6 +11,7 @@ namespace Infinit {
 
 	class Mesh
 	{
+		friend class MeshInstance;
 	public:
 		struct Vertex
 		{
@@ -55,6 +56,7 @@ namespace Infinit {
 	private:
 		std::shared_ptr<VertexArray> m_VertexArray;
 		uint m_VertexCount;
+		string& m_FilePath;
 	};
 
 }

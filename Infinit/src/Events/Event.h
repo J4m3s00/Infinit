@@ -9,7 +9,7 @@ namespace Infinit {
 	{
 		None = 0,
 		WindowClose, WindowResize, WindowFocus, WindowLostFocus, WindowMoved,
-		AppTick, AppUpdate, AppRender,
+		AppUpdate, AppRender, AppImGuiRender,
 		KeyPressed, KeyDown, KeyReleased, KeyTyped, 
 		MouseButtonPressed, MouseButtonReleased, MouseMoved, MouseScrolled
 	};

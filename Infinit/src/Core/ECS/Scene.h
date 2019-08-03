@@ -25,6 +25,7 @@ namespace Infinit {
 		void Update();
 		void Render();
 		void ImGuiRender();
+
 		void DrawImGui();
 	public:
 		LightMap LightMap;

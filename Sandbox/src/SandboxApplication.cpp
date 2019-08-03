@@ -58,12 +58,6 @@ public:
 		mat->AddParameter(new Infinit::MaterialParameter("u_RadiancePrefilter", Infinit::MaterialParameterType::Float, &m_RadianceFilter));
 		mat->AddParameter(new Infinit::MaterialParameter("u_EnvMapRotation", Infinit::MaterialParameterType::Float, &m_EnvMapRotation));
 		m_Instance->Material = mat;
-
-		Infinit::GameObject* go = new Infinit::GameObject("Test Go", Infinit::Transform({0.0f, 4.0f, 0.0f}));
-		go->StaticMesh = m_Instance;
-		go->AddChild((new Infinit::GameObject("Child"))->AddChild(new Infinit::GameObject("Child 3")))->AddChild(new Infinit::GameObject("Child 2"));
-		AddGameObject(go);
-		
 	}
 
 	virtual void OnDetach() override
@@ -72,7 +66,6 @@ public:
 
 	virtual void OnUpdate() override
 	{
-		m_Camera->Update();
 	}
 
 	virtual void OnRender() override
@@ -81,26 +74,32 @@ public:
 
 	virtual void OnImGuiRender() override
 	{
-		ImGui::Begin("Light");
-		ImGui::SliderFloat3("Direction", &m_Light->Direction[0], -360.0f, 360.0f);
-		ImGui::SliderFloat3("Radiance", &m_Light->Radiance[0], 0.0f, 1.0f);
-		ImGui::End();
-
-		ImGui::Begin("Material");
-		m_Instance->Material->DrawImGui();
-		ImGui::End();
 		
-		ImGui::Begin("GameObject");
-		for (Infinit::GameObject* go : m_GameObjects)
-			go->DrawImGui();
-		ImGui::End();
-
-		Scene->DrawImGui();
 	}
 
 	virtual void OnEvent(Infinit::Event& e) override
 	{
-		if (e.GetEventType() == Infinit::EventType::KeyPressed)
+		Layer::OnEvent(e);
+		if (e.GetEventType() == Infinit::EventType::AppUpdate)
+		{
+			m_Camera->Update();
+		}
+		else if (e.GetEventType() == Infinit::EventType::AppImGuiRender)
+		{
+			ImGui::Begin("Light");
+			ImGui::SliderFloat3("Direction", &m_Light->Direction[0], -360.0f, 360.0f);
+			ImGui::SliderFloat3("Radiance", &m_Light->Radiance[0], 0.0f, 1.0f);
+			ImGui::End();
+
+			ImGui::Begin("Material");
+			m_Instance->Material->DrawImGui();
+			ImGui::End();
+
+
+
+			Scene->DrawImGui();
+		}
+		else if (e.GetEventType() == Infinit::EventType::KeyPressed)
 		{
 			Infinit::KeyPressedEvent& keyPress = (Infinit::KeyPressedEvent&)e;
 			if (keyPress.GetKeyCode() == IN_KEY_R && keyPress.GetMods() == IN_MOD_CONTROL)

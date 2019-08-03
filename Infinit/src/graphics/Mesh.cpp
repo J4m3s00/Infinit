@@ -44,6 +44,7 @@ namespace Infinit {
 	};
 	
 	Mesh::Mesh(const string& filename)
+		: m_FilePath(filename)
 	{
 		LogStream::Initialize();
 
@@ -131,6 +132,7 @@ namespace Infinit {
 	}
 
 	MeshInstance::MeshInstance(std::shared_ptr<Mesh> instance)
+		: m_FilePath(instance->m_FilePath)
 	{
 		m_VertexArray = instance->GetVertexArray();
 		m_VertexCount = m_VertexArray->GetIndexBuffer()->GetCount();
@@ -138,6 +140,7 @@ namespace Infinit {
 
 	void MeshInstance::DrawImGui()
 	{
+		ImGui::Text(m_FilePath.c_str());
 	}
 
 }

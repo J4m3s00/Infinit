@@ -4,6 +4,9 @@
     <Filter Include="Core">
       <UniqueIdentifier>{2EB4837C-1AEB-840D-C3D7-6A10AFED000F}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Core\ECS">
+      <UniqueIdentifier>{780F99C2-64DC-F3CD-8DF5-E1757921295C}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Core\ImGui">
       <UniqueIdentifier>{D8137ACD-C4CB-BB1A-2DD3-947619AA560B}</UniqueIdentifier>
     </Filter>
@@ -19,6 +22,9 @@
     <Filter Include="Platform\OpenGL">
       <UniqueIdentifier>{1E7D2C1D-8A08-9AE1-9319-1DD6FF23F6E1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Util">
+      <UniqueIdentifier>{23A78D7C-0FDE-8E0D-B8CA-7410A4E00A0F}</UniqueIdentifier>
+    </Filter>
     <Filter Include="graphics">
       <UniqueIdentifier>{36EF08BC-22BC-63C7-4BD5-516F37019955}</UniqueIdentifier>
     </Filter>
@@ -30,8 +36,17 @@
     <ClInclude Include="src\Core\Core.h">
       <Filter>Core</Filter>
     </ClInclude>
+    <ClInclude Include="src\Core\ECS\GameObject.h">
+      <Filter>Core\ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Core\ECS\Scene.h">
+      <Filter>Core\ECS</Filter>
+    </ClInclude>
     <ClInclude Include="src\Core\EntryPoint.h">
       <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Core\ImGui\ImGuiHelper.h">
+      <Filter>Core\ImGui</Filter>
     </ClInclude>
     <ClInclude Include="src\Core\Input.h">
       <Filter>Core</Filter>
@@ -48,7 +63,16 @@
     <ClInclude Include="src\Core\Layer\LayerStack.h">
       <Filter>Core\Layer</Filter>
     </ClInclude>
+    <ClInclude Include="src\Core\Light.h">
+      <Filter>Core</Filter>
+    </ClInclude>
     <ClInclude Include="src\Core\Log.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Core\Material.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Core\Transform.h">
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="src\Events\Event.h">
@@ -75,6 +99,9 @@
     </ClInclude>
     <ClInclude Include="src\Platform\OpenGL\OpenGLVertexArray.h">
       <Filter>Platform\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Util\StringUtil.h">
+      <Filter>Util</Filter>
     </ClInclude>
     <ClInclude Include="src\graphics\Buffer.h">
       <Filter>graphics</Filter>
@@ -107,20 +134,28 @@
       <Filter>graphics</Filter>
     </ClInclude>
     <ClInclude Include="src\inpch.h" />
-    <ClInclude Include="src\Core\Material.h" />
-    <ClInclude Include="src\Util\StringUtil.h" />
-    <ClInclude Include="src\Core\Light.h" />
-    <ClInclude Include="src\Core\ECS\Scene.h" />
-    <ClInclude Include="src\Core\ECS\GameObject.h" />
-    <ClInclude Include="src\Core\Transform.h" />
-    <ClInclude Include="src\Core\ImGui\ImGuiHelper.h" />
-    <ClInclude Include="src\Core\ECS\Component.h" />
+    <ClInclude Include="src\Events\AppEvents.h" />
+    <ClInclude Include="src\Events\Events.h" />
+    <ClInclude Include="src\Core\ECS\Component\Component.h">
+      <Filter>Core\ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Core\ECS\Component\MeshComponent.h" />
+    <ClInclude Include="src\Core\ECS\Component\Components.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Core\Application.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="src\Core\ECS\GameObject.cpp">
+      <Filter>Core\ECS</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Core\ECS\Scene.cpp">
+      <Filter>Core\ECS</Filter>
+    </ClCompile>
     <ClCompile Include="src\Core\ImGui\ImGuiBuild.cpp">
+      <Filter>Core\ImGui</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Core\ImGui\ImGuiHelper.cpp">
       <Filter>Core\ImGui</Filter>
     </ClCompile>
     <ClCompile Include="src\Core\Input.cpp">
@@ -138,6 +173,12 @@
     <ClCompile Include="src\Core\Log.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="src\Core\Material.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Core\Transform.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
     <ClCompile Include="src\Platform\OpenGL\OpenGLBuffer.cpp">
       <Filter>Platform\OpenGL</Filter>
     </ClCompile>
@@ -152,6 +193,9 @@
     </ClCompile>
     <ClCompile Include="src\Platform\OpenGL\OpenGLVertexArray.cpp">
       <Filter>Platform\OpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Util\StringUtil.cpp">
+      <Filter>Util</Filter>
     </ClCompile>
     <ClCompile Include="src\graphics\Buffer.cpp">
       <Filter>graphics</Filter>
@@ -181,11 +225,7 @@
       <Filter>graphics</Filter>
     </ClCompile>
     <ClCompile Include="src\inpch.cpp" />
-    <ClCompile Include="src\Core\Material.cpp" />
-    <ClCompile Include="src\Util\StringUtil.cpp" />
-    <ClCompile Include="src\Core\ECS\Scene.cpp" />
-    <ClCompile Include="src\Core\ECS\GameObject.cpp" />
-    <ClCompile Include="src\Core\Transform.cpp" />
-    <ClCompile Include="src\Core\ImGui\ImGuiHelper.cpp" />
+    <ClCompile Include="src\Core\ECS\Component\MeshComponent.cpp" />
+    <ClCompile Include="src\Core\ECS\Component\Component.cpp" />
   </ItemGroup>
 </Project>

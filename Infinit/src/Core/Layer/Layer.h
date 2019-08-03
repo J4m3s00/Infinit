@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Core/Core.h"
-#include "Events/Event.h"
+#include "Events/Events.h"
 
 namespace Infinit {
 	class Scene;
@@ -15,12 +15,11 @@ namespace Infinit {
 
 		void Attach();
 		void Detach();
-		void Update();
-		void Render();
-		void ImGuiRender();
+
 		void DrawImGui();
 
-		virtual void OnEvent(Event& e) {}
+		virtual void OnEvent(Event& e);
+		//Maybe layers should not be extendable
 	protected:
 		virtual void OnAttach() {}
 		virtual void OnDetach() {}
@@ -38,6 +37,7 @@ namespace Infinit {
 	protected:
 		string m_Name;
 		std::vector<GameObject*> m_GameObjects;
+		GameObject* m_SelectedGameObject;
 	};
 
 }

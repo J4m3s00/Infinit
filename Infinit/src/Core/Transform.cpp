@@ -20,11 +20,12 @@ namespace Infinit {
 
 	Transform& Transform::operator+(const Transform& t)
 	{
-		m_Position += t.Position;
-		m_Scale *= t.Scale;
-		m_Rotation += t.Rotation;
-		CalculateTransformMatrix();
-		return *this;
+		Transform result;
+		result.m_Position = m_Position + t.Position;
+		result.m_Rotation = m_Rotation + t.Rotation;
+		result.m_Scale = m_Scale * t.Scale;
+		result.CalculateTransformMatrix();
+		return result;
 	}
 
 	Transform& Transform::operator=(const Transform& t)

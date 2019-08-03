@@ -20,10 +20,12 @@ namespace Infinit {
 		glDeleteProgram(m_RendererID);
 	}
 
-	void OpenGLShader::Reload()
+	bool OpenGLShader::Reload(const string& filepath)
 	{
+		if (filepath != "") m_FilePath = filePath;
 		if (m_RendererID) glDeleteProgram(m_RendererID);
 		CompileShader();
+		return true;
 	}
 
 	void OpenGLShader::CompileShader()

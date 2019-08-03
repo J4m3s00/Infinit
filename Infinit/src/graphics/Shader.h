@@ -1,11 +1,12 @@
 #pragma once
 
 #include "Core/Core.h"
+#include "Core/Core.h"
 #include <glm/glm.hpp>
 
 namespace Infinit {
 	
-	class INFINIT_API Shader
+	class Shader : public Resource
 	{
 	public:
 		virtual ~Shader() {}
@@ -22,7 +23,7 @@ namespace Infinit {
 
 		virtual int GetResourceSlot(const string& name) const = 0;
 
-		virtual void Reload() = 0;
+		virtual bool Reload(const string& filePath) = 0;
 
 		static std::shared_ptr<Shader> Create(const string& filePath);
 	};

@@ -27,11 +27,35 @@ namespace Infinit {
 		return levels;
 	}
 
+	//Remove srgb??
 	OpenGLTexture2D::OpenGLTexture2D(const string& path, bool srgb)
-		: m_FilePath(path)
+	{
+		Reload(path);
+	}
+
+	OpenGLTexture2D::OpenGLTexture2D(TextureFormat format, uint width, uint height)
+		: m_Format(format), m_Width(width), m_Height(height)
+	{
+		glGenTextures(1, &m_RendererID);
+		glBindTexture(GL_TEXTURE_2D, m_RendererID);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+		glTexImage2D(GL_TEXTURE_2D, 0, InfinitToOpenGLTextureFormat(m_Format), m_Width, m_Height, 0, InfinitToOpenGLTextureFormat(m_Format), GL_UNSIGNED_BYTE, nullptr);
+		glGenerateMipmap(GL_TEXTURE_2D);
+
+		glBindTexture(GL_TEXTURE_2D, 0);
+
+		return true;
+	}
+
+	bool OpenGLTexture2D::Reload(const string& filePath)
 	{
 		int width, height, channels;
-		IN_CORE_INFO("Loading texture {0}, srgb={1}", path, srgb);
+		IN_CORE_INFO("Loading texture {0}", path);
 		stbi_set_flip_vertically_on_load(false);
 		m_ImageData = stbi_load(path.c_str(), &width, &height, &channels, STBI_rgb_alpha);
 		IN_CORE_INFO("Ready reading data");
@@ -54,23 +78,6 @@ namespace Infinit {
 		glBindTexture(GL_TEXTURE_2D, 0);
 	}
 
-	OpenGLTexture2D::OpenGLTexture2D(TextureFormat format, uint width, uint height)
-		: m_Format(format), m_Width(width), m_Height(height)
-	{
-		glGenTextures(1, &m_RendererID);
-		glBindTexture(GL_TEXTURE_2D, m_RendererID);
-
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-		glTexImage2D(GL_TEXTURE_2D, 0, InfinitToOpenGLTextureFormat(m_Format), m_Width, m_Height, 0, InfinitToOpenGLTextureFormat(m_Format), GL_UNSIGNED_BYTE, nullptr);
-		glGenerateMipmap(GL_TEXTURE_2D);
-
-		glBindTexture(GL_TEXTURE_2D, 0);
-	}
-
 	OpenGLTexture2D::~OpenGLTexture2D()
 	{
 		IN_CORE_INFO("OpenGL Texture detroyed!");
@@ -82,11 +89,17 @@ namespace Infinit {
 		glBindTextureUnit(slot, m_RendererID);
 	}
 
+//REMOVE srgb??
 	OpenGLTextureCube::OpenGLTextureCube(const string& path, bool srgb)
+	{
+		Reload(path);
+	}
+
+	bool OpenGLTextureCube::Reload(const string& filePath)
 	{
 		int width, height, channels;
 		stbi_set_flip_vertically_on_load(false);
-		m_ImageData = stbi_load(path.c_str(), &width, &height, &channels, STBI_rgb);
+		m_ImageData = stbi_load(filePath.c_str(), &width, &height, &channels, STBI_rgb);
 
 		m_Width = width;
 		m_Height = height;
@@ -165,6 +178,7 @@ namespace Infinit {
 			delete[] faces[i];
 
 		stbi_image_free(m_ImageData);
+		return true;
 	}
 
 	OpenGLTextureCube::~OpenGLTextureCube()

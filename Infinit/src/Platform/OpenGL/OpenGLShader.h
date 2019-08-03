@@ -22,7 +22,7 @@ namespace Infinit {
 
 		virtual int GetResourceSlot(const string& name) const override;
 
-		virtual void Reload() override;
+		virtual bool Reload(const string& filePath) override;
 	private:
 		int GetUniformLocation(const string& name);
 		void LoadShaderFromFile(const string& path);
@@ -34,7 +34,6 @@ namespace Infinit {
 		std::unordered_map<string, int> m_UniformBuffer;
 		std::vector<string> m_Resources;
 		string m_ShaderSource;
-		string m_FilePath;
 		uint m_RendererID;
 	};
 

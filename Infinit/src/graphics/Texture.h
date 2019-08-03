@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core/Core.h"
+#include "Core/Resource.h"
 
 namespace Infinit {
 
@@ -11,7 +12,7 @@ namespace Infinit {
 		RGBA = 2
 	};
 
-	class Texture
+	class Texture : public Resource
 	{
 	public:
 		virtual ~Texture() {  }
@@ -21,6 +22,8 @@ namespace Infinit {
 		virtual TextureFormat GetFormat() const = 0;
 		virtual uint GetWidth() const = 0;
 		virtual uint GetHeight() const = 0;
+
+		virtual bool Reload(const string& filePath) = 0;
 
 		virtual const string& GetPath() const = 0;
 	};

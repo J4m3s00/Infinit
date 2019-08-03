@@ -7,3 +7,14 @@ bin-int/
 *.filters
 *.user
 Infinit/vendor/ImGui
+Sandbox/Sandbox.xcodeproj/project.pbxproj
+Infinit/vendor/Glad/Glad.xcodeproj/xcuserdata/lucaherzke.xcuserdatad/xcschemes/xcschememanagement.plist
+Infinit/vendor/Glad/Glad.xcodeproj/project.pbxproj
+Infinit/Infinit.xcodeproj/xcuserdata/lucaherzke.xcuserdatad/xcschemes/xcschememanagement.plist
+Infinit/Infinit.xcodeproj/project.pbxproj
+Infinit/.DS_Store
+Infinit.xcworkspace/xcuserdata/lucaherzke.xcuserdatad/xcdebugger/Breakpoints_v2.xcbkptlist
+Infinit.xcworkspace/xcuserdata/lucaherzke.xcuserdatad/UserInterfaceState.xcuserstate
+Infinit.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist
+Infinit.xcworkspace/contents.xcworkspacedata
+Sandbox/Sandbox.xcodeproj/xcuserdata/lucaherzke.xcuserdatad/xcschemes/xcschememanagement.plist

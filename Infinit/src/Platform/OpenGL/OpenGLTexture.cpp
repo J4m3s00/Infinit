@@ -29,12 +29,13 @@ namespace Infinit {
 
 	//Remove srgb??
 	OpenGLTexture2D::OpenGLTexture2D(const string& path, bool srgb)
+		: Texture2D(path)
 	{
 		Reload(path);
 	}
 
 	OpenGLTexture2D::OpenGLTexture2D(TextureFormat format, uint width, uint height)
-		: m_Format(format), m_Width(width), m_Height(height)
+		: Texture2D(""), m_Format(format), m_Width(width), m_Height(height)
 	{
 		glGenTextures(1, &m_RendererID);
 		glBindTexture(GL_TEXTURE_2D, m_RendererID);
@@ -48,16 +49,15 @@ namespace Infinit {
 		glGenerateMipmap(GL_TEXTURE_2D);
 
 		glBindTexture(GL_TEXTURE_2D, 0);
-
-		return true;
 	}
 
 	bool OpenGLTexture2D::Reload(const string& filePath)
 	{
+		m_FilePath = filePath;
 		int width, height, channels;
-		IN_CORE_INFO("Loading texture {0}", path);
+		IN_CORE_INFO("Loading texture {0}", m_FilePath);
 		stbi_set_flip_vertically_on_load(false);
-		m_ImageData = stbi_load(path.c_str(), &width, &height, &channels, STBI_rgb_alpha);
+		m_ImageData = stbi_load(m_FilePath.c_str(), &width, &height, &channels, STBI_rgb_alpha);
 		IN_CORE_INFO("Ready reading data");
 
 		m_Width = width;
@@ -76,6 +76,8 @@ namespace Infinit {
 		glGenerateMipmap(GL_TEXTURE_2D);
 
 		glBindTexture(GL_TEXTURE_2D, 0);
+
+		return true;
 	}
 
 	OpenGLTexture2D::~OpenGLTexture2D()
@@ -91,6 +93,7 @@ namespace Infinit {
 
 //REMOVE srgb??
 	OpenGLTextureCube::OpenGLTextureCube(const string& path, bool srgb)
+		: TextureCube(path)
 	{
 		Reload(path);
 	}

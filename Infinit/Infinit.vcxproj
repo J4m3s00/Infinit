@@ -108,6 +108,7 @@
     <ClInclude Include="src\Core\Light.h" />
     <ClInclude Include="src\Core\Log.h" />
     <ClInclude Include="src\Core\Material.h" />
+    <ClInclude Include="src\Core\Resource.h" />
     <ClInclude Include="src\Events\Event.h" />
     <ClInclude Include="src\Events\InputEvent.h" />
     <ClInclude Include="src\Events\WindowEvent.h" />
@@ -117,6 +118,7 @@
     <ClInclude Include="src\Platform\OpenGL\OpenGLShader.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLTexture.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLVertexArray.h" />
+    <ClInclude Include="src\Util\StringUtil.h" />
     <ClInclude Include="src\graphics\Buffer.h" />
     <ClInclude Include="src\graphics\Camera.h" />
     <ClInclude Include="src\graphics\Mesh.h" />
@@ -128,7 +130,6 @@
     <ClInclude Include="src\graphics\VertexArray.h" />
     <ClInclude Include="src\graphics\Window.h" />
     <ClInclude Include="src\inpch.h" />
-    <ClInclude Include="src\Util\StringUtil.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Core\Application.cpp" />
@@ -144,6 +145,7 @@
     <ClCompile Include="src\Platform\OpenGL\OpenGLShader.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLTexture.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLVertexArray.cpp" />
+    <ClCompile Include="src\Util\StringUtil.cpp" />
     <ClCompile Include="src\graphics\Buffer.cpp" />
     <ClCompile Include="src\graphics\Camera.cpp" />
     <ClCompile Include="src\graphics\Mesh.cpp" />
@@ -156,7 +158,6 @@
     <ClCompile Include="src\inpch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="src\Util\StringUtil.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="vendor\GLFW\GLFW.vcxproj">

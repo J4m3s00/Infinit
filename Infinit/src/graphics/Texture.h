@@ -15,6 +15,7 @@ namespace Infinit {
 	class Texture : public Resource
 	{
 	public:
+		Texture(const string& filePath, const string& name = "Unknown") : Resource(filePath, name) {}
 		virtual ~Texture() {  }
 
 		virtual void Bind(uint slot) const = 0;
@@ -31,6 +32,8 @@ namespace Infinit {
 	class Texture2D : public Texture
 	{
 	public:
+		Texture2D(const string& filePath, const string& name = "Unknown") : Texture(filePath, name) {}
+
 		static std::shared_ptr<Texture2D> Create(const string& path, bool srgb = false);
 		static std::shared_ptr<Texture2D> Create(TextureFormat format, uint width, uint height);
 	};
@@ -38,6 +41,8 @@ namespace Infinit {
 	class TextureCube : public Texture
 	{
 	public:
+		TextureCube(const string& filePath, const string& name = "Unknown") : Texture(filePath, name) {}
+
 		static std::shared_ptr<TextureCube> Create(const string& path, bool srgb = false);
 	};
 

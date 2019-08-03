@@ -43,7 +43,7 @@ namespace Infinit {
 		virtual uint GetHeight() const override { return m_Height; }
 		virtual uint GetWidth() const override { return m_Width; }
 
-		virtual void Reload(const string& filePath);
+		virtual bool Reload(const string& filePath);
 
 		virtual const string& GetPath() const override { return m_FilePath; }
 	private:

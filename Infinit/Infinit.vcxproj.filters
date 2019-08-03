@@ -19,6 +19,9 @@
     <Filter Include="Platform\OpenGL">
       <UniqueIdentifier>{1E7D2C1D-8A08-9AE1-9319-1DD6FF23F6E1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Util">
+      <UniqueIdentifier>{23A78D7C-0FDE-8E0D-B8CA-7410A4E00A0F}</UniqueIdentifier>
+    </Filter>
     <Filter Include="graphics">
       <UniqueIdentifier>{36EF08BC-22BC-63C7-4BD5-516F37019955}</UniqueIdentifier>
     </Filter>
@@ -48,7 +51,16 @@
     <ClInclude Include="src\Core\Layer\LayerStack.h">
       <Filter>Core\Layer</Filter>
     </ClInclude>
+    <ClInclude Include="src\Core\Light.h">
+      <Filter>Core</Filter>
+    </ClInclude>
     <ClInclude Include="src\Core\Log.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Core\Material.h">
+      <Filter>Core</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Core\Resource.h">
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="src\Events\Event.h">
@@ -75,6 +87,9 @@
     </ClInclude>
     <ClInclude Include="src\Platform\OpenGL\OpenGLVertexArray.h">
       <Filter>Platform\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Util\StringUtil.h">
+      <Filter>Util</Filter>
     </ClInclude>
     <ClInclude Include="src\graphics\Buffer.h">
       <Filter>graphics</Filter>
@@ -107,9 +122,6 @@
       <Filter>graphics</Filter>
     </ClInclude>
     <ClInclude Include="src\inpch.h" />
-    <ClInclude Include="src\Core\Material.h" />
-    <ClInclude Include="src\Util\StringUtil.h" />
-    <ClInclude Include="src\Core\Light.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Core\Application.cpp">
@@ -133,6 +145,9 @@
     <ClCompile Include="src\Core\Log.cpp">
       <Filter>Core</Filter>
     </ClCompile>
+    <ClCompile Include="src\Core\Material.cpp">
+      <Filter>Core</Filter>
+    </ClCompile>
     <ClCompile Include="src\Platform\OpenGL\OpenGLBuffer.cpp">
       <Filter>Platform\OpenGL</Filter>
     </ClCompile>
@@ -147,6 +162,9 @@
     </ClCompile>
     <ClCompile Include="src\Platform\OpenGL\OpenGLVertexArray.cpp">
       <Filter>Platform\OpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Util\StringUtil.cpp">
+      <Filter>Util</Filter>
     </ClCompile>
     <ClCompile Include="src\graphics\Buffer.cpp">
       <Filter>graphics</Filter>
@@ -176,7 +194,5 @@
       <Filter>graphics</Filter>
     </ClCompile>
     <ClCompile Include="src\inpch.cpp" />
-    <ClCompile Include="src\Core\Material.cpp" />
-    <ClCompile Include="src\Util\StringUtil.cpp" />
   </ItemGroup>
 </Project>

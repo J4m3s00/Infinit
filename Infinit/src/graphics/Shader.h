@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Core/Core.h"
-#include "Core/Core.h"
+#include "Core/Resource.h"
 #include <glm/glm.hpp>
 
 namespace Infinit {
@@ -9,6 +9,8 @@ namespace Infinit {
 	class Shader : public Resource
 	{
 	public:
+		Shader(const string& filePath, const string& name = "Unknown") : Resource(filePath, name) {}
+
 		virtual ~Shader() {}
 
 		virtual void Bind() const = 0;

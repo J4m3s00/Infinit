@@ -9,7 +9,7 @@
 namespace Infinit {
 
 	OpenGLShader::OpenGLShader(const string& path)
-		: m_FilePath(path), m_RendererID(0)
+		: Shader(path), m_RendererID(0)
 	{
 		CompileShader();
 	}
@@ -22,7 +22,7 @@ namespace Infinit {
 
 	bool OpenGLShader::Reload(const string& filepath)
 	{
-		if (filepath != "") m_FilePath = filePath;
+		if (filepath != "") m_FilePath = filepath;
 		if (m_RendererID) glDeleteProgram(m_RendererID);
 		CompileShader();
 		return true;

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core.h"
+#include "Resource.h"
 #include "graphics/Window.h"
 #include "Events/Event.h"
 #include "Events/WindowEvent.h"
@@ -31,10 +32,14 @@ namespace Infinit {
 
 		void Run();
 
+		std::shared_ptr<Resource> GetResource(const string& filePath);
+
 		inline Window& GetWindow() { return *m_Window; }
 		inline static Application& Get() { return *s_Instance; }
 	private:
 		bool Init();
+		void LoadAllResources(const string& folder);
+		void SaveResourceInCache(const string& path);
 		bool OnWindowClose(WindowCloseEvent& e);
 	private:
 		LayerStack m_LayerStack;
@@ -43,6 +48,7 @@ namespace Infinit {
 		bool m_Running;
 		string m_Name;
 		std::unique_ptr<Window> m_Window;
+		std::unordered_map<string, std::shared_ptr<Resource>> m_ResourceCache;
 	private:
 		static Application* s_Instance;
 	};

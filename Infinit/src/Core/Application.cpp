@@ -11,6 +11,11 @@
 
 #include <glm/glm.hpp>
 #include <graphics/Renderer.h>
+#include "Util/StringUtil.h"
+
+#ifdef IN_PLATFORM_WINDOWS
+#include <filesystem>
+#endif
 
 namespace Infinit {
 
@@ -103,10 +108,57 @@ namespace Infinit {
 		RendererAPI::Init();
 		Renderer::Init();
 
-		m_ImGuiLayer = new ImGuiLayer();
-		PushLayer(m_ImGuiLayer);
+		LoadAllResources("res/");
+
+		//m_ImGuiLayer = new ImGuiLayer();
+		//PushLayer(m_ImGuiLayer);
 		
 		return true;
+	}
+
+	void Application::LoadAllResources(const string& folder)
+	{
+		for (const auto& entry : std::filesystem::directory_iterator(folder))
+		{
+			if (entry.is_directory())
+				LoadAllResources(entry.path().u8string());
+			else
+			{
+				string filePath = entry.path().u8string();
+				SaveResourceInCache(filePath);
+			}
+		}
+	}
+
+	void Application::SaveResourceInCache(const string& filePath)
+	{
+		string fileEnding = filePath.substr(filePath.find_last_of(".") + 1, filePath.size());
+		//Textures
+		if (fileEnding == "png" || fileEnding == "tga")
+		{
+			m_ResourceCache[filePath] = Texture2D::Create(filePath);
+		}
+		//Meshes
+		else if (fileEnding == "fbx")
+		{
+			m_ResourceCache[filePath] = std::shared_ptr<Mesh>(new Mesh(filePath));
+		}
+		//Shaders
+		else if (fileEnding == "shader")
+		{
+			m_ResourceCache[filePath] = Shader::Create(filePath);
+		}
+	}
+
+	std::shared_ptr<Resource> Application::GetResource(const string& filePath)
+	{
+		std::unordered_map<string, std::shared_ptr<Resource>>::iterator it = m_ResourceCache.find(filePath);
+		if (it != m_ResourceCache.end())
+		{
+			return it->second;
+		}
+		IN_CORE_WARN("Could not find Resource: \"{0}\"", filePath);
+		return nullptr;
 	}
 
 	bool Application::OnWindowClose(WindowCloseEvent& e)

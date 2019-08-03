@@ -43,12 +43,13 @@ namespace Infinit {
 	};
 	
 	Mesh::Mesh(const string& filename)
+		: Resource(filename)
 	{
 		Reload(filename);
 	}
 
 	Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<Index>& indices)
-		: m_Vertices(vertices), m_Indices(indices)
+		: Resource(""), m_Vertices(vertices), m_Indices(indices)
 	{
 		m_VertexArray.reset(VertexArray::Create());
 		std::shared_ptr<VertexBuffer> vertexBuffer;
@@ -105,7 +106,6 @@ namespace Infinit {
 				vertex.Texcoord = { mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y };
 			m_Vertices.push_back(vertex);
 		}
-		delete scene;
 
 		m_VertexArray.reset(VertexArray::Create());
 		std::shared_ptr<VertexBuffer> vertexBuffer;

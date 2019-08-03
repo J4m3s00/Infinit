@@ -30,18 +30,18 @@ public:
 	virtual void OnAttach() override
 	{
 		m_Camera.reset(new Infinit::Camera(glm::perspective(65.0f, 16.0f / 9.0f, 0.0001f, 10000.0f)));
-		m_Shader = Infinit::Shader::Create("pbr.shader");
-		m_Mesh.reset(new Infinit::Mesh("cerberus.fbx"));
+		m_Shader = Infinit::Shader::Create("res/shaders/pbr.shader");
+		m_Mesh.reset(new Infinit::Mesh("res/cerberus.fbx"));
 
 		m_Instance.reset(new Infinit::MeshInstance(m_Mesh));
 		std::shared_ptr<Infinit::Material> mat = std::make_shared<Infinit::Material>(Infinit::Material(m_Shader));
-		mat->AddTexture("u_AlbedoTexture", Infinit::Texture2D::Create("cerberus_A.png"));
-		mat->AddTexture("u_NormalTexture", Infinit::Texture2D::Create("cerberus_N.png"));
-		mat->AddTexture("u_MetalnessTexture", Infinit::Texture2D::Create("cerberus_M.png"));
-		mat->AddTexture("u_RoughnessTexture", Infinit::Texture2D::Create("cerberus_R.png"));
-		mat->AddTexture("u_EnvRadianceTex", Infinit::TextureCube::Create("Arches_E_PineTree_Radiance.tga"));
-		mat->AddTexture("u_EnvIrradianceTex", Infinit::TextureCube::Create("Arches_E_PineTree_Irradiance.tga"));
-		mat->AddTexture("u_BRDFLUTTexture", Infinit::Texture2D::Create("BRDF_LUT.tga"));
+		mat->AddTexture("u_AlbedoTexture", std::dynamic_pointer_cast<Infinit::Texture2D>(Infinit::Application::Get().GetResource("res/cerberus_A.png")));
+		mat->AddTexture("u_NormalTexture", Infinit::Texture2D::Create("res/cerberus_N.png"));
+		mat->AddTexture("u_MetalnessTexture", Infinit::Texture2D::Create("res/cerberus_M.png"));
+		mat->AddTexture("u_RoughnessTexture", Infinit::Texture2D::Create("res/cerberus_R.png"));
+		mat->AddTexture("u_EnvRadianceTex", Infinit::TextureCube::Create("res/Arches_E_PineTree_Radiance.tga"));
+		mat->AddTexture("u_EnvIrradianceTex", Infinit::TextureCube::Create("res/Arches_E_PineTree_Irradiance.tga"));
+		mat->AddTexture("u_BRDFLUTTexture", Infinit::Texture2D::Create("res/BRDF_LUT.tga"));
 		mat->AddParameter(new Infinit::MaterialParameter("u_AlbedoTexToggle", Infinit::ShaderDataType::Bool, &m_UseAlbedo));
 		mat->AddParameter(new Infinit::MaterialParameter("u_MetalnessTexToggle", Infinit::ShaderDataType::Bool, &m_UseMetalness));
 		mat->AddParameter(new Infinit::MaterialParameter("u_RoughnessTexToggle", Infinit::ShaderDataType::Bool, &m_UseRoughness));
@@ -89,7 +89,7 @@ public:
 			Infinit::KeyPressedEvent& keyPress = (Infinit::KeyPressedEvent&)e;
 			if (keyPress.GetKeyCode() == IN_KEY_R && keyPress.GetMods() == IN_MOD_CONTROL)
 			{
-				m_Shader->Reload();
+				m_Shader->Reload("");
 			}
 		}
 	}

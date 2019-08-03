@@ -114,6 +114,7 @@
     <ClInclude Include="src\Core\Light.h" />
     <ClInclude Include="src\Core\Log.h" />
     <ClInclude Include="src\Core\Material.h" />
+    <ClInclude Include="src\Core\Resource.h" />
     <ClInclude Include="src\Core\Transform.h" />
     <ClInclude Include="src\Events\Event.h" />
     <ClInclude Include="src\Events\Events.h" />

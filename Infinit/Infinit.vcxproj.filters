@@ -73,6 +73,7 @@
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="src\Core\Transform.h">
+    <ClInclude Include="src\Core\Resource.h">
       <Filter>Core</Filter>
     </ClInclude>
     <ClInclude Include="src\Events\Event.h">
@@ -134,6 +135,9 @@
       <Filter>graphics</Filter>
     </ClInclude>
     <ClInclude Include="src\inpch.h" />
+    <ClInclude Include="src\Core\Material.h" />
+    <ClInclude Include="src\Util\StringUtil.h" />
+    <ClInclude Include="src\Core\Light.h" />
     <ClInclude Include="src\Events\AppEvents.h" />
     <ClInclude Include="src\Events\Events.h" />
     <ClInclude Include="src\Core\ECS\Component\Component.h">

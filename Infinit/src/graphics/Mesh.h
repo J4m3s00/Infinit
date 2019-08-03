@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Core/Core.h"
+#include "Core/Resource.h"
 #include "inpch.h"
 #include "glm/glm.hpp"
 #include "graphics/VertexArray.h"
@@ -9,7 +10,7 @@
 
 namespace Infinit {
 
-	class Mesh
+	class Mesh : public Resource
 	{
 		friend class MeshInstance;
 	public:
@@ -31,15 +32,14 @@ namespace Infinit {
 		Mesh(const std::vector<Vertex>& vertices, const std::vector<Index>& indices);
 		~Mesh();
 
-		inline const string& GetFilePath() const { return m_FilePath; }
+		virtual bool Reload(const string& filepath);
+
 		std::shared_ptr<VertexArray> GetVertexArray() const { return m_VertexArray; }
 	private:
 		std::vector<Vertex> m_Vertices;
 		std::vector<Index> m_Indices;
 
 		std::shared_ptr<VertexArray> m_VertexArray;
-
-		string m_FilePath;
 	};
 
 	class MeshInstance

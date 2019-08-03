@@ -104,7 +104,7 @@ public:
 			Infinit::KeyPressedEvent& keyPress = (Infinit::KeyPressedEvent&)e;
 			if (keyPress.GetKeyCode() == IN_KEY_R && keyPress.GetMods() == IN_MOD_CONTROL)
 			{
-				m_Shader->Reload();
+				m_Shader->Reload("");
 			}
 		}
 	}

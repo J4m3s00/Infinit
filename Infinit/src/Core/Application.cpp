@@ -42,6 +42,8 @@ namespace Infinit {
 	};
 
 	Application* Application::s_Instance = nullptr;
+	int Application::LaunchArgumentCount = 0;
+	char** Application::LaunchArguments = nullptr;
 
 	Application::Application(const std::string& name, RendererAPI::Type renderer) 
 		: m_Name(name)
@@ -124,6 +126,7 @@ namespace Infinit {
 			else
 			{
 				string filePath = entry.path().u8string();
+				std::replace(filePath.begin(), filePath.end(), '\\', '/');
 				SaveResourceInCache(filePath);
 			}
 		}
@@ -250,7 +253,13 @@ namespace Infinit {
 
 		if (GetOpenFileNameA(&ofn) == TRUE)
 		{
-			return ofn.lpstrFile;
+			string result = ofn.lpstrFile;
+			std::filesystem::path path("./../");
+			std::string resourcePath = std::filesystem::absolute(path).u8string();
+			result = result.substr(resourcePath.size(), result.size() - resourcePath.size());
+			std::replace(result.begin(), result.end(), '\\', '/');
+
+			return result;
 		}
 		return std::string();
 	}

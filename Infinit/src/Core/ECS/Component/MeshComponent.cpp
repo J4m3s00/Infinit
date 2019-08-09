@@ -6,6 +6,7 @@
 #include "Core/Application.h"
 
 #include <imgui.h>
+#include <filesystem>
 
 namespace Infinit {
 
@@ -30,8 +31,11 @@ namespace Infinit {
 			if (ImGui::Button("Load"))
 			{
 				std::string filename = Application::Get().OpenFile("");
-				Mesh* mesh = new Mesh(filename);
+				
+				std::shared_ptr<Mesh> mesh = std::dynamic_pointer_cast<Mesh>(Application::Get().GetResource(filename));
 				Instance = new MeshInstance(mesh);
+
+				IN_CORE_TRACE("FileName: {0}, {1}", filename, mesh->GetFilePath());
 			}
 		}
 	}

@@ -1,8 +1,11 @@
 #pragma once
 
 #include "graphics/Shader.h"
+#include "graphics/ShaderUniforms.h"
 
 namespace Infinit {
+
+	
 
 	class INFINIT_API OpenGLShader : public Shader
 	{
@@ -28,11 +31,15 @@ namespace Infinit {
 		void LoadShaderFromFile(const string& path);
 		void ProcessResources();
 		void ParseUniform(const string& statement);
+		void ParseUniformStruct(const string& statement);
 		uint ShaderTypeFromString(const string& type);
 		void CompileShader();
+		bool FindStruct(const string& name, ShaderStruct* struc);
 	private:
 		std::unordered_map<string, int> m_UniformBuffer;
 		std::vector<string> m_Resources;
+		std::vector<UniformMap<string, ShaderUniform*, int>> m_UniformMap;
+		std::vector<ShaderStruct> m_Structs;
 		string m_ShaderSource;
 		uint m_RendererID;
 	};

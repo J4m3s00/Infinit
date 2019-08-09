@@ -4,6 +4,15 @@ typedef std::string string;
 typedef unsigned int uint;
 typedef unsigned char byte;
 
+template< typename tPair >
+struct second_t {
+	typename tPair::second_type operator()(const tPair& p) const { return     p.second; }
+};
+
+template< typename tMap >
+second_t< typename tMap::value_type > second(const tMap& m) { return second_t<     typename tMap::value_type >(); }
+
+
 #define IN_ENABLE_ASSERT
 
 #if 0

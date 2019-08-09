@@ -16,6 +16,8 @@ namespace Infinit {
 		virtual void Bind() const = 0;
 		virtual void Unbind() const = 0;
 
+		virtual void* GetUniformBuffer(const string& name);
+
 		virtual void SetUniform1i(const string& name, const int& value) = 0;
 		virtual void SetUniform1f(const string& name, const float& value) = 0;
 		virtual void SetUniform2f(const string& name, const glm::vec2& value) = 0;
@@ -26,8 +28,6 @@ namespace Infinit {
 		virtual int GetResourceSlot(const string& name) const = 0;
 
 		virtual bool Reload(const string& filePath) = 0;
-
-		virtual const string& GetFilePath() const = 0;
 
 		static std::shared_ptr<Shader> Create(const string& filePath);
 	};

@@ -53,6 +53,9 @@ namespace Infinit {
 		std::unordered_map<string, std::shared_ptr<Resource>> m_ResourceCache;
 	private:
 		static Application* s_Instance;
+	public:
+		static int LaunchArgumentCount;
+		static char** LaunchArguments;
 	};
 
 	Application* CreateApplication();

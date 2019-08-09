@@ -121,6 +121,7 @@
     <ClInclude Include="src\Events\InputEvent.h" />
     <ClInclude Include="src\Events\AppEvents.h" />
     <ClInclude Include="src\Events\WindowEvent.h" />
+    <ClInclude Include="src\graphics\ShaderUniforms.h" />
     <ClInclude Include="src\Infinit.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLBuffer.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLRendererAPI.h" />

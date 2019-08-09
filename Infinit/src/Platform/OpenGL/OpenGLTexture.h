@@ -12,6 +12,7 @@ namespace Infinit {
 
 		virtual ~OpenGLTexture2D();
 
+		virtual uint GetRendererID() const { return m_RendererID; }
 		virtual void Bind(uint slot) const override;
 
 		virtual TextureFormat GetFormat() const override { return m_Format; }
@@ -37,6 +38,7 @@ namespace Infinit {
 
 		virtual ~OpenGLTextureCube();
 
+		virtual uint GetRendererID() const { return m_RendererID; }
 		virtual void Bind(uint slot) const override;
 
 		virtual TextureFormat GetFormat() const override { return m_Format; }

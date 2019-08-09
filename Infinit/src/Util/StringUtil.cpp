@@ -1,10 +1,13 @@
 #include "inpch.h"
 #include "StringUtil.h"
 
+#include <stdio.h>
+
 namespace Infinit {
 
 	std::vector<string> SplitString(const string& str, const string& delimiters)
 	{
+
 		size_t start = 0;
 		size_t end = str.find_first_of(delimiters);
 
@@ -33,7 +36,13 @@ namespace Infinit {
 
 	std::vector<string> Tokenize(const string& str)
 	{
-		return SplitString(str, " \t\n");
+		std::vector<std::string> tokens;
+		std::istringstream iss(str);
+		for (string s; iss >> s; )
+			tokens.push_back(s);
+
+		return tokens;
+		//return SplitString(str, " \t\n");
 	}
 
 	std::vector<string> GetLines(const string& str)
@@ -72,6 +81,24 @@ namespace Infinit {
 			*outPosition = end;
 		uint length = end - str + 1;
 		return string(str, length);
+	}
+
+	string GetBlock(const char* str, const char** outPosition)
+	{
+		const char* end = strstr(str, "}");
+		if (!end)
+			return string(str);
+
+		if (outPosition)
+			*outPosition = end;
+		uint length = end - str + 1;
+		return string(str, length);
+	}
+
+	string GetBlock(const string& string, uint offset)
+	{
+		const char* str = string.c_str() + offset;
+		return GetBlock(str);
 	}
 
 }

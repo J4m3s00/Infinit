@@ -39,7 +39,7 @@ public:
 		m_Shader = Infinit::Shader::Create("pbr.shader");
 		m_Mesh.reset(new Infinit::Mesh("cerberus.fbx"));
 
-		m_Instance.reset(new Infinit::MeshInstance(m_Mesh));
+//		m_Instance.reset(new Infinit::MeshInstance(m_Mesh));
 		std::shared_ptr<Infinit::Material> mat = std::make_shared<Infinit::Material>(Infinit::Material(m_Shader));
 		mat->AddTexture("u_AlbedoTexture", Infinit::Texture2D::Create(Infinit::TextureFormat::RGB, 1, 1));
 		mat->AddParameter(new Infinit::MaterialParameter("u_AlbedoTexToggle", Infinit::MaterialParameterType::Bool, &m_UseAlbedo));
@@ -52,12 +52,12 @@ public:
 		mat->AddTexture("u_RoughnessTexture", Infinit::Texture2D::Create(Infinit::TextureFormat::RGB, 1, 1));
 		mat->AddParameter(new Infinit::MaterialParameter("u_RoughnessTexToggle", Infinit::MaterialParameterType::Bool, &m_UseRoughness));
 		mat->AddParameter(new Infinit::MaterialParameter("u_Roughness", Infinit::MaterialParameterType::Float, &m_Roughness));
-		mat->AddTexture("u_EnvRadianceTex", Infinit::TextureCube::Create("Arches_E_PineTree_Radiance.tga"));
-		mat->AddTexture("u_EnvIrradianceTex", Infinit::TextureCube::Create("Arches_E_PineTree_Irradiance.tga"));
-		mat->AddTexture("u_BRDFLUTTexture", Infinit::Texture2D::Create("BRDF_LUT.tga"));
+		mat->AddTexture("u_EnvRadianceTex", Infinit::TextureCube::Create("res/Arches_E_PineTree_Radiance.tga"));
+		mat->AddTexture("u_EnvIrradianceTex", Infinit::TextureCube::Create("res/Arches_E_PineTree_Irradiance.tga"));
+		mat->AddTexture("u_BRDFLUTTexture", Infinit::Texture2D::Create("res/BRDF_LUT.tga"));
 		mat->AddParameter(new Infinit::MaterialParameter("u_RadiancePrefilter", Infinit::MaterialParameterType::Float, &m_RadianceFilter));
 		mat->AddParameter(new Infinit::MaterialParameter("u_EnvMapRotation", Infinit::MaterialParameterType::Float, &m_EnvMapRotation));
-		m_Instance->Material = mat;
+//		m_Instance->Material = mat;
 	}
 
 	virtual void OnDetach() override
@@ -89,10 +89,6 @@ public:
 			ImGui::Begin("Light");
 			ImGui::SliderFloat3("Direction", &m_Light->Direction[0], -360.0f, 360.0f);
 			ImGui::SliderFloat3("Radiance", &m_Light->Radiance[0], 0.0f, 1.0f);
-			ImGui::End();
-
-			ImGui::Begin("Material");
-			m_Instance->Material->DrawImGui();
 			ImGui::End();
 
 

@@ -1,6 +1,8 @@
 #include "inpch.h"
 #include "OpenGLShader.h"
 
+#include "graphics/Buffer.h"
+
 #include <glad/glad.h>
 #include "Core/Log.h"
 
@@ -49,7 +51,6 @@ namespace Infinit {
 			shaderSources[ShaderTypeFromString(type)] = m_ShaderSource.substr(nextLinePos, pos - (nextLinePos == std::string::npos ? m_ShaderSource.size() - 1 : nextLinePos));
 		}
 
-		ProcessResources();
 
 		GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
 
@@ -155,6 +156,9 @@ namespace Infinit {
 		// Always detach shaders after a successful link.
 		glDetachShader(m_RendererID, vertexShader);
 		glDetachShader(m_RendererID, fragmentShader);
+
+		glUseProgram(m_RendererID);
+		ProcessResources();
 	}
 
 
@@ -178,6 +182,10 @@ namespace Infinit {
 		const char* token;
 		const char* source = m_ShaderSource.c_str();
 
+		while (token = FindToken(source, "struct"))
+			ParseUniformStruct(GetBlock(token, &source));
+
+		source = m_ShaderSource.c_str();
 		while (token = FindToken(source, "uniform"))
 			ParseUniform(GetStatement(token, &source));
 	}
@@ -185,14 +193,114 @@ namespace Infinit {
 	void OpenGLShader::ParseUniform(const string& statement)
 	{
 		std::vector<string> tokens = Tokenize(statement);
+		unsigned int index = 0;
+		index++; // "uniform"
+		string typeString = tokens[index++];
+		string name = tokens[index++];
 
-		if (tokens[1] == "smapler2D" || tokens[1] == "samplerCube");
-
-		string name = tokens[2];
-		if (const char* s = std::strstr(name.c_str(), ";"))
+		// Strip ; from name if present
+		if (const char* s = strstr(name.c_str(), ";"))
 			name = string(name.c_str(), s - name.c_str());
 
-		m_Resources.push_back(name);
+		short count = 1;
+		const char* namestr = name.c_str();
+		if (const char* s = strstr(namestr, "["))
+		{
+			name = string(namestr, s - namestr);
+
+			const char* end = strstr(namestr, "]");
+			string c(s + 1, end - s);
+			count = atoi(c.c_str());
+		}
+
+		if (typeString == "sampler2D" || typeString == "samplerCube")
+		{
+
+		}
+		if (name == "lights")
+			__debugbreak();
+		int location = GetUniformLocation(name);
+		ShaderDataType type = ShaderDataTypeFromString(typeString);
+		uint size = ShaderDataTypeSize(type);
+		if (type == ShaderDataType::None)
+		{
+			ShaderStruct str;
+			//Find struct
+			if (FindStruct(typeString, &str))
+			{
+				for (StructMember& mem : str.Members)
+				{
+					size = ShaderDataTypeSize(mem.Type);
+					string uniformName = name + "." + mem.Name;
+					location = GetUniformLocation(uniformName);
+					m_UniformMap.push_back({ uniformName, new ShaderUniform(count * size), location });
+				}
+			}
+		}
+		else
+			m_UniformMap.push_back({ name, new ShaderUniform(count * size), location });
+		//m_UniformBuffer[name] = 1;
+
+
+		//string name = tokens[2];
+
+		//if (const char* s = std::strstr(name.c_str(), ";"))
+		//	name = string(name.c_str(), s - name.c_str());
+		//
+		//m_Resources.push_back(name);
+	}
+
+	bool OpenGLShader::FindStruct(const string& name, ShaderStruct* str)
+	{
+		if (!str)
+		{
+			IN_CORE_WARN("To find a struct give a valid struct to store data in!");
+			return false;
+		}
+
+		for (ShaderStruct& s : m_Structs)
+			if (s.Name == name)
+				*str = s;
+		return (bool)str;
+	}
+
+	void OpenGLShader::ParseUniformStruct(const string& block)
+	{
+		std::vector<string> tokens = Tokenize(block);
+		std::vector<StructMember> members;
+		uint structSize = 0;
+		unsigned int index = 0;
+		index++; // "struct"
+		string name = tokens[index++];
+		index++; //;
+		while (index < tokens.size())
+		{
+			if (tokens[index] == "}")
+				break;
+			string typeString = tokens[index++];
+			string memberName = tokens[index++];
+
+			// Strip ; from name if present
+			if (const char* s = strstr(memberName.c_str(), ";"))
+				memberName = string(memberName.c_str(), s - memberName.c_str());
+
+			short count = 1;
+			const char* namestr = memberName.c_str();
+			if (const char* s = strstr(namestr, "["))
+			{
+				memberName = string(namestr, s - namestr);
+
+				const char* end = strstr(namestr, "]");
+				string c(s + 1, end - s);
+				count = atoi(c.c_str());
+			}
+			ShaderDataType type = ShaderDataTypeFromString(typeString);
+			uint size = ShaderDataTypeSize(type);
+
+			structSize += count * size;
+			members.push_back({type, memberName});
+		}
+		m_Structs.push_back({ name, members, structSize });
 	}
 
 	void OpenGLShader::Bind() const

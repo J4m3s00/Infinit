@@ -92,7 +92,7 @@ namespace Infinit {
 		{
 			std::string buttonName = "Reload##" + ShaderProgram->GetFilePath();
 			if (ImGui::Button(buttonName.c_str()))
-				ShaderProgram->Reload();
+				ShaderProgram->Reload("");
 			ImGui::TreePop();
 		}
 

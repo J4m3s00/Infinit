@@ -14,10 +14,12 @@ IncludeDir["spdlog"] = "Infinit/vendor/spdlog/include"
 IncludeDir["glm"] = "Infinit/vendor/glm"
 IncludeDir["imgui"] = "Infinit/vendor/imgui"
 IncludeDir["Assimp"] = "Infinit/vendor/Assimp/include"
+IncludeDir["lua"] = "Infinit/vendor/lua"
 
 include "Infinit/vendor/GLFW"
 include "Infinit/vendor/Glad"
 include "Infinit/vendor/imgui"
+include "Infinit/vendor/lua"
 
 project "Infinit"
 	location "Infinit"
@@ -46,7 +48,8 @@ project "Infinit"
 		"%{IncludeDir.glm}",
 		"%{IncludeDir.imgui}",
 		"Infinit/vendor/stb/",
-		"%{IncludeDir.Assimp}"
+		"%{IncludeDir.Assimp}",
+		"%{IncludeDir.lua}"
 	}
 
 	links
@@ -54,6 +57,7 @@ project "Infinit"
 		"GLFW",
 		"Glad",
 		"imgui",
+		"lua",
 		"Infinit/vendor/Assimp/lib/x64/assimp-vc140-mt.lib",
 		"opengl32.lib"
 	}

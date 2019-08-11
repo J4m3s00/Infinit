@@ -14,4 +14,7 @@ namespace Infinit {
 	const char* FindToken(const string& str, const string& token);
 	string GetStatement(const char* str, const char** outPosition = nullptr);
 
+	string GetBlock(const char* str, const char** outPosition = nullptr);
+	string GetBlock(const string& string, uint offset = 0);
+
 }

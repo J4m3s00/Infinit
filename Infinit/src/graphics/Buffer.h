@@ -7,30 +7,52 @@ namespace Infinit {
 
 	enum class ShaderDataType
 	{
-		None = 0, Float, Float2, Float3, Float4, Matrix3, Matrix4, Int, Int2, Int3, Int4, UInt, Byte4, Bool
+		None = 0, Float, Float2, Float3, Float4, Matrix3, Matrix4, Int, Int2, Int3, Int4, UInt, Byte4, Bool, Texture2D, TextureCube
 	};
 
 	static uint ShaderDataTypeSize(ShaderDataType type)
 	{
 		switch (type)
 		{
-		case Infinit::ShaderDataType::Float:	return 4;
-		case Infinit::ShaderDataType::Float2:	return 4 * 2;
-		case Infinit::ShaderDataType::Float3:	return 4 * 3;
-		case Infinit::ShaderDataType::Float4:	return 4 * 4;
-		case Infinit::ShaderDataType::Matrix3:	return 4 * 3 * 3;
-		case Infinit::ShaderDataType::Matrix4:	return 4 * 4 * 4;
-		case Infinit::ShaderDataType::Int:		return 4;
-		case Infinit::ShaderDataType::Int2:		return 4 * 2;
-		case Infinit::ShaderDataType::Int3:		return 4 * 3;
-		case Infinit::ShaderDataType::Int4:		return 4 * 4;
-		case Infinit::ShaderDataType::UInt:		return 4;
-		case Infinit::ShaderDataType::Byte4:	return 4;
-		case Infinit::ShaderDataType::Bool:		return 1;
+		case Infinit::ShaderDataType::Float:			return 4;
+		case Infinit::ShaderDataType::Float2:			return 4 * 2;
+		case Infinit::ShaderDataType::Float3:			return 4 * 3;
+		case Infinit::ShaderDataType::Float4:			return 4 * 4;
+		case Infinit::ShaderDataType::Matrix3:			return 4 * 3 * 3;
+		case Infinit::ShaderDataType::Matrix4:			return 4 * 4 * 4;
+		case Infinit::ShaderDataType::Int:				return 4;
+		case Infinit::ShaderDataType::Texture2D:		return 4;
+		case Infinit::ShaderDataType::TextureCube:		return 4;
+		case Infinit::ShaderDataType::Int2:				return 4 * 2;
+		case Infinit::ShaderDataType::Int3:				return 4 * 3;
+		case Infinit::ShaderDataType::Int4:				return 4 * 4;
+		case Infinit::ShaderDataType::UInt:				return 4;
+		case Infinit::ShaderDataType::Byte4:			return 4;
+		case Infinit::ShaderDataType::Bool:				return 1;
 		}
 
-		IN_CORE_ASSERT(false, "Unknown ShaderDataType");
+		IN_CORE_WARN("Unknown ShaderDataType");
 		return 0;
+	}
+
+	static ShaderDataType ShaderDataTypeFromString(const string& typeString)
+	{
+		if (typeString == "float") return ShaderDataType::Float;
+		else if (typeString == "vec2") return ShaderDataType::Float2;
+		else if (typeString == "vec3") return ShaderDataType::Float3;
+		else if (typeString == "vec4") return ShaderDataType::Float4;
+		else if (typeString == "bool") return ShaderDataType::Bool;
+		else if (typeString == "dont know") return ShaderDataType::Byte4;
+		else if (typeString == "int") return ShaderDataType::Int;
+		else if (typeString == "ivec2") return ShaderDataType::Int2;
+		else if (typeString == "ivec3") return ShaderDataType::Int3;
+		else if (typeString == "ivec4") return ShaderDataType::Int4;
+		else if (typeString == "mat3") return ShaderDataType::Matrix3;
+		else if (typeString == "mat4") return ShaderDataType::Matrix4;
+		else if (typeString == "sampler2D") return ShaderDataType::Texture2D;
+		else if (typeString == "samplerCube") return ShaderDataType::TextureCube;
+
+		return ShaderDataType::None;
 	}
 
 	struct BufferElement

@@ -33,6 +33,7 @@ void main()
 
 const float PI = 3.141592;
 const float Epsilon = 0.00001;
+const float TO_RADIANS = (PI / 180.0);
 
 const int LightCount = 1;
 
@@ -228,7 +229,7 @@ vec3 Lighting(vec3 F0)
 	vec3 result = vec3(0.0);
 	for(int i = 0; i < LightCount; i++)
 	{
-		vec3 Li = -lights.Direction;
+		vec3 Li = -(lights.Direction * TO_RADIANS);
 		vec3 Lradiance = lights.Radiance;
 		vec3 Lh = normalize(Li + m_Params.View);
 
@@ -306,4 +307,5 @@ void main()
 	//color = vec4(texture(u_AlbedoTexture, vs_Input.TexCoord));
 	//color = vec4(m_Params.Metalness , m_Params.Roughness, 0.0, 1.0);
 	color = vec4(lightContribution + iblContribution, 1.0);
+	//color = vec4(m_Params.Albedo, 1.0);
 }

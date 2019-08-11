@@ -10,3 +10,9 @@
 [submodule "Infinit/vendor/ImGui"]
 	path = Infinit/vendor/ImGui
 	url = https://github.com/J4m3s00/imgui
+[submodule "lua"]
+	path = lua
+	url = https://github.com/J4m3s00/lua.git
+[submodule "Infinit/vendor/lua"]
+	path = Infinit/vendor/lua
+	url = https://github.com/J4m3s00/lua.git

@@ -58,7 +58,7 @@
       <PrecompiledHeaderFile>inpch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>IN_PLATFORM_WINDOWS;IN_BUILD_DLL;IN_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;vendor\GLFW\include;vendor\Glad\include;vendor\spdlog\include;vendor\glm;vendor\imgui;vendor\stb;vendor\Assimp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;vendor\GLFW\include;vendor\Glad\include;vendor\spdlog\include;vendor\glm;vendor\imgui;vendor\stb;vendor\Assimp\include;vendor\lua;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <Optimization>Disabled</Optimization>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -78,7 +78,7 @@
       <PrecompiledHeaderFile>inpch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
       <PreprocessorDefinitions>IN_PLATFORM_WINDOWS;IN_BUILD_DLL;IN_RELEASE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalIncludeDirectories>src;vendor\GLFW\include;vendor\Glad\include;vendor\spdlog\include;vendor\glm;vendor\imgui;vendor\stb;vendor\Assimp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>src;vendor\GLFW\include;vendor\Glad\include;vendor\spdlog\include;vendor\glm;vendor\imgui;vendor\stb;vendor\Assimp\include;vendor\lua;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -99,7 +99,13 @@
   <ItemGroup>
     <ClInclude Include="src\Core\Application.h" />
     <ClInclude Include="src\Core\Core.h" />
+    <ClInclude Include="src\Core\ECS\Component\Component.h" />
+    <ClInclude Include="src\Core\ECS\Component\Components.h" />
+    <ClInclude Include="src\Core\ECS\Component\MeshComponent.h" />
+    <ClInclude Include="src\Core\ECS\GameObject.h" />
+    <ClInclude Include="src\Core\ECS\Scene.h" />
     <ClInclude Include="src\Core\EntryPoint.h" />
+    <ClInclude Include="src\Core\ImGui\ImGuiHelper.h" />
     <ClInclude Include="src\Core\Input.h" />
     <ClInclude Include="src\Core\KeyCodes.h" />
     <ClInclude Include="src\Core\Layer\ImGuiLayer.h" />
@@ -108,8 +114,13 @@
     <ClInclude Include="src\Core\Light.h" />
     <ClInclude Include="src\Core\Log.h" />
     <ClInclude Include="src\Core\Material.h" />
+    <ClInclude Include="src\Core\Resource.h" />
+    <ClInclude Include="src\Core\Transform.h" />
+    <ClInclude Include="src\Events\AppEvents.h" />
     <ClInclude Include="src\Events\Event.h" />
+    <ClInclude Include="src\Events\Events.h" />
     <ClInclude Include="src\Events\InputEvent.h" />
+    <ClInclude Include="src\Events\ObjectEvents.h" />
     <ClInclude Include="src\Events\WindowEvent.h" />
     <ClInclude Include="src\Infinit.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLBuffer.h" />
@@ -117,6 +128,7 @@
     <ClInclude Include="src\Platform\OpenGL\OpenGLShader.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLTexture.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLVertexArray.h" />
+    <ClInclude Include="src\Util\StringUtil.h" />
     <ClInclude Include="src\graphics\Buffer.h" />
     <ClInclude Include="src\graphics\Camera.h" />
     <ClInclude Include="src\graphics\Mesh.h" />
@@ -124,26 +136,33 @@
     <ClInclude Include="src\graphics\Renderer.h" />
     <ClInclude Include="src\graphics\RendererAPI.h" />
     <ClInclude Include="src\graphics\Shader.h" />
+    <ClInclude Include="src\graphics\ShaderUniforms.h" />
     <ClInclude Include="src\graphics\Texture.h" />
     <ClInclude Include="src\graphics\VertexArray.h" />
     <ClInclude Include="src\graphics\Window.h" />
     <ClInclude Include="src\inpch.h" />
-    <ClInclude Include="src\Util\StringUtil.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Core\Application.cpp" />
+    <ClCompile Include="src\Core\ECS\Component\Component.cpp" />
+    <ClCompile Include="src\Core\ECS\Component\MeshComponent.cpp" />
+    <ClCompile Include="src\Core\ECS\GameObject.cpp" />
+    <ClCompile Include="src\Core\ECS\Scene.cpp" />
     <ClCompile Include="src\Core\ImGui\ImGuiBuild.cpp" />
+    <ClCompile Include="src\Core\ImGui\ImGuiHelper.cpp" />
     <ClCompile Include="src\Core\Input.cpp" />
     <ClCompile Include="src\Core\Layer\ImGuiLayer.cpp" />
     <ClCompile Include="src\Core\Layer\Layer.cpp" />
     <ClCompile Include="src\Core\Layer\LayerStack.cpp" />
     <ClCompile Include="src\Core\Log.cpp" />
     <ClCompile Include="src\Core\Material.cpp" />
+    <ClCompile Include="src\Core\Transform.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLBuffer.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLRendererAPI.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLShader.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLTexture.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLVertexArray.cpp" />
+    <ClCompile Include="src\Util\StringUtil.cpp" />
     <ClCompile Include="src\graphics\Buffer.cpp" />
     <ClCompile Include="src\graphics\Camera.cpp" />
     <ClCompile Include="src\graphics\Mesh.cpp" />
@@ -156,7 +175,6 @@
     <ClCompile Include="src\inpch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="src\Util\StringUtil.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="vendor\GLFW\GLFW.vcxproj">
@@ -167,6 +185,9 @@
     </ProjectReference>
     <ProjectReference Include="vendor\imgui\ImGui.vcxproj">
       <Project>{C0FF640D-2C14-8DBE-F595-301E616989EF}</Project>
+    </ProjectReference>
+    <ProjectReference Include="vendor\lua\lua.vcxproj">
+      <Project>{C78D880B-3397-887C-BC12-9F7C281B947C}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

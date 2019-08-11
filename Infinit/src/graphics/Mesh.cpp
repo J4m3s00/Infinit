@@ -9,6 +9,7 @@
 
 #include <Core/Log.h>
 #include "graphics/Renderer.h"
+#include "Core/ImGui/ImGuiHelper.h"
 
 namespace Infinit {
 
@@ -43,17 +44,45 @@ namespace Infinit {
 	};
 	
 	Mesh::Mesh(const string& filename)
+		: Resource(filename)
+	{
+		Reload(filename);
+	}
+
+	Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<Index>& indices)
+		: Resource(""), m_Vertices(vertices), m_Indices(indices)
+	{
+		m_VertexArray.reset(VertexArray::Create());
+		std::shared_ptr<VertexBuffer> vertexBuffer;
+		vertexBuffer.reset(VertexBuffer::Create(m_Vertices.data(), m_Vertices.size() * sizeof(Vertex)));
+
+		vertexBuffer->SetLayout({ {ShaderDataType::Float3, "position"},
+									{ShaderDataType::Float3, "normal"},
+									{ShaderDataType::Float2, "texCoord"},
+									{ShaderDataType::Float3, "tangent"},
+									{ShaderDataType::Float3, "binormal"} });
+		m_VertexArray->AddVertexBuffer(vertexBuffer);
+
+		std::shared_ptr<IndexBuffer> indexBuffer;
+		indexBuffer.reset(IndexBuffer::Create((const uint*)m_Indices.data(), 3));
+		m_VertexArray->SetIndexBuffer(indexBuffer);
+	}
+
+	bool Mesh::Reload(const string& filePath)
 	{
 		LogStream::Initialize();
 
-		IN_CORE_INFO("Loading mesh: {0}", filename.c_str());
+		IN_CORE_INFO("Loading mesh: {0}", filePath.c_str());
 
 		Assimp::Importer importer;
 
-		const aiScene* scene = importer.ReadFile(filename, ImportFlags);
+		const aiScene* scene = importer.ReadFile(filePath, ImportFlags);
 		if (!scene || !scene->HasMeshes())
-			IN_CORE_ERROR("Failed to load mesh file: {0}", filename);
-
+		{
+			IN_CORE_ERROR("Failed to load mesh file: {0}", filePath);
+			return false;
+		}
+			
 		aiMesh* mesh = scene->mMeshes[0];
 
 		IN_CORE_ASSERT(mesh->HasPositions(), "Meshes require positions.");
@@ -79,7 +108,6 @@ namespace Infinit {
 			m_Vertices.push_back(vertex);
 		}
 
-
 		m_VertexArray.reset(VertexArray::Create());
 		std::shared_ptr<VertexBuffer> vertexBuffer;
 		vertexBuffer.reset(VertexBuffer::Create(m_Vertices.data(), m_Vertices.size() * sizeof(Vertex)));
@@ -103,25 +131,7 @@ namespace Infinit {
 		std::shared_ptr<IndexBuffer> indexBuffer;
 		indexBuffer.reset(IndexBuffer::Create((const uint*)&m_Indices[0], m_Indices.size() * 3));
 		m_VertexArray->SetIndexBuffer(indexBuffer);
-	}
-
-	Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<Index>& indices)
-		: m_Vertices(vertices), m_Indices(indices)
-	{
-		m_VertexArray.reset(VertexArray::Create());
-		std::shared_ptr<VertexBuffer> vertexBuffer;
-		vertexBuffer.reset(VertexBuffer::Create(m_Vertices.data(), m_Vertices.size() * sizeof(Vertex)));
-
-		vertexBuffer->SetLayout({ {ShaderDataType::Float3, "position"},
-									{ShaderDataType::Float3, "normal"},
-									{ShaderDataType::Float2, "texCoord"},
-									{ShaderDataType::Float3, "tangent"},
-									{ShaderDataType::Float3, "binormal"} });
-		m_VertexArray->AddVertexBuffer(vertexBuffer);
-
-		std::shared_ptr<IndexBuffer> indexBuffer;
-		indexBuffer.reset(IndexBuffer::Create((const uint*)m_Indices.data(), 3));
-		m_VertexArray->SetIndexBuffer(indexBuffer);
+		return true;
 	}
 
 	Mesh::~Mesh()
@@ -130,9 +140,15 @@ namespace Infinit {
 	}
 
 	MeshInstance::MeshInstance(std::shared_ptr<Mesh> instance)
+		: m_FilePath(instance->m_FilePath)
 	{
 		m_VertexArray = instance->GetVertexArray();
 		m_VertexCount = m_VertexArray->GetIndexBuffer()->GetCount();
+	}
+
+	void MeshInstance::DrawImGui()
+	{
+		ImGui::Text(m_FilePath.c_str());
 	}
 
 }

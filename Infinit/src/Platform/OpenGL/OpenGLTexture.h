@@ -12,11 +12,14 @@ namespace Infinit {
 
 		virtual ~OpenGLTexture2D();
 
+		virtual uint GetRendererID() const { return m_RendererID; }
 		virtual void Bind(uint slot) const override;
 
 		virtual TextureFormat GetFormat() const override { return m_Format; }
 		virtual uint GetHeight() const override { return m_Height; }
 		virtual uint GetWidth() const override { return m_Width; }
+
+		virtual bool Reload(const string& filepath);
 
 		virtual const string& GetPath() const override { return m_FilePath; }
 	private:
@@ -35,11 +38,14 @@ namespace Infinit {
 
 		virtual ~OpenGLTextureCube();
 
+		virtual uint GetRendererID() const { return m_RendererID; }
 		virtual void Bind(uint slot) const override;
 
 		virtual TextureFormat GetFormat() const override { return m_Format; }
 		virtual uint GetHeight() const override { return m_Height; }
 		virtual uint GetWidth() const override { return m_Width; }
+
+		virtual bool Reload(const string& filePath);
 
 		virtual const string& GetPath() const override { return m_FilePath; }
 	private:

@@ -4,6 +4,17 @@ typedef std::string string;
 typedef unsigned int uint;
 typedef unsigned char byte;
 
+template< typename tPair >
+struct second_t {
+	typename tPair::second_type operator()(const tPair& p) const { return     p.second; }
+};
+
+template< typename tMap >
+second_t< typename tMap::value_type > second(const tMap& m) { return second_t<     typename tMap::value_type >(); }
+
+
+#define IN_ENABLE_ASSERT
+
 #if 0
 	#ifdef IN_PLATFORM_WINDOWS
 		#ifdef IN_BUILD_DLL
@@ -30,3 +41,7 @@ typedef unsigned char byte;
 
 #define BIT(x) (1 << x)
 #define IN_BIND_EVENT_FN(fn) std::bind(&fn, this, std::placeholders::_1)
+
+#define M_PI 3.1415f
+#define TO_RADIANS (M_PI / 180.0f)
+#define TO_DEGREES (180.0f / M_PI)

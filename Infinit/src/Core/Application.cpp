@@ -11,6 +11,27 @@
 
 #include <glm/glm.hpp>
 #include <graphics/Renderer.h>
+#include "Util/StringUtil.h"
+
+#ifdef IN_PLATFORM_WINDOWS
+#include <filesystem>
+#endif
+
+//Bring imgui for all platforms
+#include <GLFW/glfw3.h>
+
+#ifdef IN_PLATFORM_WINDOWS
+#define GLFW_EXPOSE_NATIVE_WIN32
+#include <GLFW/glfw3native.h>
+#include <Windows.h>
+#endif
+
+#include <imgui.h>
+#include "examples/imgui_impl_glfw.h"
+#include "examples/imgui_impl_opengl3.h"
+
+#include "Transform.h"
+#include "Events/AppEvents.h"
 
 namespace Infinit {
 
@@ -21,9 +42,11 @@ namespace Infinit {
 	};
 
 	Application* Application::s_Instance = nullptr;
+	int Application::LaunchArgumentCount = 0;
+	char** Application::LaunchArguments = nullptr;
 
 	Application::Application(const std::string& name, RendererAPI::Type renderer) 
-		: m_Name(name), m_LayerStack()
+		: m_Name(name)
 	{
 		RendererAPI::Renderer = renderer;
 		s_Instance = this;
@@ -35,28 +58,11 @@ namespace Infinit {
 
 	}
 
-	void Application::PushLayer(Layer* layer)
+	void Application::SetActiveScene(Scene* scene)
 	{
-		m_LayerStack.PushLayer(layer);
-		layer->OnAttach();
-	}
-
-	void Application::PushOverlay(Layer* layer)
-	{
-		m_LayerStack.PushOverlay(layer);
-		layer->OnAttach();
-	}
-
-	void Application::PopLayer(Layer* layer)
-	{
-		m_LayerStack.PopLayer(layer);
-		layer->OnDetach();
-	}
-
-	void Application::PopOverlay(Layer* layer)
-	{
-		m_LayerStack.PopOverlay(layer);
-		layer->OnDetach();
+		m_ActiveScene->Detach();
+		m_ActiveScene = scene;
+		m_ActiveScene->Attach();
 	}
 
 	void Application::OnEvent(Event& e)
@@ -64,12 +70,7 @@ namespace Infinit {
 		EventDispatcher disp(e);
 		disp.Dispatch<WindowCloseEvent>(IN_BIND_EVENT_FN(Application::OnWindowClose));
 
-		for (auto it = m_LayerStack.end(); it != m_LayerStack.begin(); )
-		{
-			(*--it)->OnEvent(e);
-			if (e.Handled)
-				break;
-		}
+		m_ActiveScene->OnEvent(e);
 	}
 
 	void Application::Run()
@@ -78,20 +79,24 @@ namespace Infinit {
 		{
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-			for (Layer* layer : m_LayerStack)
-				layer->OnUpdate();
+			IN_CORE_ASSERT(m_ActiveScene, "No ActiveScene Set!"); //Forgot to call Application::SetActiveScene();
 
-			for (Layer* layer : m_LayerStack)
-				layer->OnRender();
+			//OnEvent(AppUpdateEvent(0.0f));
+			m_ActiveScene->Update();
+
+			//OnEvent(AppRenderEvent());
+			m_ActiveScene->Render();
 			
 
-			ImGuiLayer::Begin();
-			for (Layer* layer : m_LayerStack)
-				layer->OnImGuiRender();
-			ImGuiLayer::End();
+			ImGuiBegin();
+			//OnEvent(AppImGuiRenderEvent());
+			m_ActiveScene->ImGuiRender();
+			ImGuiEnd();
 
 			m_Window->Update();
 		}
+
+		ImGuiDestroy();
 	}
 
 	bool Application::Init()
@@ -102,16 +107,165 @@ namespace Infinit {
 
 		RendererAPI::Init();
 		Renderer::Init();
+		ImGuiInit();
 
-		m_ImGuiLayer = new ImGuiLayer();
-		PushLayer(m_ImGuiLayer);
+		LoadAllResources("res/");
+
+		//m_ImGuiLayer = new ImGuiLayer();
+		//PushLayer(m_ImGuiLayer);
 		
 		return true;
+	}
+
+	void Application::LoadAllResources(const string& folder)
+	{
+		for (const auto& entry : std::filesystem::directory_iterator(folder))
+		{
+			if (entry.is_directory())
+				LoadAllResources(entry.path().u8string());
+			else
+			{
+				string filePath = entry.path().u8string();
+				std::replace(filePath.begin(), filePath.end(), '\\', '/');
+				SaveResourceInCache(filePath);
+			}
+		}
+	}
+
+	void Application::SaveResourceInCache(const string& filePath)
+	{
+		string fileEnding = filePath.substr(filePath.find_last_of(".") + 1, filePath.size());
+		//Textures
+		if (fileEnding == "png" || fileEnding == "tga")
+		{
+			m_ResourceCache[filePath] = Texture2D::Create(filePath);
+		}
+		//Cubemaps
+		else if (fileEnding == "cubemap")
+		{
+			m_ResourceCache[filePath] = TextureCube::Create(filePath);
+		}
+		//Meshes
+		else if (fileEnding == "fbx")
+		{
+			m_ResourceCache[filePath] = std::shared_ptr<Mesh>(new Mesh(filePath));
+		}
+		//Shaders
+		else if (fileEnding == "shader")
+		{
+			m_ResourceCache[filePath] = Shader::Create(filePath);
+		}
+	}
+
+	std::shared_ptr<Resource> Application::GetResource(const string& filePath)
+	{
+		std::unordered_map<string, std::shared_ptr<Resource>>::iterator it = m_ResourceCache.find(filePath);
+		if (it != m_ResourceCache.end())
+		{
+			return it->second;
+		}
+		IN_CORE_WARN("Could not find Resource: \"{0}\"", filePath);
+		return nullptr;
 	}
 
 	bool Application::OnWindowClose(WindowCloseEvent& e)
 	{
 		m_Running = false;
 		return true;
+	}
+
+	void Application::ImGuiInit()
+	{
+		// Setup Dear ImGui context
+		IMGUI_CHECKVERSION();
+		ImGuiContext* context = ImGui::CreateContext();
+		ImGui::SetCurrentContext(context);
+		ImGuiIO& io = ImGui::GetIO(); (void)io;
+		io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;       // Enable Keyboard Controls
+		//io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
+		io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
+		io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Multi-Viewport / Platform Windows
+		//io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoTaskBarIcons;
+		//io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoMerge;
+
+		// Setup Dear ImGui style
+		ImGui::StyleColorsLight();
+		//ImGui::StyleColorsClassic();
+
+		// When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
+		ImGuiStyle& style = ImGui::GetStyle();
+		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+		{
+			style.WindowRounding = 0.0f;
+			style.Colors[ImGuiCol_WindowBg].w = 1.0f;
+		}
+
+		// Setup Platform/Renderer bindings
+		ImGui_ImplGlfw_InitForOpenGL(m_Window->GetNativeWindow(), true);
+		ImGui_ImplOpenGL3_Init("#version 410");
+	}
+
+	void Application::ImGuiDestroy()
+	{
+		ImGui_ImplOpenGL3_Shutdown();
+		ImGui_ImplGlfw_Shutdown();
+		ImGui::DestroyContext();
+	}
+
+	void Application::ImGuiBegin()
+	{
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui_ImplGlfw_NewFrame();
+		ImGui::NewFrame();
+	}
+
+	void Application::ImGuiEnd()
+	{
+		ImGuiIO& io = ImGui::GetIO();
+		Application& app = Application::Get();
+		io.DisplaySize = ImVec2(app.GetWindow().GetWidth(), app.GetWindow().GetHeight());
+
+		// Rendering
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+		if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+		{
+			GLFWwindow* backup_current_context = glfwGetCurrentContext();
+			ImGui::UpdatePlatformWindows();
+			ImGui::RenderPlatformWindowsDefault();
+			glfwMakeContextCurrent(backup_current_context);
+		}
+	}
+
+	string Application::OpenFile(const string& filter) const
+	{
+		OPENFILENAMEA ofn;       // common dialog box structure
+		CHAR szFile[260] = { 0 };       // if using TCHAR macros
+
+		// Initialize OPENFILENAME
+		ZeroMemory(&ofn, sizeof(OPENFILENAME));
+		ofn.lStructSize = sizeof(OPENFILENAME);
+		ofn.hwndOwner = glfwGetWin32Window((GLFWwindow*)m_Window->GetNativeWindow());
+		ofn.lpstrFile = szFile;
+		ofn.nMaxFile = sizeof(szFile);
+		ofn.lpstrFilter = "All\0*.*\0";
+		ofn.nFilterIndex = 1;
+		ofn.lpstrFileTitle = NULL;
+		ofn.nMaxFileTitle = 0;
+		ofn.lpstrInitialDir = NULL;
+		ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+
+		if (GetOpenFileNameA(&ofn) == TRUE)
+		{
+			string result = ofn.lpstrFile;
+			std::filesystem::path path("./../");
+			std::string resourcePath = std::filesystem::absolute(path).u8string();
+			result = result.substr(resourcePath.size(), result.size() - resourcePath.size());
+			std::replace(result.begin(), result.end(), '\\', '/');
+
+			return result;
+		}
+		return std::string();
 	}
 }

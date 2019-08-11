@@ -19,3 +19,4 @@ Infinit.xcworkspace/xcshareddata/IDEWorkspaceChecks.plist
 Infinit.xcworkspace/contents.xcworkspacedata
 Sandbox/Sandbox.xcodeproj/xcuserdata/lucaherzke.xcuserdatad/xcschemes/xcschememanagement.plist
 *.orig
+Infinit/vendor/lua

@@ -36,28 +36,34 @@ public:
 		Scene->ActiveCamera = m_Camera;
 		Scene->LightMap.push_back({ { 0.2f, 0.34f, 0.5f }, { 1.0f, 1.0f, 1.0f } });
 		m_Light = &Scene->LightMap[0];
-		m_Shader = Infinit::Shader::Create("pbr.shader");
-		m_Mesh.reset(new Infinit::Mesh("cerberus.fbx"));
+		m_Shader = std::dynamic_pointer_cast<Infinit::Shader>(Infinit::Application::Get().GetResource("res/shaders/pbr.shader"));
+		//Infinit::Shader::Create("pbr.shader");
+		//m_Mesh.reset(new Infinit::Mesh("res/cerberus.fbx"));
+		m_Mesh = std::dynamic_pointer_cast<Infinit::Mesh>(Infinit::Application::Get().GetResource("res/cerberus.fbx"));
 
-//		m_Instance.reset(new Infinit::MeshInstance(m_Mesh));
+		m_Instance.reset(new Infinit::MeshInstance(m_Mesh));
 		std::shared_ptr<Infinit::Material> mat = std::make_shared<Infinit::Material>(Infinit::Material(m_Shader));
-		mat->AddTexture("u_AlbedoTexture", Infinit::Texture2D::Create(Infinit::TextureFormat::RGB, 1, 1));
-		mat->AddParameter(new Infinit::MaterialParameter("u_AlbedoTexToggle", Infinit::MaterialParameterType::Bool, &m_UseAlbedo));
-		mat->AddParameter(new Infinit::MaterialParameter("u_AlbedoColor", Infinit::MaterialParameterType::Color3, &m_AlbedoColor));
-		mat->AddTexture("u_NormalTexture", Infinit::Texture2D::Create(Infinit::TextureFormat::RGB, 1, 1));
-		mat->AddParameter(new Infinit::MaterialParameter("u_NormalTexToggle", Infinit::MaterialParameterType::Bool, &m_UseNormal));
-		mat->AddTexture("u_MetalnessTexture", Infinit::Texture2D::Create(Infinit::TextureFormat::RGB, 1, 1));
-		mat->AddParameter(new Infinit::MaterialParameter("u_MetalnessTexToggle", Infinit::MaterialParameterType::Bool, &m_UseMetalness));
-		mat->AddParameter(new Infinit::MaterialParameter("u_Metalness", Infinit::MaterialParameterType::Float, &m_Metalness));
-		mat->AddTexture("u_RoughnessTexture", Infinit::Texture2D::Create(Infinit::TextureFormat::RGB, 1, 1));
-		mat->AddParameter(new Infinit::MaterialParameter("u_RoughnessTexToggle", Infinit::MaterialParameterType::Bool, &m_UseRoughness));
-		mat->AddParameter(new Infinit::MaterialParameter("u_Roughness", Infinit::MaterialParameterType::Float, &m_Roughness));
-		mat->AddTexture("u_EnvRadianceTex", Infinit::TextureCube::Create("res/Arches_E_PineTree_Radiance.tga"));
-		mat->AddTexture("u_EnvIrradianceTex", Infinit::TextureCube::Create("res/Arches_E_PineTree_Irradiance.tga"));
-		mat->AddTexture("u_BRDFLUTTexture", Infinit::Texture2D::Create("res/BRDF_LUT.tga"));
-		mat->AddParameter(new Infinit::MaterialParameter("u_RadiancePrefilter", Infinit::MaterialParameterType::Float, &m_RadianceFilter));
-		mat->AddParameter(new Infinit::MaterialParameter("u_EnvMapRotation", Infinit::MaterialParameterType::Float, &m_EnvMapRotation));
-//		m_Instance->Material = mat;
+		mat->AddTexture("u_AlbedoTexture", std::dynamic_pointer_cast<Infinit::Texture2D>(Infinit::Application::Get().GetResource("res/cerberus_A.png")));
+		mat->AddParameter(new Infinit::MaterialParameter<bool>("u_AlbedoTexToggle"));
+		mat->AddParameter(new Infinit::MaterialParameter<glm::vec3>("u_AlbedoColor"));
+		mat->AddTexture("u_NormalTexture", std::dynamic_pointer_cast<Infinit::Texture2D>(Infinit::Application::Get().GetResource("res/cerberus_N.png")));
+		mat->AddParameter(new Infinit::MaterialParameter<bool>("u_NormalTexToggle"));
+		mat->AddTexture("u_MetalnessTexture", std::dynamic_pointer_cast<Infinit::Texture2D>(Infinit::Application::Get().GetResource("res/cerberus_M.png")));
+		mat->AddParameter(new Infinit::MaterialParameter<bool>("u_MetalnessTexToggle"));
+		mat->AddParameter(new Infinit::MaterialParameter<float>("u_Metalness"));
+		mat->AddTexture("u_RoughnessTexture", std::dynamic_pointer_cast<Infinit::Texture2D>(Infinit::Application::Get().GetResource("res/cerberus_R.png")));
+		mat->AddParameter(new Infinit::MaterialParameter<bool>("u_RoughnessTexToggle"));
+		mat->AddParameter(new Infinit::MaterialParameter<float>("u_Roughness"));
+		mat->AddTexture("u_EnvRadianceTex", std::dynamic_pointer_cast<Infinit::TextureCube>(Infinit::Application::Get().GetResource("res/Arches_E_PineTree_Radiance.cubemap")));
+		mat->AddTexture("u_EnvIrradianceTex", std::dynamic_pointer_cast<Infinit::TextureCube>(Infinit::Application::Get().GetResource("res/Arches_E_PineTree_Irradiance.cubemap")));
+		mat->AddTexture("u_BRDFLUTTexture", std::dynamic_pointer_cast<Infinit::Texture2D>(Infinit::Application::Get().GetResource("res/BRDF_LUT.tga")));
+		mat->AddParameter(new Infinit::MaterialParameter<float>("u_RadiancePrefilter"));
+		mat->AddParameter(new Infinit::MaterialParameter<float>("u_EnvMapRotation"));
+		m_Instance->Material = mat;
+
+		Infinit::GameObject* go = new Infinit::GameObject("Name");
+		go->AddComponent<Infinit::MeshComponent>()->Instance = m_Instance.get();
+		AddGameObject(go);
 	}
 
 	virtual void OnDetach() override

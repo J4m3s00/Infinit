@@ -16,7 +16,9 @@ namespace Infinit {
 		virtual void Bind() const = 0;
 		virtual void Unbind() const = 0;
 
-		virtual void* GetUniformBuffer(const string& name);
+		virtual byte* GetUniformBuffer(const string& name) = 0;
+
+		virtual void UploadUniformBuffer() = 0;
 
 		virtual void SetUniform1i(const string& name, const int& value) = 0;
 		virtual void SetUniform1f(const string& name, const float& value) = 0;

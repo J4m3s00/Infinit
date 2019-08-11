@@ -11,7 +11,7 @@
 namespace Infinit {
 
 	OpenGLShader::OpenGLShader(const string& path)
-		: Shader(path), m_RendererID(0)
+		: Shader(path), m_RendererID(0), m_UniformBufferSize(0)
 	{
 		CompileShader();
 	}
@@ -19,6 +19,7 @@ namespace Infinit {
 	OpenGLShader::~OpenGLShader()
 	{
 		IN_CORE_INFO("OpenGL Shader {0} destroyed!", m_RendererID);
+		delete m_UniformBuffer;
 		glDeleteProgram(m_RendererID);
 	}
 
@@ -188,6 +189,33 @@ namespace Infinit {
 		source = m_ShaderSource.c_str();
 		while (token = FindToken(source, "uniform"))
 			ParseUniform(GetStatement(token, &source));
+
+		m_UniformBuffer = (byte*) malloc(m_UniformBufferSize);
+	}
+
+	byte* OpenGLShader::GetUniformBuffer(const string& name)
+	{
+		byte* result = m_UniformBuffer;
+		for (ShaderUniform& uni : m_Uniforms)
+		{
+			if (uni.Name == name)
+				return result;
+			else if (uni.Name.find(".") != string::npos)
+			{
+				string ss;
+				for (uint i = 0; i < uni.Name.size(); i++)
+				{
+					if (uni.Name[i] == '.') break;
+					ss += uni.Name[i];
+				}
+				if (ss == name)
+					return result;
+			}
+		
+			result += ShaderDataTypeSize(uni.Type);
+		}
+		IN_CORE_WARN("Could not find Uniform {0} in uniformBuffer", name);
+		return nullptr;
 	}
 
 	void OpenGLShader::ParseUniform(const string& statement)
@@ -213,15 +241,14 @@ namespace Infinit {
 			count = atoi(c.c_str());
 		}
 
-		if (typeString == "sampler2D" || typeString == "samplerCube")
-		{
-
-		}
-		if (name == "lights")
-			__debugbreak();
-		int location = GetUniformLocation(name);
+		
 		ShaderDataType type = ShaderDataTypeFromString(typeString);
 		uint size = ShaderDataTypeSize(type);
+
+		if (type == ShaderDataType::Texture2D || type == ShaderDataType::TextureCube)
+			m_Resources.push_back(name);
+
+
 		if (type == ShaderDataType::None)
 		{
 			ShaderStruct str;
@@ -232,14 +259,20 @@ namespace Infinit {
 				{
 					size = ShaderDataTypeSize(mem.Type);
 					string uniformName = name + "." + mem.Name;
-					location = GetUniformLocation(uniformName);
-					m_UniformMap.push_back({ uniformName, new ShaderUniform(count * size), location });
+					m_Uniforms.push_back({uniformName, mem.Type});
+					m_UniformBufferSize += count * size;
 				}
 			}
 		}
 		else
-			m_UniformMap.push_back({ name, new ShaderUniform(count * size), location });
-		//m_UniformBuffer[name] = 1;
+		{
+			m_Uniforms.push_back({ name, type });
+			m_UniformBufferSize += count * size;
+		}
+
+
+
+		//m_UniformCache[name] = 1;
 
 
 		//string name = tokens[2];
@@ -327,15 +360,40 @@ namespace Infinit {
 
 	int OpenGLShader::GetUniformLocation(const string& name)
 	{
-		if (m_UniformBuffer.find(name) != m_UniformBuffer.end())
-			return m_UniformBuffer[name];
+		if (m_UniformCache.find(name) != m_UniformCache.end())
+			return m_UniformCache[name];
 
 		int result = glGetUniformLocation(m_RendererID, name.c_str());
 		if (result == -1)
 			IN_CORE_WARN("Could not find Uniform {0}", name);
 		else
-			m_UniformBuffer[name] = result;
+			m_UniformCache[name] = result;
 		return result;
+	}
+
+	void OpenGLShader::UploadUniformBuffer()
+	{
+		byte* buffer = m_UniformBuffer;
+		for (ShaderUniform& uniform : m_Uniforms)
+		{
+			switch (uniform.Type)
+			{
+			case ShaderDataType::Matrix3: SetUniformMat3(uniform.Name, *((const glm::mat3*)buffer)); break;
+			case ShaderDataType::Matrix4: SetUniformMat4(uniform.Name, *((const glm::mat4*)buffer)); break;
+			case ShaderDataType::Float: SetUniform1f(uniform.Name, *((const float*)buffer)); break;
+			case ShaderDataType::Float2: SetUniform2f(uniform.Name, *((const glm::vec2*)buffer)); break;
+			case ShaderDataType::Float3: SetUniform3f(uniform.Name, *((const glm::vec3*)buffer)); break;
+			case ShaderDataType::Float4: SetUniform4f(uniform.Name, *((const glm::vec4*)buffer)); break;
+			case ShaderDataType::Int: SetUniform1i(uniform.Name, *((const int*)buffer)); break;
+			case ShaderDataType::Bool: SetUniform1i(uniform.Name, *((const int*)buffer)); break;
+			case ShaderDataType::Texture2D:
+			case ShaderDataType::TextureCube: SetUniform1i(uniform.Name, (int&)*((int*)buffer)); break;
+			default:
+				IN_CORE_WARN("Cant decide what uniform type to upload");
+				break;
+			}
+			buffer += ShaderDataTypeSize(uniform.Type);
+		}
 	}
 
 	void OpenGLShader::SetUniform1i(const string& name, const int& value)
@@ -363,6 +421,11 @@ namespace Infinit {
 		glUniform4f(GetUniformLocation(name), value.x, value.y, value.z, value.w);
 	}
 
+	void OpenGLShader::SetUniformMat3(const string& name, const glm::mat3& value)
+	{
+		glUniformMatrix3fv(GetUniformLocation(name), 1, GL_FALSE, &value[0][0]);
+	}
+
 	void OpenGLShader::SetUniformMat4(const string& name, const glm::mat4& value)
 	{
 		glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE, &value[0][0]);
@@ -373,6 +436,6 @@ namespace Infinit {
 		auto it = std::find(m_Resources.begin(), m_Resources.end(), name);
 		if (it == m_Resources.end())
 			return -1;
-		return std::distance(m_Resources.begin(), it) - 1;
+		return std::distance(m_Resources.begin(), it);
 	}
 }

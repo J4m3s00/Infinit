@@ -31,7 +31,7 @@ namespace Infinit {
 		case Infinit::ShaderDataType::Bool:				return 1;
 		}
 
-		IN_CORE_ASSERT(false, "Unknown ShaderDataType");
+		IN_CORE_WARN("Unknown ShaderDataType");
 		return 0;
 	}
 

@@ -37,6 +37,12 @@ namespace Infinit {
 
 				IN_CORE_TRACE("FileName: {0}, {1}", filename, mesh->GetFilePath());
 			}
+			if (Instance->Material)
+			{
+				ImGui::Begin("Material");
+				Instance->Material->DrawImGui();
+				ImGui::End();
+			}
 		}
 	}
 

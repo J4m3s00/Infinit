@@ -19,8 +19,9 @@ namespace Infinit {
 
 	struct ShaderUniform
 	{
-		void* Data;
-		ShaderUniform(uint sizeInByte) { Data = new byte[sizeInByte]; }
+		string Name;
+		ShaderDataType Type;
+		ShaderUniform(const string& name, ShaderDataType type) : Name(name), Type(type) {  }
 	};
 
 	struct StructMember

@@ -116,12 +116,12 @@
     <ClInclude Include="src\Core\Material.h" />
     <ClInclude Include="src\Core\Resource.h" />
     <ClInclude Include="src\Core\Transform.h" />
+    <ClInclude Include="src\Events\AppEvents.h" />
     <ClInclude Include="src\Events\Event.h" />
     <ClInclude Include="src\Events\Events.h" />
     <ClInclude Include="src\Events\InputEvent.h" />
-    <ClInclude Include="src\Events\AppEvents.h" />
+    <ClInclude Include="src\Events\ObjectEvents.h" />
     <ClInclude Include="src\Events\WindowEvent.h" />
-    <ClInclude Include="src\graphics\ShaderUniforms.h" />
     <ClInclude Include="src\Infinit.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLBuffer.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLRendererAPI.h" />
@@ -136,6 +136,7 @@
     <ClInclude Include="src\graphics\Renderer.h" />
     <ClInclude Include="src\graphics\RendererAPI.h" />
     <ClInclude Include="src\graphics\Shader.h" />
+    <ClInclude Include="src\graphics\ShaderUniforms.h" />
     <ClInclude Include="src\graphics\Texture.h" />
     <ClInclude Include="src\graphics\VertexArray.h" />
     <ClInclude Include="src\graphics\Window.h" />

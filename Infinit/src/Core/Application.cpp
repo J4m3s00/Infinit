@@ -140,6 +140,11 @@ namespace Infinit {
 		{
 			m_ResourceCache[filePath] = Texture2D::Create(filePath);
 		}
+		//Cubemaps
+		else if (fileEnding == "cubemap")
+		{
+			m_ResourceCache[filePath] = TextureCube::Create(filePath);
+		}
 		//Meshes
 		else if (fileEnding == "fbx")
 		{

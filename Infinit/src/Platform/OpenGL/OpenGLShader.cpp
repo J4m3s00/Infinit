@@ -385,7 +385,7 @@ namespace Infinit {
 			case ShaderDataType::Float3: SetUniform3f(uniform.Name, *((const glm::vec3*)buffer)); break;
 			case ShaderDataType::Float4: SetUniform4f(uniform.Name, *((const glm::vec4*)buffer)); break;
 			case ShaderDataType::Int: SetUniform1i(uniform.Name, *((const int*)buffer)); break;
-			case ShaderDataType::Bool: SetUniform1i(uniform.Name, *((const int*)buffer)); break;
+			case ShaderDataType::Bool: SetUniform1i(uniform.Name, *((const bool*)buffer)); break;
 			case ShaderDataType::Texture2D:
 			case ShaderDataType::TextureCube: SetUniform1i(uniform.Name, (int&)*((int*)buffer)); break;
 			default:

@@ -52,7 +52,7 @@ namespace Infinit {
 			ImGuiProperty(GetName(), (T&)*Value);
 		}
 	public:
-		T const * Value;
+		T* Value;
 	};
 
 	class Material

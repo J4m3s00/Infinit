@@ -10,3 +10,6 @@
 [submodule "Infinit/vendor/lua"]
 	path = Infinit/vendor/lua
 	url = https://github.com/J4m3s00/lua.git
+[submodule "Infinit/vendor/GLFW"]
+	path = Infinit/vendor/GLFW
+	url = https://github.com/J4m3s00/glfw.git

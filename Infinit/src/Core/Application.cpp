@@ -17,6 +17,8 @@
 #include <filesystem>
 #endif
 
+#include <glm/gtc/matrix_transform.hpp>
+
 //Bring imgui for all platforms
 #include <GLFW/glfw3.h>
 
@@ -62,6 +64,11 @@ namespace Infinit {
 	{
 		m_ActiveScene->Detach();
 		m_ActiveScene = scene;
+		if (!m_ActiveScene->ActiveCamera)
+			m_ActiveScene->ActiveCamera = new Infinit::Camera(glm::perspective(65.0f, 16.0f / 9.0f, 0.0001f, 10000.0f));
+
+		if (m_ActiveScene->LightMap.size() <= 0)
+			m_ActiveScene->LightMap.push_back({ { 0.2f, 0.34f, 0.5f }, { 1.0f, 1.0f, 1.0f } });
 		m_ActiveScene->Attach();
 	}
 
@@ -121,19 +128,24 @@ namespace Infinit {
 	{
 		for (const auto& entry : std::filesystem::directory_iterator(folder))
 		{
-			if (entry.is_directory())
-				LoadAllResources(entry.path().u8string());
-			else
+			if (!entry.is_directory())
 			{
 				string filePath = entry.path().u8string();
 				std::replace(filePath.begin(), filePath.end(), '\\', '/');
 				SaveResourceInCache(filePath);
+			}
+			else
+			{
+				LoadAllResources(entry.path().u8string());
 			}
 		}
 	}
 
 	void Application::SaveResourceInCache(const string& filePath)
 	{
+		std::unordered_map<string, std::shared_ptr<Resource>>::iterator it = m_ResourceCache.find(filePath);
+		if (it != m_ResourceCache.end())
+			return;
 		string fileEnding = filePath.substr(filePath.find_last_of(".") + 1, filePath.size());
 		//Textures
 		if (fileEnding == "png" || fileEnding == "tga")
@@ -144,6 +156,11 @@ namespace Infinit {
 		else if (fileEnding == "cubemap")
 		{
 			m_ResourceCache[filePath] = TextureCube::Create(filePath);
+		}
+		//Materials
+		else if (fileEnding == "lua")
+		{
+			m_ResourceCache[filePath] = std::shared_ptr<Material>(new Material(filePath));
 		}
 		//Meshes
 		else if (fileEnding == "fbx")
@@ -164,8 +181,9 @@ namespace Infinit {
 		{
 			return it->second;
 		}
-		IN_CORE_WARN("Could not find Resource: \"{0}\"", filePath);
-		return nullptr;
+		IN_CORE_WARN("Could not find Resource: \"{0}\". Trying to load from Memory!", filePath);
+		SaveResourceInCache(filePath);
+		return m_ResourceCache[filePath];
 	}
 
 	bool Application::OnWindowClose(WindowCloseEvent& e)

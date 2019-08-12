@@ -7,7 +7,7 @@
 namespace Infinit {
 
 	Scene::Scene(const string& name)
-		: m_Name(name)
+		: m_Name(name), ActiveCamera(NULL)
 	{
 
 	}
@@ -54,6 +54,8 @@ namespace Infinit {
 
 	void Scene::Update()
 	{
+		if (ActiveCamera)
+			ActiveCamera->Update();
 		OnEvent(AppUpdateEvent(0.0f));
 	}
 
@@ -66,6 +68,7 @@ namespace Infinit {
 
 	void Scene::ImGuiRender()
 	{
+		DrawImGui();
 		OnEvent(AppImGuiRenderEvent());
 	}
 
@@ -109,6 +112,10 @@ namespace Infinit {
 		}
 		ImGui::End();
 
+		ImGui::Begin("Light");
+		ImGui::SliderFloat3("Direction", &LightMap[0].Direction[0], -360.0f, 360.0f);
+		ImGui::SliderFloat3("Radiance", &LightMap[0].Radiance[0], 0.0f, 1.0f);
+		ImGui::End();
 	}
 
 }

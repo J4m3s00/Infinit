@@ -55,11 +55,13 @@ namespace Infinit {
 		T* Value;
 	};
 
-	class Material
+	class Material : public Resource
 	{
 	public:
-		Material(std::shared_ptr<Shader> shader);
+		Material(const string& filePath);
 		virtual ~Material();
+
+		virtual bool Reload(const string& filePath) override;
 
 		void Bind() const;
 

@@ -1,6 +1,3 @@
-[submodule "Infinit/vendor/GLFW"]
-	path = Infinit/vendor/GLFW
-	url = https://github.com/J4m3s00/glfw.git
 [submodule "Infinit/vendor/spdlog"]
 	path = Infinit/vendor/spdlog
 	url = https://github.com/gabime/spdlog.git

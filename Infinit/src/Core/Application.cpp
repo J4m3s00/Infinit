@@ -17,6 +17,8 @@
 #include <filesystem>
 #endif
 
+#include <glm/gtc/matrix_transform.hpp>
+
 //Bring imgui for all platforms
 #include <GLFW/glfw3.h>
 
@@ -62,6 +64,11 @@ namespace Infinit {
 	{
 		m_ActiveScene->Detach();
 		m_ActiveScene = scene;
+		if (!m_ActiveScene->ActiveCamera)
+			m_ActiveScene->ActiveCamera = new Infinit::Camera(glm::perspective(65.0f, 16.0f / 9.0f, 0.0001f, 10000.0f));
+
+		if (m_ActiveScene->LightMap.size() <= 0)
+			m_ActiveScene->LightMap.push_back({ { 0.2f, 0.34f, 0.5f }, { 1.0f, 1.0f, 1.0f } });
 		m_ActiveScene->Attach();
 	}
 

@@ -7,7 +7,7 @@
 namespace Infinit {
 
 	Scene::Scene(const string& name)
-		: m_Name(name)
+		: m_Name(name), ActiveCamera(NULL)
 	{
 
 	}
@@ -54,6 +54,8 @@ namespace Infinit {
 
 	void Scene::Update()
 	{
+		if (ActiveCamera)
+			ActiveCamera->Update();
 		OnEvent(AppUpdateEvent(0.0f));
 	}
 
@@ -66,6 +68,7 @@ namespace Infinit {
 
 	void Scene::ImGuiRender()
 	{
+		DrawImGui();
 		OnEvent(AppImGuiRenderEvent());
 	}
 

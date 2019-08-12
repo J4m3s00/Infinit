@@ -109,6 +109,10 @@ namespace Infinit {
 		}
 		ImGui::End();
 
+		ImGui::Begin("Light");
+		ImGui::SliderFloat3("Direction", &LightMap[0].Direction[0], -360.0f, 360.0f);
+		ImGui::SliderFloat3("Radiance", &LightMap[0].Radiance[0], 0.0f, 1.0f);
+		ImGui::End();
 	}
 
 }

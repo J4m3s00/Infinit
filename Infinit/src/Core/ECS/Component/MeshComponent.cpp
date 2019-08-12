@@ -34,14 +34,18 @@ namespace Infinit {
 				
 				std::shared_ptr<Mesh> mesh = std::dynamic_pointer_cast<Mesh>(Application::Get().GetResource(filename));
 				Instance = new MeshInstance(mesh);
+				Instance->Material = std::dynamic_pointer_cast<Material>(Application::Get().GetResource("res/material/TestMaterial.lua"));
 
 				IN_CORE_TRACE("FileName: {0}, {1}", filename, mesh->GetFilePath());
 			}
-			if (Instance->Material)
+			if (Instance)
 			{
-				ImGui::Begin("Material");
-				Instance->Material->DrawImGui();
-				ImGui::End();
+				if (Instance->Material)
+				{
+					ImGui::Begin("Material");
+					Instance->Material->DrawImGui();
+					ImGui::End();
+				}
 			}
 		}
 	}

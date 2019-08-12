@@ -6,23 +6,164 @@
 #include "Core/ImGui/ImGuiHelper.h"
 #include "Core/Application.h"
 
+extern "C" {
+	#include <lua.h>
+	#include <lauxlib.h>
+	#include <lualib.h>
+}
+
+
 namespace Infinit {
+
+	MaterialParameterType MaterialParameterTypeFromString(const string& typeString)
+	{
+		if (typeString == "float") return MaterialParameterType::Float;
+		else if (typeString == "vec2") return MaterialParameterType::Float2;
+		else if (typeString == "vec3") return MaterialParameterType::Float3;
+		else if (typeString == "color3") return MaterialParameterType::Color3;
+		else if (typeString == "vec4") return MaterialParameterType::Float4;
+		else if (typeString == "color4") return MaterialParameterType::Color4;
+		else if (typeString == "bool") return MaterialParameterType::Bool;
+		else if (typeString == "int") return MaterialParameterType::Int;
+		else if (typeString == "sampler2D") return MaterialParameterType::Texture2D;
+		else if (typeString == "samplerCube") return MaterialParameterType::TextureCube;
+
+		return MaterialParameterType::None;
+	}
+
+	bool CheckLuaError(lua_State* L, int err)
+	{
+		if (err != LUA_OK)
+		{
+			IN_CORE_ERROR("Lua: {0}", lua_tostring(L, -1));
+			lua_pop(L, 1);
+			return false;
+		}
+		return true;
+	}
 
 	void Parameter::BindToShader(std::shared_ptr<Shader> shader)
 	{
 		m_Buffer = shader->GetUniformBuffer(m_Name);
 	}
 
-	Material::Material(std::shared_ptr<Shader> shader)
-		: ShaderProgram(shader)
+	Material::Material(const string& filePath)
+		: Resource(filePath)
 	{
-
+		Reload(filePath);
+		//while (isvalid)
+		//{
+		//
+		//}
 	}
 
 	Material::~Material()
 	{
 		for (Parameter* p : m_Params)
 			delete p;
+	}
+
+	bool Material::Reload(const string& filePath)
+	{
+		lua_State* L = luaL_newstate();
+		int err = 0;
+		
+		if (luaL_loadfile(L, filePath.c_str()) || lua_pcall(L, 0, 0, 0))
+		{
+			IN_CORE_ERROR("Lua: {0}", lua_tostring(L, -1));
+			lua_pop(L, 1);
+			return false;
+		}
+		
+		
+
+		Application& app = Application::Get();
+		err = lua_getglobal(L, "material");
+		if (lua_istable(L, -1))
+			IN_CORE_INFO("Table");
+		
+		lua_pushstring(L, "name");
+		lua_gettable(L, -2);
+		
+		ChangeName(lua_tostring(L, -1));
+
+		lua_pop(L, 1);
+
+
+		lua_pushstring(L, "shader");
+		lua_gettable(L, -2);
+		ShaderProgram = std::dynamic_pointer_cast<Shader>(app.GetResource(lua_tostring(L, -1)));
+		lua_pop(L, 1);
+
+		lua_pushstring(L, "textures");
+		lua_gettable(L, -2);
+		lua_pushnil(L);
+		while (lua_next(L, -2) != 0)
+		{
+			lua_pushstring(L, "name");
+			lua_gettable(L, -2);
+			const char* name = lua_tostring(L, -1);
+			lua_pop(L, 1);
+			lua_pushstring(L, "path");
+			lua_gettable(L, -2);
+			const char* path = lua_tostring(L, -1);
+			AddTexture(name, std::dynamic_pointer_cast<Texture2D>(app.GetResource(path)));
+			lua_pop(L, 2);
+		}
+		
+		lua_pop(L, 1);
+		lua_pushstring(L, "params");
+		lua_gettable(L, -2);
+		lua_pushnil(L);
+		while (lua_next(L, -2) != 0)
+		{
+			lua_pushstring(L, "name");
+			lua_gettable(L, -2);
+			const char* name = lua_tostring(L, -1);
+			lua_pop(L, 1);
+			lua_pushstring(L, "type");
+			lua_gettable(L, -2);
+			const char* type = lua_tostring(L, -1);
+			MaterialParameterType shaderType = MaterialParameterTypeFromString(type);
+			switch (shaderType)
+			{
+			case MaterialParameterType::Bool: AddParameter(new MaterialParameter<bool>(name)); break;
+			case MaterialParameterType::Int: AddParameter(new MaterialParameter<int>(name)); break;
+			case MaterialParameterType::Float: AddParameter(new MaterialParameter<float>(name)); break;
+			case MaterialParameterType::Float2: AddParameter(new MaterialParameter<glm::vec2>(name)); break;
+			case MaterialParameterType::Float3: 
+			case MaterialParameterType::Color3: AddParameter(new MaterialParameter<glm::vec3>(name)); break;
+			case MaterialParameterType::Float4: 
+			case MaterialParameterType::Color4: AddParameter(new MaterialParameter<glm::vec4>(name)); break;
+			case MaterialParameterType::Texture2D: 
+			case MaterialParameterType::TextureCube: AddParameter(new MaterialParameter<int>(name)); break;
+			default:
+				break;
+			}
+			//AddTexture(name, std::dynamic_pointer_cast<Texture2D>(app.GetResource(path)));
+			lua_pop(L, 2);
+		}
+
+		lua_pop(L, 1);
+		lua_pushstring(L, "cubemaps");
+		lua_gettable(L, -2);
+		lua_pushnil(L);
+		while (lua_next(L, -2) != 0)
+		{
+			lua_pushstring(L, "name");
+			lua_gettable(L, -2);
+			const char* name = lua_tostring(L, -1);
+			lua_pop(L, 1);
+			lua_pushstring(L, "path");
+			lua_gettable(L, -2);
+			const char* path = lua_tostring(L, -1);
+			AddTexture(name, std::dynamic_pointer_cast<TextureCube>(app.GetResource(path)));
+			lua_pop(L, 2);
+		}
+
+		lua_close(L);
+
+		return true;
 	}
 
 	void Material::Bind() const

@@ -32,6 +32,9 @@ namespace Infinit {
 		virtual bool Reload(const string& filePath) = 0;
 
 		static std::shared_ptr<Shader> Create(const string& filePath);
+		static std::shared_ptr<Shader> Create(const string& vertexSource, const string& fragmentSource);
+	public:
+		static std::shared_ptr<Shader> DefaultShader;
 	};
 
 }

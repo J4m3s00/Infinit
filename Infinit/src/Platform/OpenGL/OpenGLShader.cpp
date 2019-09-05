@@ -16,6 +16,13 @@ namespace Infinit {
 		CompileShader();
 	}
 
+	OpenGLShader::OpenGLShader(const string& vertexSource, const string& fragmentSource)
+		: Shader("", "Default Shader")
+	{
+		m_ShaderSource = "#shader vertex\n" + vertexSource + "#shader fragment\n" + fragmentSource;
+		CompileShader();
+	}
+
 	OpenGLShader::~OpenGLShader()
 	{
 		IN_CORE_INFO("OpenGL Shader {0} destroyed!", m_RendererID);
@@ -27,13 +34,14 @@ namespace Infinit {
 	{
 		if (filepath != "") m_FilePath = filepath;
 		if (m_RendererID) glDeleteProgram(m_RendererID);
+		LoadShaderFromFile(filepath);
+
 		CompileShader();
 		return true;
 	}
 
 	void OpenGLShader::CompileShader()
 	{
-		LoadShaderFromFile(m_FilePath);
 		string* shaderSources = new string[2];
 
 		const char* typeToken = "#shader";

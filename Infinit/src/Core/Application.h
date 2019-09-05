@@ -29,12 +29,12 @@ namespace Infinit {
 
 		void Run();
 
-		string OpenFile(const std::string& filter) const;
+		string OpenFile(const LPCSTR& filter) const;
 		std::shared_ptr<Resource> GetResource(const string& filePath);
 
 		inline Window& GetWindow() { return *m_Window; }
 		inline static Application& Get() { return *s_Instance; }
-	private:
+	public:
 		bool Init();
 		void LoadAllResources(const string& folder);
 		void SaveResourceInCache(const string& path);

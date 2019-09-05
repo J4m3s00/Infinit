@@ -30,20 +30,21 @@ namespace Infinit {
 			}
 			if (ImGui::Button("Load"))
 			{
-				std::string filename = Application::Get().OpenFile("");
+				std::string filename = Application::Get().OpenFile(IN_FILE_FILTER_Mesh);
 				
 				std::shared_ptr<Mesh> mesh = std::dynamic_pointer_cast<Mesh>(Application::Get().GetResource(filename));
+				if (!mesh) return;
 				Instance = new MeshInstance(mesh);
-				Instance->Material = std::dynamic_pointer_cast<Material>(Application::Get().GetResource("res/material/TestMaterial.lua"));
+				//Instance->UsedMaterial = std::dynamic_pointer_cast<Material>(Application::Get().GetResource("res/material/TestMaterial.lua"));
 
 				IN_CORE_TRACE("FileName: {0}, {1}", filename, mesh->GetFilePath());
 			}
 			if (Instance)
 			{
-				if (Instance->Material)
+				if (Instance->UsedMaterial)
 				{
-					ImGui::Begin("Material");
-					Instance->Material->DrawImGui();
+					ImGui::Begin("Material##MaterialWindow");
+					Instance->UsedMaterial->DrawImGui();
 					ImGui::End();
 				}
 			}

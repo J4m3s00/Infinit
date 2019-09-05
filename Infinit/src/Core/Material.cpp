@@ -15,6 +15,8 @@ extern "C" {
 
 namespace Infinit {
 
+	std::shared_ptr<Material> Material::DefaultMaterial;
+
 	MaterialParameterType MaterialParameterTypeFromString(const string& typeString)
 	{
 		if (typeString == "float") return MaterialParameterType::Float;
@@ -57,8 +59,15 @@ namespace Infinit {
 		//}
 	}
 
+	Material::Material(const std::shared_ptr<Shader>& shader)
+		: Resource(""), ShaderProgram(shader)
+	{
+
+	}
+
 	Material::~Material()
 	{
+		IN_CORE_INFO("Delete Material");
 		for (Parameter* p : m_Params)
 			delete p;
 	}
@@ -79,8 +88,8 @@ namespace Infinit {
 
 		Application& app = Application::Get();
 		err = lua_getglobal(L, "material");
-		if (lua_istable(L, -1))
-			IN_CORE_INFO("Table");
+		if (!lua_istable(L, -1))
+			IN_CORE_WARN("Material has no Table");
 		
 		lua_pushstring(L, "name");
 		lua_gettable(L, -2);
@@ -202,19 +211,48 @@ namespace Infinit {
 		m_Textures[shaderName] = texture;
 	}
 
+	//////////////////IMGUI///////////////////////////////
+	void ShowAddParameterMenu()
+	{
+		
+		if (ImGui::BeginMenu("Add Parameter"))
+		{
+			ImGui::MenuItem("Color");
+			ImGui::EndMenu();
+		}
+	}
+
 	void Material::DrawImGui()
 	{
-		if (ImGui::TreeNode(("Shader " + ShaderProgram->GetFilePath()).c_str()))
+		if (ShaderProgram)
 		{
-			std::string buttonName = "Reload##" + ShaderProgram->GetFilePath();
-			if (ImGui::Button(buttonName.c_str()))
-				ShaderProgram->Reload("");
-			ImGui::TreePop();
+			if (ImGui::TreeNode(("Shader " + ShaderProgram->GetFilePath()).c_str()))
+			{
+				std::string buttonName = "Reload##" + ShaderProgram->GetFilePath();
+				if (ImGui::Button(buttonName.c_str()))
+					ShaderProgram->Reload("");
+				ImGui::TreePop();
+			}
+		}
+		else
+		{
+			if (ImGui::TreeNode("Shader"))
+			{
+				if (ImGui::Button("Load"))
+				{
+					Application::Get().OpenFile(IN_FILE_FILTER_Shader);
+				}
+			}
 		}
 
 		for (auto& param : m_Params)
 		{
 			param->DrawImGui();
+		}
+
+		if (ImGui::Button("Add Parameter"))
+		{
+			ShowAddParameterMenu();
 		}
 
 		//for (auto& a : m_Textures)

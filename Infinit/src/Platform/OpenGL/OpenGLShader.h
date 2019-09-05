@@ -11,6 +11,7 @@ namespace Infinit {
 	{
 	public:
 		OpenGLShader(const string& path);
+		OpenGLShader(const string& vertexSource, const string& fragmentSource);
 		virtual ~OpenGLShader();
 
 		virtual void Bind() const override;

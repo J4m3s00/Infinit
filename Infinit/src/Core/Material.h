@@ -59,6 +59,7 @@ namespace Infinit {
 	{
 	public:
 		Material(const string& filePath);
+		Material(const std::shared_ptr<Shader>& shader);
 		virtual ~Material();
 
 		virtual bool Reload(const string& filePath) override;
@@ -89,6 +90,8 @@ namespace Infinit {
 	private:
 		std::unordered_map<string, std::shared_ptr<Texture>> m_Textures;
 		std::vector<Parameter*> m_Params;
+	public:
+		static std::shared_ptr<Material> DefaultMaterial;
 	};
 
 }

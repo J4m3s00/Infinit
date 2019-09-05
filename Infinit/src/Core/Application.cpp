@@ -116,7 +116,8 @@ namespace Infinit {
 		Renderer::Init();
 		ImGuiInit();
 
-		LoadAllResources("res/");
+		//LoadAllResources("res/");
+		SaveResourceInCache("res/cerberus.fbx");
 
 		//m_ImGuiLayer = new ImGuiLayer();
 		//PushLayer(m_ImGuiLayer);
@@ -158,7 +159,7 @@ namespace Infinit {
 			m_ResourceCache[filePath] = TextureCube::Create(filePath);
 		}
 		//Materials
-		else if (fileEnding == "lua")
+		else if (fileEnding == "inm")
 		{
 			m_ResourceCache[filePath] = std::shared_ptr<Material>(new Material(filePath));
 		}
@@ -256,7 +257,7 @@ namespace Infinit {
 		}
 	}
 
-	string Application::OpenFile(const string& filter) const
+	string Application::OpenFile(const LPCSTR& filter) const
 	{
 		OPENFILENAMEA ofn;       // common dialog box structure
 		CHAR szFile[260] = { 0 };       // if using TCHAR macros
@@ -267,7 +268,7 @@ namespace Infinit {
 		ofn.hwndOwner = glfwGetWin32Window((GLFWwindow*)m_Window->GetNativeWindow());
 		ofn.lpstrFile = szFile;
 		ofn.nMaxFile = sizeof(szFile);
-		ofn.lpstrFilter = "All\0*.*\0";
+		ofn.lpstrFilter = filter;
 		ofn.nFilterIndex = 1;
 		ofn.lpstrFileTitle = NULL;
 		ofn.nMaxFileTitle = 0;

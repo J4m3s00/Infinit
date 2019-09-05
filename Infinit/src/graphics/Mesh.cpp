@@ -144,6 +144,7 @@ namespace Infinit {
 	{
 		m_VertexArray = instance->GetVertexArray();
 		m_VertexCount = m_VertexArray->GetIndexBuffer()->GetCount();
+		UsedMaterial = Material::DefaultMaterial;
 	}
 
 	void MeshInstance::DrawImGui()

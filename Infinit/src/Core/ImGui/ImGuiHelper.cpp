@@ -143,7 +143,7 @@ namespace Infinit {
 			}
 			if (ImGui::IsItemClicked())
 			{
-				std::string filename = Application::Get().OpenFile("");
+				std::string filename = Application::Get().OpenFile(IN_FILE_FILTER_Texture);
 				if (filename != "")
 					tex->Reload(filename);
 			}

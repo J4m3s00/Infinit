@@ -45,3 +45,9 @@ second_t< typename tMap::value_type > second(const tMap& m) { return second_t<  
 #define M_PI 3.1415f
 #define TO_RADIANS (M_PI / 180.0f)
 #define TO_DEGREES (180.0f / M_PI)
+
+#define IN_FILE_FILTER_All ("All\0*.*\0")
+#define IN_FILE_FILTER_Shader ("Shader (*.shader)\0*.shader\0")
+#define IN_FILE_FILTER_Material ("Material (*.inm)\0*.inm*\0")
+#define IN_FILE_FILTER_Mesh ("Models (*.blend, *.fbx)\0*.blend;*.fbx\0")
+#define IN_FILE_FILTER_Texture ("Models (*.png, *.tga)\0*.png;*.tga\0")

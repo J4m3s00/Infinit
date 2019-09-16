@@ -27,6 +27,11 @@ project "Infinit"
 	language "C++"
 	staticruntime "off"
 
+	flags
+	{
+		"MultiProcessorCompile"
+	}
+
 	pchheader "inpch.h"
 	pchsource "Infinit/src/inpch.cpp"
 
@@ -95,6 +100,11 @@ project "Sandbox"
 	kind "ConsoleApp"
 	language "C++"
 	staticruntime "off"
+
+	flags
+	{
+		"MultiProcessorCompile"
+	}
 
 --	targetdir ("bin/" .. outputdir .. "/Infinit")
 	targetdir ("bin/" .. outputdir .. "/%{prj.name}")

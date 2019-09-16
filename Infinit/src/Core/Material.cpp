@@ -121,6 +121,7 @@ namespace Infinit {
 		}
 		
 		lua_pop(L, 1);
+
 		lua_pushstring(L, "params");
 		lua_gettable(L, -2);
 		lua_pushnil(L);
@@ -224,6 +225,25 @@ namespace Infinit {
 
 	void Material::DrawImGui()
 	{
+		if (ImGui::BeginPopupContextWindow())
+		{
+			if (ImGui::MenuItem("Texture"))
+			{
+				ImGui::OpenPopup("Set Name");
+			}
+			ImGui::EndPopup();
+		}
+
+		bool namePopupOpen = true;
+		if (ImGui::BeginPopupModal("Set Name", &namePopupOpen))
+		{
+			char* name = new char[64];
+			ImGui::Button("Close");
+			ImGui::InputText("Unknown", name, 64);
+			ImGui::EndPopup();
+			delete[] name;
+		}
+
 		if (ShaderProgram)
 		{
 			if (ImGui::TreeNode(("Shader " + ShaderProgram->GetFilePath()).c_str()))
@@ -240,8 +260,10 @@ namespace Infinit {
 			{
 				if (ImGui::Button("Load"))
 				{
-					Application::Get().OpenFile(IN_FILE_FILTER_Shader);
+					string filePath = Application::Get().OpenFile(IN_FILE_FILTER_Shader);
+					ShaderProgram = std::dynamic_pointer_cast<Shader>(Application::Get().GetResource(filePath));
 				}
+				ImGui::TreePop();
 			}
 		}
 
@@ -250,10 +272,10 @@ namespace Infinit {
 			param->DrawImGui();
 		}
 
-		if (ImGui::Button("Add Parameter"))
-		{
-			ShowAddParameterMenu();
-		}
+		//if (ImGui::Button("Add Parameter"))
+		//{
+		//	ShowAddParameterMenu();
+		//}
 
 		//for (auto& a : m_Textures)
 		//{

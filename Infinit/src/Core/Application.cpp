@@ -50,6 +50,10 @@ namespace Infinit {
 	Application::Application(const std::string& name, RendererAPI::Type renderer) 
 		: m_Name(name)
 	{
+		std::filesystem::path path("./");
+		m_ResourcePath = std::filesystem::absolute(path).u8string();
+		std::replace(m_ResourcePath.begin(), m_ResourcePath.end(), '\\', '/');
+
 		RendererAPI::Renderer = renderer;
 		s_Instance = this;
 		m_Running = Init();
@@ -117,7 +121,7 @@ namespace Infinit {
 		ImGuiInit();
 
 		//LoadAllResources("res/");
-		SaveResourceInCache("res/cerberus.fbx");
+		//SaveResourceInCache("res/cerberus.fbx");
 
 		//m_ImGuiLayer = new ImGuiLayer();
 		//PushLayer(m_ImGuiLayer);
@@ -133,7 +137,7 @@ namespace Infinit {
 			{
 				string filePath = entry.path().u8string();
 				std::replace(filePath.begin(), filePath.end(), '\\', '/');
-				SaveResourceInCache(filePath);
+				SaveResourceInCache(filePath, std::filesystem::absolute(std::filesystem::path(filePath)).u8string());
 			}
 			else
 			{
@@ -142,49 +146,62 @@ namespace Infinit {
 		}
 	}
 
-	void Application::SaveResourceInCache(const string& filePath)
+	void Application::SaveResourceInCache(const string& relativPath, const string& absoultePath)
 	{
-		std::unordered_map<string, std::shared_ptr<Resource>>::iterator it = m_ResourceCache.find(filePath);
+		IN_CORE_TRACE("Save resource {0}", relativPath);
+		std::unordered_map<string, std::shared_ptr<Resource>>::iterator it = m_ResourceCache.find(relativPath);
 		if (it != m_ResourceCache.end())
 			return;
-		string fileEnding = filePath.substr(filePath.find_last_of(".") + 1, filePath.size());
+		string fileEnding = relativPath.substr(relativPath.find_last_of(".") + 1, relativPath.size());
 		//Textures
 		if (fileEnding == "png" || fileEnding == "tga")
 		{
-			m_ResourceCache[filePath] = Texture2D::Create(filePath);
+			m_ResourceCache[relativPath] = Texture2D::Create(absoultePath);
 		}
 		//Cubemaps
 		else if (fileEnding == "cubemap")
 		{
-			m_ResourceCache[filePath] = TextureCube::Create(filePath);
+			m_ResourceCache[relativPath] = TextureCube::Create(absoultePath);
 		}
 		//Materials
 		else if (fileEnding == "inm")
 		{
-			m_ResourceCache[filePath] = std::shared_ptr<Material>(new Material(filePath));
+			m_ResourceCache[relativPath] = std::shared_ptr<Material>(new Material(absoultePath));
 		}
 		//Meshes
 		else if (fileEnding == "fbx")
 		{
-			m_ResourceCache[filePath] = std::shared_ptr<Mesh>(new Mesh(filePath));
+			m_ResourceCache[relativPath] = std::shared_ptr<Mesh>(new Mesh(absoultePath));
 		}
 		//Shaders
 		else if (fileEnding == "shader")
 		{
-			m_ResourceCache[filePath] = Shader::Create(filePath);
+			m_ResourceCache[relativPath] = Shader::Create(absoultePath);
 		}
 	}
 
 	std::shared_ptr<Resource> Application::GetResource(const string& filePath)
 	{
-		std::unordered_map<string, std::shared_ptr<Resource>>::iterator it = m_ResourceCache.find(filePath);
+		string absolutePath = filePath;
+		string relativPath = filePath;
+		std::filesystem::path path(filePath);
+
+		if (path.is_absolute())
+		{
+			absolutePath = std::filesystem::absolute(path).u8string();
+			relativPath = absolutePath.substr(m_ResourcePath.size(), absolutePath.size() - m_ResourcePath.size());
+
+			std::replace(absolutePath.begin(), absolutePath.end(), '\\', '/');
+			std::replace(relativPath.begin(), relativPath.end(), '\\', '/');
+		}
+		std::unordered_map<string, std::shared_ptr<Resource>>::iterator it = m_ResourceCache.find(relativPath);
 		if (it != m_ResourceCache.end())
 		{
 			return it->second;
 		}
-		IN_CORE_WARN("Could not find Resource: \"{0}\". Trying to load from Memory!", filePath);
-		SaveResourceInCache(filePath);
-		return m_ResourceCache[filePath];
+		IN_CORE_WARN("Could not find Resource: \"{0}\". Trying to load from Memory!", relativPath);
+		SaveResourceInCache(relativPath, absolutePath);
+		return m_ResourceCache[relativPath];
 	}
 
 	bool Application::OnWindowClose(WindowCloseEvent& e)
@@ -278,10 +295,9 @@ namespace Infinit {
 		if (GetOpenFileNameA(&ofn) == TRUE)
 		{
 			string result = ofn.lpstrFile;
-			std::filesystem::path path("./../");
-			std::string resourcePath = std::filesystem::absolute(path).u8string();
-			result = result.substr(resourcePath.size(), result.size() - resourcePath.size());
 			std::replace(result.begin(), result.end(), '\\', '/');
+
+			//result = result.substr(m_ResourcePath.size(), result.size() - m_ResourcePath.size());
 
 			return result;
 		}

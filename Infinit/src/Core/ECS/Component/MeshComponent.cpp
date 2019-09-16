@@ -28,7 +28,7 @@ namespace Infinit {
 				Instance->DrawImGui();
 				ImGui::SameLine();
 			}
-			if (ImGui::Button("Load"))
+			if (ImGui::Button("Load##Mesh"))
 			{
 				std::string filename = Application::Get().OpenFile(IN_FILE_FILTER_Mesh);
 				
@@ -43,9 +43,20 @@ namespace Infinit {
 			{
 				if (Instance->UsedMaterial)
 				{
+					ImGui::Text(Instance->UsedMaterial->GetName().c_str());
+
 					ImGui::Begin("Material##MaterialWindow");
 					Instance->UsedMaterial->DrawImGui();
 					ImGui::End();
+				}
+				else
+				{
+					if (ImGui::Button("Load##Material"))
+					{
+						string filePath = Application::Get().OpenFile(IN_FILE_FILTER_Material);
+
+						Instance->UsedMaterial = std::dynamic_pointer_cast<Material>(Application::Get().GetResource(filePath));
+					}
 				}
 			}
 		}

@@ -13,7 +13,7 @@ namespace Infinit {
 	OpenGLShader::OpenGLShader(const string& path)
 		: Shader(path), m_RendererID(0), m_UniformBufferSize(0)
 	{
-		CompileShader();
+		Reload(path);
 	}
 
 	OpenGLShader::OpenGLShader(const string& vertexSource, const string& fragmentSource)

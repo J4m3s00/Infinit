@@ -37,7 +37,7 @@ namespace Infinit {
 	public:
 		bool Init();
 		void LoadAllResources(const string& folder);
-		void SaveResourceInCache(const string& path);
+		void SaveResourceInCache(const string& relativPath, const string& absolutePath);
 		bool OnWindowClose(WindowCloseEvent& e);
 
 		void ImGuiInit();
@@ -51,6 +51,7 @@ namespace Infinit {
 		string m_Name;
 		std::unique_ptr<Window> m_Window;
 		std::unordered_map<string, std::shared_ptr<Resource>> m_ResourceCache;
+		string m_ResourcePath;
 	private:
 		static Application* s_Instance;
 	public:

@@ -10,7 +10,7 @@ namespace Infinit {
 
 	void CreateDefaults()
 	{
-		Shader::DefaultShader = Shader::Create(
+		/*Shader::DefaultShader = Shader::Create(
 		R"(#version 430 core
 
 layout(location = 0) in vec3 a_Position;
@@ -318,7 +318,7 @@ void main()
 	color = vec4(lightContribution + iblContribution, 1.0);
 }
 		)"
-);
+);*/
 		Material::DefaultMaterial = std::shared_ptr<Material>(new Material(Shader::DefaultShader));
 	}
 

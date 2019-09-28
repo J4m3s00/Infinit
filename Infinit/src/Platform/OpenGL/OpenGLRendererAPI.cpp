@@ -10,8 +10,7 @@ namespace Infinit {
 
 	void CreateDefaults()
 	{
-		/*Shader::DefaultShader = Shader::Create(
-		R"(#version 430 core
+		string vertexSource = R"(#version 430 core
 
 layout(location = 0) in vec3 a_Position;
 layout(location = 1) in vec3 a_Normal;
@@ -39,8 +38,9 @@ void main()
 
 	gl_Position = u_ViewProjectionMatrix * u_ModelMatrix * vec4(a_Position, 1.0);
 }
-		)",
-		R"(#version 430 core
+		)";
+
+string fragmentSource = R"(#version 430 core
 
 const float PI = 3.141592;
 const float Epsilon = 0.00001;
@@ -317,8 +317,9 @@ void main()
 
 	color = vec4(lightContribution + iblContribution, 1.0);
 }
-		)"
-);*/
+		)";
+		
+		Shader::DefaultShader = Shader::Create(vertexSource, fragmentSource);
 		Material::DefaultMaterial = std::shared_ptr<Material>(new Material(Shader::DefaultShader));
 	}
 

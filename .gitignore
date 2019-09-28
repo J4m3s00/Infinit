@@ -7,7 +7,3 @@ bin-int/
 *.filters
 *.user
 .travis.yml
-*.vcxproj
-*.vcxproj
-*.vcxproj
-*.vcxproj

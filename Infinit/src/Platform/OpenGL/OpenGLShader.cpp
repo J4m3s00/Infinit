@@ -17,7 +17,7 @@ namespace Infinit {
 	}
 
 	OpenGLShader::OpenGLShader(const string& vertexSource, const string& fragmentSource)
-		: Shader("", "Default Shader")
+		: Shader("", "Default Shader"), m_UniformBufferSize(0)
 	{
 		m_ShaderSource = "#shader vertex\n" + vertexSource + "#shader fragment\n" + fragmentSource;
 		CompileShader();
@@ -199,6 +199,7 @@ namespace Infinit {
 			ParseUniform(GetStatement(token, &source));
 
 		m_UniformBuffer = (byte*) malloc(m_UniformBufferSize);
+		memset(m_UniformBuffer, 0, m_UniformBufferSize);
 	}
 
 	byte* OpenGLShader::GetUniformBuffer(const string& name)

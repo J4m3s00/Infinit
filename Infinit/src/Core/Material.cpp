@@ -272,50 +272,6 @@ namespace Infinit {
 			param->DrawImGui();
 		}
 
-		//if (ImGui::Button("Add Parameter"))
-		//{
-		//	ShowAddParameterMenu();
-		//}
-
-		//for (auto& a : m_Textures)
-		//{
-		//	if (ImGui::CollapsingHeader(a.first.c_str(), nullptr, ImGuiTreeNodeFlags_DefaultOpen))
-		//	{
-		//		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 10));
-		//		if (a.second)
-		//		ImGui::Image((void*)a.second->GetRendererID(), ImVec2(64, 64));
-		//		ImGui::PopStyleVar();
-		//		if (ImGui::IsItemHovered())
-		//		{
-		//			if (a.second)
-		//			{
-		//				ImGui::BeginTooltip();
-		//				ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
-		//				ImGui::TextUnformatted(a.second->GetPath().c_str());
-		//				ImGui::PopTextWrapPos();
-		//				ImGui::Image((void*)a.second->GetRendererID(), ImVec2(384, 384));
-		//				ImGui::EndTooltip();
-		//			}
-		//			if (ImGui::IsItemClicked())
-		//			{
-		//				std::string filename = Application::Get().OpenFile("");
-		//				if (filename != "")
-		//					a.second = Texture2D::Create(filename);
-		//			}
-		//		}
-		//		//ImGui::SameLine();
-		//		//ImGui::BeginGroup();
-		//		//ImGui::Checkbox("Use##AlbedoMap", &m_AlbedoInput.UseTexture);
-		//		//if (ImGui::Checkbox("sRGB##AlbedoMap", &m_AlbedoInput.SRGB))
-		//		//{
-		//		//	if (m_AlbedoInput.TextureMap)
-		//		//		m_AlbedoInput.TextureMap.reset(Hazel::Texture2D::Create(m_AlbedoInput.TextureMap->GetPath(), m_AlbedoInput.SRGB));
-		//		//}
-		//		//ImGui::EndGroup();
-		//		//ImGui::SameLine();
-		//		//ImGui::ColorEdit3("Color##Albedo", glm::value_ptr(m_AlbedoInput.Color), ImGuiColorEditFlags_NoInputs);
-		//	}
-		//}
 	}
 
 }

@@ -68,8 +68,46 @@ namespace Infinit {
 
 	void Scene::ImGuiRender()
 	{
+		static bool p_open;
+
+		static bool opt_fullscreen_persistant = true;
+		static ImGuiDockNodeFlags opt_flags = ImGuiDockNodeFlags_None;
+		bool opt_fullscreen = opt_fullscreen_persistant;
+
+		ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar;
+		if (opt_fullscreen)
+		{
+			ImGuiViewport* viewport = ImGui::GetMainViewport();
+			ImGui::SetNextWindowPos(viewport->Pos);
+			ImGui::SetNextWindowSize(viewport->Size);
+			ImGui::SetNextWindowViewport(viewport->ID);
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+			window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+			window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+		}
+
+
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+		ImGui::Begin("DockSpace Demo", &p_open, window_flags);
+		ImGui::PopStyleVar();
+
+
+		if (opt_fullscreen)
+			ImGui::PopStyleVar(2);
+
+		// Dockspace
+		ImGuiIO& io = ImGui::GetIO();
+		if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
+		{
+			ImGuiID dockspace_id = ImGui::GetID("MyDockspace");
+			ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), opt_flags);
+		}
+
 		DrawImGui();
 		OnEvent(AppImGuiRenderEvent());
+
+		ImGui::End();
 	}
 
 	void Scene::Attach()
@@ -105,6 +143,12 @@ namespace Infinit {
 
 	void Scene::DrawImGui()
 	{
+		ImGui::Begin("Components##ComponentView");
+		ImGui::End();
+
+		ImGui::Begin("Material##MaterialWindow");
+		ImGui::End();
+
 		ImGui::Begin(("Scene " + m_Name).c_str());
 		for (Layer* layer : m_LayerStack)
 		{

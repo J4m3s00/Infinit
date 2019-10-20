@@ -28,6 +28,8 @@ namespace Infinit {
 				Instance->DrawImGui();
 				ImGui::SameLine();
 			}
+			ImGui::Text("Mesh:");
+			ImGui::SameLine();
 			if (ImGui::Button("Load##Mesh"))
 			{
 				std::string filename = Application::Get().OpenFile(IN_FILE_FILTER_Mesh);
@@ -51,6 +53,8 @@ namespace Infinit {
 				}
 				else
 				{
+					ImGui::Text("Material:");
+					ImGui::SameLine();
 					if (ImGui::Button("Load##Material"))
 					{
 						string filePath = Application::Get().OpenFile(IN_FILE_FILTER_Material);

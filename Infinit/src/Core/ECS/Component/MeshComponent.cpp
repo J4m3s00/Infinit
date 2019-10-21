@@ -21,6 +21,16 @@ namespace Infinit {
 
 	void MeshComponent::DrawImGui()
 	{
+		if (Instance)
+		{
+			if (Instance->UsedMaterial)
+			{
+				ImGui::Begin("Material##MaterialWindow");
+				Instance->UsedMaterial->DrawImGui();
+				ImGui::End();
+			}
+		}
+
 		if (ImGui::CollapsingHeader(GetTypeName().c_str()))
 		{
 			if (Instance)
@@ -46,10 +56,6 @@ namespace Infinit {
 				if (Instance->UsedMaterial)
 				{
 					ImGui::Text(Instance->UsedMaterial->GetName().c_str());
-
-					ImGui::Begin("Material##MaterialWindow");
-					Instance->UsedMaterial->DrawImGui();
-					ImGui::End();
 				}
 				else
 				{

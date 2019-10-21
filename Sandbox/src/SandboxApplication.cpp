@@ -61,7 +61,7 @@ public:
 	{
 		ImGui::Begin("Viewport##RenderView");
 		auto viewportSize = ImGui::GetContentRegionAvail();
-		ImGui::Image((void*) m_FrameBuffer->GetColorAttachment(), viewportSize);
+		ImGui::Image((void*)m_FrameBuffer->GetColorAttachment(), viewportSize, { 0, 1 }, { 1, 0 });
 		ImGui::End();
 		return false;
 	}

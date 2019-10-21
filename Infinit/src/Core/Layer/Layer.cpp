@@ -36,7 +36,7 @@ namespace Infinit {
 
 	void Layer::DrawImGui()
 	{
-		ImGui::CollapsingHeader(m_Name.c_str(), ImGuiTreeNodeFlags_DefaultOpen);
+		ImGui::CollapsingHeader(m_Name.c_str(), ImGuiTreeNodeFlags_DefaultOpen); 
 		//Right click
 		if (ImGui::BeginPopupContextItem())
 		{

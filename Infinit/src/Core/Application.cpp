@@ -84,7 +84,7 @@ namespace Infinit {
 	{
 		while (m_Running)
 		{
-			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+			RendererAPI::s_Instance->Clear();
 
 			IN_CORE_ASSERT(m_ActiveScene, "No ActiveScene Set!"); //Forgot to call Application::SetActiveScene();
 

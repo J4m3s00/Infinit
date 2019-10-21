@@ -23,6 +23,8 @@ namespace Infinit {
 	void Renderer::Begin(Camera* camera, const LightMap& lightMap)
 	{
 		IN_CORE_ASSERT(camera, "Set a Camera to Render properly");
+
+		Infinit::RendererAPI::s_Instance->SetClearColor({ 0.0f, 0.0f, 0.0f, 1.0f });
 		RendererAPI::s_Instance->Clear();
 		s_Instance->m_ViewProjectionMatrix = camera->GetProjectionMatrix() * camera->GetViewMatrix();
 		s_Instance->m_CameraPosition = camera->GetPosition();

@@ -142,7 +142,7 @@ namespace Infinit {
 		static VertexBuffer* Create(const void* data, uint size);
 	};
 
-	class INFINIT_API IndexBuffer
+	class IndexBuffer
 	{
 	public:
 		virtual ~IndexBuffer() {}

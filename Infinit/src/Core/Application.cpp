@@ -84,8 +84,6 @@ namespace Infinit {
 	{
 		while (m_Running)
 		{
-			RendererAPI::s_Instance->Clear();
-
 			IN_CORE_ASSERT(m_ActiveScene, "No ActiveScene Set!"); //Forgot to call Application::SetActiveScene();
 
 			//OnEvent(AppUpdateEvent(0.0f));

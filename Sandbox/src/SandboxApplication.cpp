@@ -40,7 +40,6 @@ public:
 	bool Render(Infinit::AppRenderEvent& e)
 	{
 		m_FrameBuffer->Bind();
-		Infinit::RendererAPI::s_Instance->SetClearColor({0.0f, 0.0f, 0.0f, 1.0f});
 		Infinit::RendererAPI::s_Instance->Clear();
 		
 		for (Infinit::GameObject* go : m_GameObjects)

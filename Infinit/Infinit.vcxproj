@@ -126,6 +126,7 @@
     <ClInclude Include="src\Events\ObjectEvents.h" />
     <ClInclude Include="src\Events\WindowEvent.h" />
     <ClInclude Include="src\graphics\FrameBuffer.h" />
+    <ClInclude Include="src\graphics\RenderCommandQueue.h" />
     <ClInclude Include="src\Infinit.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLBuffer.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLFrameBuffer.h" />

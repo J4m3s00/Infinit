@@ -126,6 +126,7 @@
     <ClInclude Include="src\Events\ObjectEvents.h" />
     <ClInclude Include="src\Events\WindowEvent.h" />
     <ClInclude Include="src\graphics\FrameBuffer.h" />
+    <ClInclude Include="src\graphics\RenderCommandQueue.h" />
     <ClInclude Include="src\Infinit.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLBuffer.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLFrameBuffer.h" />
@@ -163,6 +164,7 @@
     <ClCompile Include="src\Core\Material.cpp" />
     <ClCompile Include="src\Core\Transform.cpp" />
     <ClCompile Include="src\graphics\FrameBuffer.cpp" />
+    <ClCompile Include="src\graphics\RenderCommandQueue.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLBuffer.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLFrameBuffer.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLRendererAPI.cpp" />

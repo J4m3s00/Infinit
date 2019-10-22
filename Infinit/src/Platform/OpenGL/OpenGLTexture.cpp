@@ -1,6 +1,7 @@
 #include "inpch.h"
 #include "OpenGLTexture.h"
 
+#include "graphics/Renderer.h"
 #include "Core/Log.h"
 #include <glad/glad.h>
 #define STB_IMAGE_IMPLEMENTATION
@@ -37,18 +38,20 @@ namespace Infinit {
 	OpenGLTexture2D::OpenGLTexture2D(TextureFormat format, uint width, uint height)
 		: Texture2D(""), m_Format(format), m_Width(width), m_Height(height)
 	{
-		glGenTextures(1, &m_RendererID);
-		glBindTexture(GL_TEXTURE_2D, m_RendererID);
+		IN_RENDER_S({
+			glGenTextures(1, &self->m_RendererID);
+			glBindTexture(GL_TEXTURE_2D, self->m_RendererID);
 
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-		glTexImage2D(GL_TEXTURE_2D, 0, InfinitToOpenGLTextureFormat(m_Format), m_Width, m_Height, 0, InfinitToOpenGLTextureFormat(m_Format), GL_UNSIGNED_BYTE, NULL);
-		glGenerateMipmap(GL_TEXTURE_2D);
+			glTexImage2D(GL_TEXTURE_2D, 0, InfinitToOpenGLTextureFormat(self->m_Format), self->m_Width, self->m_Height, 0, InfinitToOpenGLTextureFormat(self->m_Format), GL_UNSIGNED_BYTE, NULL);
+			glGenerateMipmap(GL_TEXTURE_2D);
 
-		glBindTexture(GL_TEXTURE_2D, 0);
+			glBindTexture(GL_TEXTURE_2D, 0);
+		})
 	}
 
 	bool OpenGLTexture2D::Reload(const string& filePath)
@@ -64,31 +67,40 @@ namespace Infinit {
 		m_Height = height;
 		m_Format = TextureFormat::RGBA;
 
-		glGenTextures(1, &m_RendererID);
-		glBindTexture(GL_TEXTURE_2D, m_RendererID);
+		IN_RENDER_S({
 
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+				glGenTextures(1, &self->m_RendererID);
+				glBindTexture(GL_TEXTURE_2D, self->m_RendererID);
 
-		glTexImage2D(GL_TEXTURE_2D, 0, InfinitToOpenGLTextureFormat(m_Format), m_Width, m_Height, 0, InfinitToOpenGLTextureFormat(m_Format), GL_UNSIGNED_BYTE, m_ImageData);
-		glGenerateMipmap(GL_TEXTURE_2D);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-		glBindTexture(GL_TEXTURE_2D, 0);
+				glTexImage2D(GL_TEXTURE_2D, 0, InfinitToOpenGLTextureFormat(self->m_Format), self->m_Width, self->m_Height, 0, InfinitToOpenGLTextureFormat(self->m_Format), GL_UNSIGNED_BYTE, self->m_ImageData);
+				glGenerateMipmap(GL_TEXTURE_2D);
 
+				glBindTexture(GL_TEXTURE_2D, 0);
+
+				stbi_image_free(self->m_ImageData);
+			})
 		return true;
 	}
 
 	OpenGLTexture2D::~OpenGLTexture2D()
 	{
 		IN_CORE_INFO("OpenGL Texture detroyed!");
-		glDeleteTextures(1, &m_RendererID);
+		IN_RENDER_S({
+				glDeleteTextures(1, &self->m_RendererID);
+			})
 	}
 
 	void OpenGLTexture2D::Bind(uint slot) const
 	{
-		glBindTextureUnit(slot, m_RendererID);
+		IN_RENDER_S1(slot, {
+				glBindTextureUnit(slot, self->m_RendererID);
+			})
+
 	}
 
 //REMOVE srgb??
@@ -115,7 +127,7 @@ namespace Infinit {
 
 		std::array<unsigned char*, 6> faces;
 		for (size_t i = 0; i < faces.size(); i++)
-			faces[i] = new unsigned char[faceWidth * faceHeight * 3]; // 3 BPP
+			faces[i] = new unsigned char[faceWidth * faceHeight * 3u]; // 3 BPP
 
 		int faceIndex = 0;
 
@@ -155,47 +167,53 @@ namespace Infinit {
 			faceIndex++;
 		}
 
-		
-		glGenTextures(1, &m_RendererID);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, m_RendererID);
+		IN_RENDER_S3(faces, faceWidth, faceHeight, {
 
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+			glGenTextures(1, &self->m_RendererID);
+			glBindTexture(GL_TEXTURE_CUBE_MAP, self->m_RendererID);
 
-		auto format = InfinitToOpenGLTextureFormat(m_Format);
-		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, format, faceWidth, faceHeight, 0, format, GL_UNSIGNED_BYTE, faces[2]);
-		glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, format, faceWidth, faceHeight, 0, format, GL_UNSIGNED_BYTE, faces[0]);
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, format, faceWidth, faceHeight, 0, format, GL_UNSIGNED_BYTE, faces[4]);
-		glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, format, faceWidth, faceHeight, 0, format, GL_UNSIGNED_BYTE, faces[5]);
+			auto format = InfinitToOpenGLTextureFormat(self->m_Format);
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, format, faceWidth, faceHeight, 0, format, GL_UNSIGNED_BYTE, faces[2]);
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, format, faceWidth, faceHeight, 0, format, GL_UNSIGNED_BYTE, faces[0]);
 
-		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, format, faceWidth, faceHeight, 0, format, GL_UNSIGNED_BYTE, faces[1]);
-		glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, format, faceWidth, faceHeight, 0, format, GL_UNSIGNED_BYTE, faces[3]);
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, format, faceWidth, faceHeight, 0, format, GL_UNSIGNED_BYTE, faces[4]);
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, format, faceWidth, faceHeight, 0, format, GL_UNSIGNED_BYTE, faces[5]);
 
-		glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, format, faceWidth, faceHeight, 0, format, GL_UNSIGNED_BYTE, faces[1]);
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, format, faceWidth, faceHeight, 0, format, GL_UNSIGNED_BYTE, faces[3]);
 
-		glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
+			glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 
+			glBindTexture(GL_TEXTURE_CUBE_MAP, 0);
 
-		for (size_t i = 0; i < faces.size(); i++)
-			delete[] faces[i];
+			for (size_t i = 0; i < faces.size(); i++)
+				delete[] faces[i];
 
-		stbi_image_free(m_ImageData);
+			stbi_image_free(self->m_ImageData);
+		})
+
 		return true;
 	}
 
 	OpenGLTextureCube::~OpenGLTextureCube()
 	{
 		IN_CORE_INFO("OpenGLTextureCube detroyed!");
-		glDeleteTextures(1, &m_RendererID);
+		IN_RENDER_S({
+				glDeleteTextures(1, &self->m_RendererID);
+			})
 	}
 
 	void OpenGLTextureCube::Bind(uint slot) const
 	{
-		glActiveTexture(GL_TEXTURE0 + slot);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, m_RendererID);
+		IN_RENDER_S1(slot, {
+				glActiveTexture(GL_TEXTURE0 + slot);
+				glBindTexture(GL_TEXTURE_CUBE_MAP, self->m_RendererID);
+			})
 	}
 
 }

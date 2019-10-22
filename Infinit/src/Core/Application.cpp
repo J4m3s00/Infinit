@@ -97,7 +97,7 @@ namespace Infinit {
 
 			//OnEvent(AppRenderEvent());
 			m_ActiveScene->Render();
-			
+			Renderer::Get()->WaitAndRender();
 
 			ImGuiBegin();
 			//OnEvent(AppImGuiRenderEvent());

@@ -319,8 +319,8 @@ void main()
 }
 		)";
 		
-		Shader::DefaultShader = Shader::Create(vertexSource, fragmentSource);
-		Material::DefaultMaterial = std::shared_ptr<Material>(new Material(Shader::DefaultShader));
+		//Shader::DefaultShader = Shader::Create(vertexSource, fragmentSource);
+		//Material::DefaultMaterial = std::shared_ptr<Material>(new Material(Shader::DefaultShader));
 	}
 
 	OpenGLRendererAPI::OpenGLRendererAPI()

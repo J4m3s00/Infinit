@@ -37,6 +37,8 @@
 
 namespace Infinit {
 
+	static void SaveResourceInCache(std::unordered_map< string, std::shared_ptr<Resource>>& resourceCache, string relativPath, string absoultePath);
+
 	struct Vertex
 	{
 		glm::vec3 position;
@@ -135,7 +137,7 @@ namespace Infinit {
 			{
 				string filePath = entry.path().u8string();
 				std::replace(filePath.begin(), filePath.end(), '\\', '/');
-				SaveResourceInCache(filePath, std::filesystem::absolute(std::filesystem::path(filePath)).u8string());
+				m_Futures.push_back(std::async(std::launch::async, SaveResourceInCache, m_ResourceCache, filePath, std::filesystem::absolute(std::filesystem::path(filePath)).u8string()));
 			}
 			else
 			{
@@ -144,37 +146,59 @@ namespace Infinit {
 		}
 	}
 
-	void Application::SaveResourceInCache(const string& relativPath, const string& absoultePath)
+	static std::mutex s_ResourceMutex;
+
+	static void SaveResourceInCache(std::unordered_map< string, std::shared_ptr<Resource>>& resourceCache, string relativPath, string absoultePath)
 	{
 		IN_CORE_TRACE("Save resource {0}", relativPath);
-		std::unordered_map<string, std::shared_ptr<Resource>>::iterator it = m_ResourceCache.find(relativPath);
-		if (it != m_ResourceCache.end())
+		std::unordered_map<string, std::shared_ptr<Resource>>::iterator it = resourceCache.find(relativPath);
+		if (it != resourceCache.end())
 			return;
 		string fileEnding = relativPath.substr(relativPath.find_last_of(".") + 1, relativPath.size());
 		//Textures
 		if (fileEnding == "png" || fileEnding == "tga")
 		{
-			m_ResourceCache[relativPath] = Texture2D::Create(absoultePath);
+			{
+				std::shared_ptr<Texture2D> texture = Texture2D::Create(absoultePath);
+				std::lock_guard<std::mutex> lock(s_ResourceMutex);
+				resourceCache[relativPath] = texture;
+			}
 		}
 		//Cubemaps
 		else if (fileEnding == "cubemap")
 		{
-			m_ResourceCache[relativPath] = TextureCube::Create(absoultePath);
+			{
+				std::shared_ptr<TextureCube> texCube = TextureCube::Create(absoultePath);
+				std::lock_guard<std::mutex> lock(s_ResourceMutex);
+				resourceCache[relativPath] = texCube;
+			}
 		}
 		//Materials
 		else if (fileEnding == "inm")
 		{
-			m_ResourceCache[relativPath] = std::shared_ptr<Material>(new Material(absoultePath));
+			{
+				std::shared_ptr<Material> material = std::shared_ptr<Material>(new Material(absoultePath));
+				std::lock_guard<std::mutex> lock(s_ResourceMutex);
+				resourceCache[relativPath] = material;
+			}
 		}
 		//Meshes
 		else if (fileEnding == "fbx")
 		{
-			m_ResourceCache[relativPath] = std::shared_ptr<Mesh>(new Mesh(absoultePath));
+			{
+				std::shared_ptr<Mesh> mesh = std::shared_ptr<Mesh>(new Mesh(absoultePath));
+				std::lock_guard<std::mutex> lock(s_ResourceMutex);
+				resourceCache[relativPath] = mesh;
+			}
 		}
-		//Shaders
+		//Shadersm_Futures
 		else if (fileEnding == "shader")
 		{
-			m_ResourceCache[relativPath] = Shader::Create(absoultePath);
+			{
+				std::shared_ptr<Shader> mesh = Shader::Create(absoultePath);
+				std::lock_guard<std::mutex> lock(s_ResourceMutex);
+				resourceCache[relativPath] = mesh;
+			}
 		}
 	}
 
@@ -198,7 +222,7 @@ namespace Infinit {
 			return it->second;
 		}
 		IN_CORE_WARN("Could not find Resource: \"{0}\". Trying to load from Memory!", relativPath);
-		SaveResourceInCache(relativPath, absolutePath);
+		m_Futures.push_back(std::async(std::launch::async, SaveResourceInCache, m_ResourceCache, relativPath, absolutePath));
 		return m_ResourceCache[relativPath];
 	}
 

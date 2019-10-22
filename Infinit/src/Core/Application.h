@@ -37,7 +37,7 @@ namespace Infinit {
 	public:
 		bool Init();
 		void LoadAllResources(const string& folder);
-		void SaveResourceInCache(const string& relativPath, const string& absolutePath);
+		//void SaveResourceInCache(const string& relativPath, const string& absolutePath);
 		bool OnWindowClose(WindowCloseEvent& e);
 
 		void ImGuiInit();
@@ -54,6 +54,7 @@ namespace Infinit {
 		string m_ResourcePath;
 	private:
 		static Application* s_Instance;
+		std::vector<std::future<void>> m_Futures;
 	public:
 		static int LaunchArgumentCount;
 		static char** LaunchArguments;

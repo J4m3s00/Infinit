@@ -2,6 +2,7 @@
 #include "OpenGLVertexArray.h"
 
 #include <glad/glad.h>
+#include "graphics/Renderer.h"
 
 namespace Infinit {
 
@@ -30,54 +31,67 @@ namespace Infinit {
 
 	OpenGLVertexArray::OpenGLVertexArray()
 	{
-		glGenVertexArrays(1, &m_RendererID);
-		glBindVertexArray(m_RendererID);
+		IN_RENDER_S({
+			glGenVertexArrays(1, &self->m_RendererID);
+			glBindVertexArray(self->m_RendererID); 
+			})
 	}
 
 	OpenGLVertexArray::~OpenGLVertexArray()
 	{
 		IN_CORE_INFO("OpenGLVertexArray {0} Destroyed!", m_RendererID);
-		glDeleteVertexArrays(1, &m_RendererID);
+		IN_RENDER_S({
+			glDeleteVertexArrays(1, &self->m_RendererID);
+			})
 	}
 
 	void OpenGLVertexArray::Bind() const
 	{
-		glBindVertexArray(m_RendererID);
+		IN_RENDER_S({
+		glBindVertexArray(self->m_RendererID);
+			});
 	}
 
 	void OpenGLVertexArray::Unbind() const
 	{
+		IN_RENDER({
 		glBindVertexArray(0);
+			});
 	}
 
 	void OpenGLVertexArray::AddVertexBuffer(const std::shared_ptr<VertexBuffer>& vertexBuffer)
 	{
 		IN_CORE_ASSERT(vertexBuffer->GetLayout().GetElements().size(), "No Vertex Layout set for the buffer");
-		glBindVertexArray(m_RendererID);
+		m_VertexBuffers.push_back(vertexBuffer);
+		Bind();
 		vertexBuffer->Bind();
 
-		uint index = 0;
-		const auto& layout = vertexBuffer->GetLayout();
+		IN_RENDER_S1(vertexBuffer, {
+
+		const auto & layout = vertexBuffer->GetLayout();
 		for (const auto& element : layout)
 		{
-			glEnableVertexAttribArray(index);
-			glVertexAttribPointer(index, 
-						element.GetComponentCount(), 
-						ShaderDataTypeToOpenGLType(element.Type), 
-						element.Normalized ? GL_TRUE : GL_FALSE, 
+			glEnableVertexAttribArray(self->m_VertexBufferIndex);
+			glVertexAttribPointer(self->m_VertexBufferIndex,
+						element.GetComponentCount(),
+						ShaderDataTypeToOpenGLType(element.Type),
+						element.Normalized ? GL_TRUE : GL_FALSE,
 						layout.GetStride(), (const void*)element.Offset);
-			index++;
+			self->m_VertexBufferIndex++;
 		}
+			});
 
-		m_VertexBuffers.push_back(vertexBuffer);
 	}
 
 	void OpenGLVertexArray::SetIndexBuffer(const std::shared_ptr<IndexBuffer>& indexBuffer)
 	{
-		glBindVertexArray(m_RendererID);
-		indexBuffer->Bind();
-
 		m_IndexBuffer = indexBuffer;
+
+		IN_RENDER_S({
+			glBindVertexArray(self->m_RendererID);
+			self->m_IndexBuffer->Bind();
+			});
+
 	}
 
 }

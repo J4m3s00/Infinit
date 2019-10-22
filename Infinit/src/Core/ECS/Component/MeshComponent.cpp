@@ -15,7 +15,9 @@ namespace Infinit {
 		if (e.GetEventType() == EventType::AppRender)
 		{
 			if (Instance)
-				Renderer::Draw(Instance, m_GameObject->GetWorldTransform().GetTransformMatrix());
+			{
+				Infinit::Renderer::Draw(Instance, m_GameObject->GetWorldTransform().GetTransformMatrix());
+			}
 		}
 	}
 

@@ -164,6 +164,7 @@
     <ClCompile Include="src\Core\Material.cpp" />
     <ClCompile Include="src\Core\Transform.cpp" />
     <ClCompile Include="src\graphics\FrameBuffer.cpp" />
+    <ClCompile Include="src\graphics\RenderCommandQueue.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLBuffer.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLFrameBuffer.cpp" />
     <ClCompile Include="src\Platform\OpenGL\OpenGLRendererAPI.cpp" />

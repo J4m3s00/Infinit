@@ -3,14 +3,13 @@
 #include "Core/Core.h"
 
 namespace Infinit {
+	typedef void(*RenderCommandFn)(void*);
 
 	class RenderCommandQueue
 	{
 	public:
 		RenderCommandQueue();
 		~RenderCommandQueue();
-
-		typedef void(*RenderCommandFn)(void*);
 
 		void* Allocate(RenderCommandFn func, uint size);
 

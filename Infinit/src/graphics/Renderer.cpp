@@ -12,14 +12,6 @@ namespace Infinit {
 		s_Instance = new Renderer();
 	}
 
-	template<typename T>
-	bool isEqual(std::vector<T> const &v1, std::vector<T> const &v2)
-	{
-		return (v1.size() == v2.size() &&
-			std::equal(v1.begin(), v1.end(), v2.begin()));
-	}
-
-
 	void Renderer::Begin(Camera* camera, const LightMap& lightMap)
 	{
 		IN_CORE_ASSERT(camera, "Set a Camera to Render properly");
@@ -35,6 +27,11 @@ namespace Infinit {
 
 	void Renderer::End()
 	{
+	}
+
+	void* Renderer::Submit(RenderCommandFn fn, uint size)
+	{
+		return s_Instance->m_CommandQueue.Allocate(fn, size);
 	}
 
 	void Renderer::Draw(MeshInstance* mesh, const glm::mat4& modelMatrix)
@@ -78,6 +75,11 @@ namespace Infinit {
 
 		mesh->GetVertexArray()->Bind();
 		RendererAPI::s_Instance->DrawIndexed(mesh->GetVertexCount());
+	}
+
+	void Renderer::WaitAndRender()
+	{
+		m_CommandQueue.Execute();
 	}
 
 }

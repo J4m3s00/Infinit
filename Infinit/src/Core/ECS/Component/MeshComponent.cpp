@@ -14,30 +14,35 @@ namespace Infinit {
 	{
 		if (e.GetEventType() == EventType::AppRender)
 		{
-			if (Instance)
+			if (MMesh && !m_Instance)
 			{
-				Infinit::Renderer::Draw(Instance, m_GameObject->GetWorldTransform().GetTransformMatrix());
+				m_Instance = new MeshInstance(MMesh);
+				//m_Instance->UsedMaterial = Material::DefaultMaterial;
+			}
+			if (m_Instance)
+			{
+				Infinit::Renderer::Draw(m_Instance, m_GameObject->GetWorldTransform().GetTransformMatrix());
 			}
 		}
 	}
 
 	void MeshComponent::DrawImGui()
 	{
-		if (Instance)
+		if (m_Instance)
 		{
-			if (Instance->UsedMaterial)
+			if (m_Instance->UsedMaterial)
 			{
 				ImGui::Begin("Material##MaterialWindow");
-				Instance->UsedMaterial->DrawImGui();
+				m_Instance->UsedMaterial->DrawImGui();
 				ImGui::End();
 			}
 		}
 
 		if (ImGui::CollapsingHeader(GetTypeName().c_str()))
 		{
-			if (Instance)
+			if (m_Instance)
 			{
-				Instance->DrawImGui();
+				m_Instance->DrawImGui();
 				ImGui::SameLine();
 			}
 			ImGui::Text("Mesh:");
@@ -46,17 +51,13 @@ namespace Infinit {
 			{
 				std::string filename = Application::Get().OpenFile(IN_FILE_FILTER_Mesh);
 				
-				std::shared_ptr<Mesh> mesh = std::dynamic_pointer_cast<Mesh>(Application::Get().GetResource(filename));
-				if (!mesh) return;
-				Instance = new MeshInstance(mesh);
-
-				IN_CORE_TRACE("FileName: {0}, {1}", filename, mesh->GetFilePath());
+				Application::Get().GetResource(filename, [this](std::shared_ptr<Resource> mesh) {this->MMesh = std::dynamic_pointer_cast<Mesh>(mesh); });
 			}
-			if (Instance)
+			if (m_Instance)
 			{
-				if (Instance->UsedMaterial)
+				if (m_Instance->UsedMaterial)
 				{
-					ImGui::Text(Instance->UsedMaterial->GetName().c_str());
+					ImGui::Text(m_Instance->UsedMaterial->GetName().c_str());
 				}
 				else
 				{
@@ -66,7 +67,7 @@ namespace Infinit {
 					{
 						string filePath = Application::Get().OpenFile(IN_FILE_FILTER_Material);
 
-						Instance->UsedMaterial = std::dynamic_pointer_cast<Material>(Application::Get().GetResource(filePath));
+						Application::Get().GetResource(filePath, [this](std::shared_ptr < Resource> material) {this->m_Instance->UsedMaterial = std::dynamic_pointer_cast<Material>(material); });
 					}
 				}
 			}

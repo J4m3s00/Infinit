@@ -68,11 +68,14 @@ namespace Infinit {
 
 		void AddTexture(const string& shaderName, std::shared_ptr<Texture2D> texture);
 		void AddTexture(const string& shaderName, std::shared_ptr<TextureCube> texture);
+
+		void ResolveMaterialParameters() const;
+
 		template <typename T>
 		void AddParameter(MaterialParameter<T>* param)
 		{
-			param->BindToShader(ShaderProgram);
 			m_Params.push_back(param);
+			m_Dirty = true;
 		}
 
 		template <typename T>
@@ -88,8 +91,10 @@ namespace Infinit {
 	public:
 		std::shared_ptr<Shader> ShaderProgram;
 	private:
+		std::mutex m_ParamPushMutex;
 		std::unordered_map<string, std::shared_ptr<Texture>> m_Textures;
 		std::vector<Parameter*> m_Params;
+		mutable bool m_Dirty;
 	public:
 		static std::shared_ptr<Material> DefaultMaterial;
 	};

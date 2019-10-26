@@ -50,7 +50,7 @@ namespace Infinit {
 	}
 
 	Material::Material(const string& filePath)
-		: Resource(filePath)
+		: Resource(filePath), m_Dirty(true), m_ParamPushMutex()
 	{
 		Reload(filePath);
 		//while (isvalid)
@@ -60,7 +60,7 @@ namespace Infinit {
 	}
 
 	Material::Material(const std::shared_ptr<Shader>& shader)
-		: Resource(""), ShaderProgram(shader)
+		: Resource(""), ShaderProgram(shader), m_Dirty(true), m_ParamPushMutex()
 	{
 
 	}
@@ -101,7 +101,7 @@ namespace Infinit {
 
 		lua_pushstring(L, "shader");
 		lua_gettable(L, -2);
-		ShaderProgram = std::dynamic_pointer_cast<Shader>(app.GetResource(lua_tostring(L, -1)));
+		app.GetResource(lua_tostring(L, -1), [this](std::shared_ptr<Resource> shader) {this->ShaderProgram = std::dynamic_pointer_cast<Shader>(shader); this->ResolveMaterialParameters(); });
 		lua_pop(L, 1);
 
 		lua_pushstring(L, "textures");
@@ -111,12 +111,12 @@ namespace Infinit {
 		{
 			lua_pushstring(L, "name");
 			lua_gettable(L, -2);
-			const char* name = lua_tostring(L, -1);
+			string name = lua_tostring(L, -1);
 			lua_pop(L, 1);
 			lua_pushstring(L, "path");
 			lua_gettable(L, -2);
 			const char* path = lua_tostring(L, -1);
-			AddTexture(name, std::dynamic_pointer_cast<Texture2D>(app.GetResource(path)));
+			app.GetResource(path, [this, &name](std::shared_ptr<Resource> texture) {this->AddTexture(name, std::dynamic_pointer_cast<Texture2D>(texture)); });
 			lua_pop(L, 2);
 		}
 		
@@ -129,7 +129,7 @@ namespace Infinit {
 		{
 			lua_pushstring(L, "name");
 			lua_gettable(L, -2);
-			const char* name = lua_tostring(L, -1);
+			string name = lua_tostring(L, -1);
 			lua_pop(L, 1);
 			lua_pushstring(L, "type");
 			lua_gettable(L, -2);
@@ -162,12 +162,12 @@ namespace Infinit {
 		{
 			lua_pushstring(L, "name");
 			lua_gettable(L, -2);
-			const char* name = lua_tostring(L, -1);
+			string name = lua_tostring(L, -1);
 			lua_pop(L, 1);
 			lua_pushstring(L, "path");
 			lua_gettable(L, -2);
 			const char* path = lua_tostring(L, -1);
-			AddTexture(name, std::dynamic_pointer_cast<TextureCube>(app.GetResource(path)));
+			app.GetResource(path, [this, &name](std::shared_ptr<Resource> texture) {this->AddTexture(name, std::dynamic_pointer_cast<TextureCube>(texture)); });
 			lua_pop(L, 2);
 		}
 
@@ -176,10 +176,24 @@ namespace Infinit {
 		return true;
 	}
 
+	void Material::ResolveMaterialParameters() const
+	{
+		if (!ShaderProgram) return;
+		for (Parameter* param : m_Params)
+		{
+			param->BindToShader(ShaderProgram);
+		}
+		m_Dirty = false;
+	}
+
 	void Material::Bind() const
 	{
 		IN_CORE_ASSERT(ShaderProgram, "Pls provide a valid shader for the Material");
 		ShaderProgram->Bind();
+		if (m_Dirty)
+		{
+			ResolveMaterialParameters();
+		}
 		//for (auto tex : m_Textures)
 		//{
 		//	uint slot = ShaderProgram->GetResourceSlot(tex.first);
@@ -199,6 +213,7 @@ namespace Infinit {
 	void Material::AddTexture(const string& shaderName, std::shared_ptr<Texture2D> texture)
 	{
 		MaterialParameter<int>* param = new MaterialParameter<int>(shaderName);
+		std::lock_guard<std::mutex> lock(m_ParamPushMutex);
 		AddParameter(param);
 		*param->Value = ShaderProgram->GetResourceSlot(shaderName);
 		m_Textures[shaderName] = texture;
@@ -207,6 +222,7 @@ namespace Infinit {
 	void Material::AddTexture(const string& shaderName, std::shared_ptr<TextureCube> texture)
 	{
 		MaterialParameter<int>* param = new MaterialParameter<int>(shaderName);
+		std::lock_guard<std::mutex> lock(m_ParamPushMutex);
 		AddParameter(param);
 		*param->Value = ShaderProgram->GetResourceSlot(shaderName);
 		m_Textures[shaderName] = texture;
@@ -261,7 +277,7 @@ namespace Infinit {
 				if (ImGui::Button("Load"))
 				{
 					string filePath = Application::Get().OpenFile(IN_FILE_FILTER_Shader);
-					ShaderProgram = std::dynamic_pointer_cast<Shader>(Application::Get().GetResource(filePath));
+					Application::Get().GetResource(filePath, [this](std::shared_ptr<Resource> shader) { this->ShaderProgram = std::dynamic_pointer_cast<Shader>(shader); this->ResolveMaterialParameters(); });
 				}
 				ImGui::TreePop();
 			}

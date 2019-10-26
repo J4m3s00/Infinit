@@ -30,7 +30,7 @@ namespace Infinit {
 		void Run();
 
 		string OpenFile(const LPCSTR& filter) const;
-		std::shared_ptr<Resource> GetResource(const string& filePath);
+		void GetResource(const string& filePath, std::function<void(std::shared_ptr<Resource>)> callback);
 
 		inline Window& GetWindow() { return *m_Window; }
 		inline static Application& Get() { return *s_Instance; }

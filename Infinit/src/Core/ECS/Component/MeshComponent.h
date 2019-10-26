@@ -9,12 +9,14 @@ namespace Infinit {
 	{
 		IN_COMPONENT(MeshComponent, Component)
 	public:
-		MeshComponent() : Instance(nullptr){}
+		MeshComponent() : MMesh(nullptr), m_Instance(nullptr){}
 
 		virtual void OnEvent(Event& e);
 		virtual void DrawImGui();
 	public:
-		MeshInstance* Instance;
+		std::shared_ptr<Mesh> MMesh;
+		MeshInstance* m_Instance;
+	private:
 	};
 
 }

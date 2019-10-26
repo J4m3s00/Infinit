@@ -37,7 +37,7 @@
 
 namespace Infinit {
 
-	static void SaveResourceInCache(std::unordered_map< string, std::shared_ptr<Resource>>& resourceCache, string relativPath, string absoultePath);
+	static void SaveResourceInCache(std::unordered_map< string, std::shared_ptr<Resource>>* resourceCache, string relativPath, string absoultePath, std::function<void(std::shared_ptr<Resource>)> callback);
 
 	struct Vertex
 	{
@@ -129,6 +129,7 @@ namespace Infinit {
 		return true;
 	}
 
+	//Not working right now!
 	void Application::LoadAllResources(const string& folder)
 	{
 		for (const auto& entry : std::filesystem::directory_iterator(folder))
@@ -137,7 +138,7 @@ namespace Infinit {
 			{
 				string filePath = entry.path().u8string();
 				std::replace(filePath.begin(), filePath.end(), '\\', '/');
-				m_Futures.push_back(std::async(std::launch::async, SaveResourceInCache, m_ResourceCache, filePath, std::filesystem::absolute(std::filesystem::path(filePath)).u8string()));
+				//m_Futures.push_back(std::async(std::launch::async, SaveResourceInCache, &m_ResourceCache, filePath, std::filesystem::absolute(std::filesystem::path(filePath)).u8string()));
 			}
 			else
 			{
@@ -148,61 +149,72 @@ namespace Infinit {
 
 	static std::mutex s_ResourceMutex;
 
-	static void SaveResourceInCache(std::unordered_map< string, std::shared_ptr<Resource>>& resourceCache, string relativPath, string absoultePath)
+	static void SaveResourceInCache(std::unordered_map< string, std::shared_ptr<Resource>>* resourceCache, string relativPath, string absoultePath, std::function<void(std::shared_ptr<Resource>)> callback)
 	{
 		IN_CORE_TRACE("Save resource {0}", relativPath);
-		std::unordered_map<string, std::shared_ptr<Resource>>::iterator it = resourceCache.find(relativPath);
-		if (it != resourceCache.end())
+		std::unordered_map<string, std::shared_ptr<Resource>>::iterator it = resourceCache->find(relativPath);
+		if (it != resourceCache->end())
 			return;
 		string fileEnding = relativPath.substr(relativPath.find_last_of(".") + 1, relativPath.size());
 		//Textures
+		std::shared_ptr<Resource> result;
 		if (fileEnding == "png" || fileEnding == "tga")
 		{
 			{
-				std::shared_ptr<Texture2D> texture = Texture2D::Create(absoultePath);
+				result = std::dynamic_pointer_cast<Resource>(Texture2D::Create(absoultePath));
 				std::lock_guard<std::mutex> lock(s_ResourceMutex);
-				resourceCache[relativPath] = texture;
+				resourceCache->insert({ relativPath, result });
+				callback(result);
+				//resourceCache[relativPath] = texture;
 			}
 		}
 		//Cubemaps
 		else if (fileEnding == "cubemap")
 		{
 			{
-				std::shared_ptr<TextureCube> texCube = TextureCube::Create(absoultePath);
+				result = std::dynamic_pointer_cast<Resource>(TextureCube::Create(absoultePath));
 				std::lock_guard<std::mutex> lock(s_ResourceMutex);
-				resourceCache[relativPath] = texCube;
+				resourceCache->insert({ relativPath, result });
+				callback(result);
+				//resourceCache[relativPath] = texCube;
 			}
 		}
 		//Materials
 		else if (fileEnding == "inm")
 		{
 			{
-				std::shared_ptr<Material> material = std::shared_ptr<Material>(new Material(absoultePath));
+				result = std::dynamic_pointer_cast<Resource>(std::shared_ptr <Material>(new Material(absoultePath)));
 				std::lock_guard<std::mutex> lock(s_ResourceMutex);
-				resourceCache[relativPath] = material;
+				resourceCache->insert({ relativPath, result });
+				callback(result);
+				//resourceCache[relativPath] = material;
 			}
 		}
 		//Meshes
 		else if (fileEnding == "fbx")
 		{
 			{
-				std::shared_ptr<Mesh> mesh = std::shared_ptr<Mesh>(new Mesh(absoultePath));
+				result = std::dynamic_pointer_cast<Resource>(std::shared_ptr<Mesh>(new Mesh(absoultePath)));
 				std::lock_guard<std::mutex> lock(s_ResourceMutex);
-				resourceCache[relativPath] = mesh;
+				resourceCache->insert({ relativPath, result });
+				callback(result);
+				//resourceCache[relativPath] = mesh;
 			}
 		}
 		//Shadersm_Futures
 		else if (fileEnding == "shader")
 		{
 			{
-				std::shared_ptr<Shader> mesh = Shader::Create(absoultePath);
+				result = std::dynamic_pointer_cast<Resource>(Shader::Create(absoultePath));
 				std::lock_guard<std::mutex> lock(s_ResourceMutex);
-				resourceCache[relativPath] = mesh;
+				resourceCache->insert({ relativPath, result});
+				callback(result);
+				//resourceCache[relativPath] = mesh;
 			}
 		}
 	}
 
-	std::shared_ptr<Resource> Application::GetResource(const string& filePath)
+	void Application::GetResource(const string& filePath, std::function<void(std::shared_ptr<Resource>)> callback)
 	{
 		string absolutePath = filePath;
 		string relativPath = filePath;
@@ -219,11 +231,11 @@ namespace Infinit {
 		std::unordered_map<string, std::shared_ptr<Resource>>::iterator it = m_ResourceCache.find(relativPath);
 		if (it != m_ResourceCache.end())
 		{
-			return it->second;
+			callback(it->second);
+			return;
 		}
 		IN_CORE_WARN("Could not find Resource: \"{0}\". Trying to load from Memory!", relativPath);
-		m_Futures.push_back(std::async(std::launch::async, SaveResourceInCache, m_ResourceCache, relativPath, absolutePath));
-		return m_ResourceCache[relativPath];
+		m_Futures.push_back(std::async(std::launch::async, SaveResourceInCache, &m_ResourceCache, relativPath, absolutePath, callback));
 	}
 
 	bool Application::OnWindowClose(WindowCloseEvent& e)

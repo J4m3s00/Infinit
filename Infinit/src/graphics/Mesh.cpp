@@ -136,7 +136,7 @@ namespace Infinit {
 
 	Mesh::~Mesh()
 	{
-
+		IN_CORE_INFO("Deleted Mesh");
 	}
 
 	MeshInstance::MeshInstance(std::shared_ptr<Mesh> instance)

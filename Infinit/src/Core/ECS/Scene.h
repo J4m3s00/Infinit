@@ -3,6 +3,7 @@
 #include "Core/Core.h"
 #include "Core/Light.h"
 #include "graphics/Camera.h"
+#include "graphics/FrameBuffer.h"
 #include "Core/Layer/LayerStack.h"
 
 namespace Infinit {
@@ -32,6 +33,7 @@ namespace Infinit {
 		Camera*  ActiveCamera;
 	private:
 		LayerStack m_LayerStack;
+		FrameBuffer* m_RenderBuffer;
 		//maybe offline cameras for effects
 		//std::vector<std::shared_ptr<Camera>> m_OfflineCameras;
 

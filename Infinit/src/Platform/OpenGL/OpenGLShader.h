@@ -11,6 +11,7 @@ namespace Infinit {
 	{
 	public:
 		OpenGLShader(const string& path);
+		OpenGLShader(const string& vertexSource, const string& fragmentSource);
 		virtual ~OpenGLShader();
 
 		virtual void Bind() const override;
@@ -26,7 +27,7 @@ namespace Infinit {
 		virtual void SetUniformMat4(const string& name, const glm::mat4& value) override;
 		void SetUniformMat3(const string& name, const glm::mat3& value);
 
-		virtual byte* GetUniformBuffer(const string& name) override;
+		virtual byte* GetUniformBuffer(const string& name) const override;
 
 		virtual int GetResourceSlot(const string& name) const override;
 

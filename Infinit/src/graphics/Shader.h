@@ -16,7 +16,7 @@ namespace Infinit {
 		virtual void Bind() const = 0;
 		virtual void Unbind() const = 0;
 
-		virtual byte* GetUniformBuffer(const string& name) = 0;
+		virtual byte* GetUniformBuffer(const string& name) const = 0;
 
 		virtual void UploadUniformBuffer() = 0;
 
@@ -32,6 +32,9 @@ namespace Infinit {
 		virtual bool Reload(const string& filePath) = 0;
 
 		static std::shared_ptr<Shader> Create(const string& filePath);
+		static std::shared_ptr<Shader> Create(const string& vertexSource, const string& fragmentSource);
+	public:
+		static std::shared_ptr<Shader> DefaultShader;
 	};
 
 }

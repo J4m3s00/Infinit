@@ -52,7 +52,7 @@ namespace Infinit {
 
 		void DrawImGui();
 	public:
-		std::shared_ptr<Material> Material;
+		std::shared_ptr<Material> UsedMaterial;
 	private:
 		std::shared_ptr<VertexArray> m_VertexArray;
 		uint m_VertexCount;

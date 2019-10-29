@@ -15,6 +15,8 @@ extern "C" {
 
 namespace Infinit {
 
+	std::shared_ptr<Material> Material::DefaultMaterial;
+
 	MaterialParameterType MaterialParameterTypeFromString(const string& typeString)
 	{
 		if (typeString == "float") return MaterialParameterType::Float;
@@ -48,7 +50,7 @@ namespace Infinit {
 	}
 
 	Material::Material(const string& filePath)
-		: Resource(filePath)
+		: Resource(filePath), m_Dirty(true), m_ParamPushMutex()
 	{
 		Reload(filePath);
 		//while (isvalid)
@@ -57,10 +59,15 @@ namespace Infinit {
 		//}
 	}
 
+	Material::Material(const std::shared_ptr<Shader>& shader)
+		: Resource(""), ShaderProgram(shader), m_Dirty(true), m_ParamPushMutex()
+	{
+
+	}
+
 	Material::~Material()
 	{
-		for (Parameter* p : m_Params)
-			delete p;
+		IN_CORE_INFO("Delete Material");
 	}
 
 	bool Material::Reload(const string& filePath)
@@ -79,8 +86,8 @@ namespace Infinit {
 
 		Application& app = Application::Get();
 		err = lua_getglobal(L, "material");
-		if (lua_istable(L, -1))
-			IN_CORE_INFO("Table");
+		if (!lua_istable(L, -1))
+			IN_CORE_WARN("Material has no Table");
 		
 		lua_pushstring(L, "name");
 		lua_gettable(L, -2);
@@ -92,7 +99,10 @@ namespace Infinit {
 
 		lua_pushstring(L, "shader");
 		lua_gettable(L, -2);
-		ShaderProgram = std::dynamic_pointer_cast<Shader>(app.GetResource(lua_tostring(L, -1)));
+		const string& shaderPath = lua_tostring(L, -1);
+		ShaderProgram = app.GetResource<Shader>(shaderPath);
+		if (!ShaderProgram)
+			app.AddResourceLoadFinishCallback(shaderPath, [this](std::shared_ptr<Resource> shader) { this->ShaderProgram = std::dynamic_pointer_cast<Shader>(shader); });
 		lua_pop(L, 1);
 
 		lua_pushstring(L, "textures");
@@ -102,16 +112,27 @@ namespace Infinit {
 		{
 			lua_pushstring(L, "name");
 			lua_gettable(L, -2);
-			const char* name = lua_tostring(L, -1);
+			string* name = new string(lua_tostring(L, -1));
 			lua_pop(L, 1);
 			lua_pushstring(L, "path");
 			lua_gettable(L, -2);
 			const char* path = lua_tostring(L, -1);
-			AddTexture(name, std::dynamic_pointer_cast<Texture2D>(app.GetResource(path)));
+			std::shared_ptr<Texture2D> texture = app.GetResource<Texture2D>(path);
+			if (!texture)
+				app.AddResourceLoadFinishCallback(path, [this, name](std::shared_ptr<Resource> tex) { 
+				AddTexture(*name, std::dynamic_pointer_cast<Texture2D>(tex)); 
+				delete name;
+					});
+			else
+			{
+				AddTexture(*name, texture);
+				delete name;
+			}
 			lua_pop(L, 2);
 		}
 		
 		lua_pop(L, 1);
+
 		lua_pushstring(L, "params");
 		lua_gettable(L, -2);
 		lua_pushnil(L);
@@ -119,7 +140,7 @@ namespace Infinit {
 		{
 			lua_pushstring(L, "name");
 			lua_gettable(L, -2);
-			const char* name = lua_tostring(L, -1);
+			string name = lua_tostring(L, -1);
 			lua_pop(L, 1);
 			lua_pushstring(L, "type");
 			lua_gettable(L, -2);
@@ -152,12 +173,24 @@ namespace Infinit {
 		{
 			lua_pushstring(L, "name");
 			lua_gettable(L, -2);
-			const char* name = lua_tostring(L, -1);
+			string* name = new string(lua_tostring(L, -1));
 			lua_pop(L, 1);
 			lua_pushstring(L, "path");
 			lua_gettable(L, -2);
 			const char* path = lua_tostring(L, -1);
-			AddTexture(name, std::dynamic_pointer_cast<TextureCube>(app.GetResource(path)));
+			std::shared_ptr<TextureCube> cubeMap = app.GetResource<TextureCube>(path);
+			if (!cubeMap)
+			{
+				app.AddResourceLoadFinishCallback(path, [this, name](std::shared_ptr<Resource> tex) { 
+					this->AddTexture(*name, std::dynamic_pointer_cast<TextureCube>(tex)); 
+					delete name;
+					});
+			}
+			else
+			{
+				AddTexture(*name, cubeMap);
+				delete name;
+			}
 			lua_pop(L, 2);
 		}
 
@@ -166,10 +199,29 @@ namespace Infinit {
 		return true;
 	}
 
-	void Material::Bind() const
+	void Material::ResolveMaterialParameters()
+	{
+		if (!ShaderProgram) return;
+		for (Parameter* param : m_Params)
+		{
+			param->BindToShader(ShaderProgram);
+		}
+		m_Dirty = false;
+	}
+
+	void Material::Bind()
 	{
 		IN_CORE_ASSERT(ShaderProgram, "Pls provide a valid shader for the Material");
 		ShaderProgram->Bind();
+		if (m_Dirty)
+		{
+			ResolveMaterialParameters();
+		}
+
+		for (Parameter* param : m_Params)
+		{
+			param->Bind();
+		}
 		//for (auto tex : m_Textures)
 		//{
 		//	uint slot = ShaderProgram->GetResourceSlot(tex.first);
@@ -178,38 +230,74 @@ namespace Infinit {
 		//	ShaderProgram->SetUniform1i(tex.first, slot);
 		//	tex.second->Bind(slot);
 		//}
-		for (const auto& tex : m_Textures)
-		{
-			uint slot = ShaderProgram->GetResourceSlot(tex.first);
-			tex.second->Bind(slot);
-		}
 		ShaderProgram->UploadUniformBuffer();
 	}
 
 	void Material::AddTexture(const string& shaderName, std::shared_ptr<Texture2D> texture)
 	{
-		MaterialParameter<int>* param = new MaterialParameter<int>(shaderName);
-		AddParameter(param);
-		*param->Value = ShaderProgram->GetResourceSlot(shaderName);
-		m_Textures[shaderName] = texture;
+		std::lock_guard<std::mutex> lock(m_ParamPushMutex);
+		AddParameter(new MaterialParameter<Texture2D>(shaderName, texture));
 	}
 
 	void Material::AddTexture(const string& shaderName, std::shared_ptr<TextureCube> texture)
 	{
-		MaterialParameter<int>* param = new MaterialParameter<int>(shaderName);
-		AddParameter(param);
-		*param->Value = ShaderProgram->GetResourceSlot(shaderName);
-		m_Textures[shaderName] = texture;
+		std::lock_guard<std::mutex> lock(m_ParamPushMutex);
+		AddParameter(new MaterialParameter<TextureCube>(shaderName, texture));
+	}
+
+	//////////////////IMGUI///////////////////////////////
+	void ShowAddParameterMenu()
+	{
+		
+		if (ImGui::BeginMenu("Add Parameter"))
+		{
+			ImGui::MenuItem("Color");
+			ImGui::EndMenu();
+		}
 	}
 
 	void Material::DrawImGui()
 	{
-		if (ImGui::TreeNode(("Shader " + ShaderProgram->GetFilePath()).c_str()))
+		if (ImGui::BeginPopupContextWindow())
 		{
-			std::string buttonName = "Reload##" + ShaderProgram->GetFilePath();
-			if (ImGui::Button(buttonName.c_str()))
-				ShaderProgram->Reload("");
-			ImGui::TreePop();
+			if (ImGui::MenuItem("Texture"))
+			{
+				ImGui::OpenPopup("Set Name");
+			}
+			ImGui::EndPopup();
+		}
+
+		bool namePopupOpen = true;
+		if (ImGui::BeginPopupModal("Set Name", &namePopupOpen))
+		{
+			char* name = new char[64];
+			ImGui::Button("Close");
+			ImGui::InputText("Unknown", name, 64);
+			ImGui::EndPopup();
+			delete[] name;
+		}
+
+		if (ShaderProgram)
+		{
+			if (ImGui::TreeNode(("Shader " + ShaderProgram->GetFilePath()).c_str()))
+			{
+				std::string buttonName = "Reload##" + ShaderProgram->GetFilePath();
+				if (ImGui::Button(buttonName.c_str()))
+					ShaderProgram->Reload("");
+				ImGui::TreePop();
+			}
+		}
+		else
+		{
+			if (ImGui::TreeNode("Shader"))
+			{
+				if (ImGui::Button("Load"))
+				{
+					string filePath = Application::Get().OpenFile(IN_FILE_FILTER_Shader);
+					ShaderProgram = Application::Get().GetResource<Shader>(filePath);
+				}
+				ImGui::TreePop();
+			}
 		}
 
 		for (auto& param : m_Params)
@@ -217,45 +305,6 @@ namespace Infinit {
 			param->DrawImGui();
 		}
 
-		//for (auto& a : m_Textures)
-		//{
-		//	if (ImGui::CollapsingHeader(a.first.c_str(), nullptr, ImGuiTreeNodeFlags_DefaultOpen))
-		//	{
-		//		ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 10));
-		//		if (a.second)
-		//		ImGui::Image((void*)a.second->GetRendererID(), ImVec2(64, 64));
-		//		ImGui::PopStyleVar();
-		//		if (ImGui::IsItemHovered())
-		//		{
-		//			if (a.second)
-		//			{
-		//				ImGui::BeginTooltip();
-		//				ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
-		//				ImGui::TextUnformatted(a.second->GetPath().c_str());
-		//				ImGui::PopTextWrapPos();
-		//				ImGui::Image((void*)a.second->GetRendererID(), ImVec2(384, 384));
-		//				ImGui::EndTooltip();
-		//			}
-		//			if (ImGui::IsItemClicked())
-		//			{
-		//				std::string filename = Application::Get().OpenFile("");
-		//				if (filename != "")
-		//					a.second = Texture2D::Create(filename);
-		//			}
-		//		}
-		//		//ImGui::SameLine();
-		//		//ImGui::BeginGroup();
-		//		//ImGui::Checkbox("Use##AlbedoMap", &m_AlbedoInput.UseTexture);
-		//		//if (ImGui::Checkbox("sRGB##AlbedoMap", &m_AlbedoInput.SRGB))
-		//		//{
-		//		//	if (m_AlbedoInput.TextureMap)
-		//		//		m_AlbedoInput.TextureMap.reset(Hazel::Texture2D::Create(m_AlbedoInput.TextureMap->GetPath(), m_AlbedoInput.SRGB));
-		//		//}
-		//		//ImGui::EndGroup();
-		//		//ImGui::SameLine();
-		//		//ImGui::ColorEdit3("Color##Albedo", glm::value_ptr(m_AlbedoInput.Color), ImGuiColorEditFlags_NoInputs);
-		//	}
-		//}
 	}
 
 }

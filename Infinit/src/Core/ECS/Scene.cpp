@@ -2,6 +2,7 @@
 #include "Scene.h"
 #include "Core/Layer/Layer.h"
 #include "graphics/Renderer.h"
+#include "Core/Application.h"
 #include <imgui.h>
 
 namespace Infinit {
@@ -9,11 +10,12 @@ namespace Infinit {
 	Scene::Scene(const string& name)
 		: m_Name(name), ActiveCamera(NULL)
 	{
-
+		m_RenderBuffer = FrameBuffer::Create(Application::Get().GetWindow().GetWidth(), Application::Get().GetWindow().GetHeight(), FramebufferFormat::RGBA16F);
 	}
 
 	Scene::~Scene()
 	{
+		delete m_RenderBuffer;
 	}
 
 	void Scene::PushLayer(Layer* layer)
@@ -61,15 +63,55 @@ namespace Infinit {
 
 	void Scene::Render()
 	{
+		m_RenderBuffer->Bind();
 		Renderer::Begin(ActiveCamera, LightMap);
 		OnEvent(AppRenderEvent(Transform()));
 		Renderer::End();
+		m_RenderBuffer->Unbind();
 	}
 
 	void Scene::ImGuiRender()
 	{
+		static bool p_open;
+
+		static bool opt_fullscreen_persistant = true;
+		static ImGuiDockNodeFlags opt_flags = ImGuiDockNodeFlags_None;
+		bool opt_fullscreen = opt_fullscreen_persistant;
+
+		ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar;
+		if (opt_fullscreen)
+		{
+			ImGuiViewport* viewport = ImGui::GetMainViewport();
+			ImGui::SetNextWindowPos(viewport->Pos);
+			ImGui::SetNextWindowSize(viewport->Size);
+			ImGui::SetNextWindowViewport(viewport->ID);
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+			ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+			window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
+			window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
+		}
+
+
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+		ImGui::Begin("DockSpace Demo", &p_open, window_flags);
+		ImGui::PopStyleVar();
+
+
+		if (opt_fullscreen)
+			ImGui::PopStyleVar(2);
+
+		// Dockspace
+		ImGuiIO& io = ImGui::GetIO();
+		if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable)
+		{
+			ImGuiID dockspace_id = ImGui::GetID("MyDockspace");
+			ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), opt_flags);
+		}
+
 		DrawImGui();
 		OnEvent(AppImGuiRenderEvent());
+
+		ImGui::End();
 	}
 
 	void Scene::Attach()
@@ -83,35 +125,27 @@ namespace Infinit {
 
 	}
 
-	/*void Scene::Update()
-	{
-		for (Layer* layer : m_LayerStack)
-			layer->Update();
-	}
-
-	void Scene::Render()
-	{
-		Infinit::Renderer::Begin(ActiveCamera, LightMap);
-		for (Layer* layer : m_LayerStack)
-			layer->Render();
-		Infinit::Renderer::End();
-	}
-
-	void Scene::ImGuiRender()
-	{
-		for (Layer* layer : m_LayerStack)
-			layer->ImGuiRender();
-	}*/
-
 	void Scene::DrawImGui()
 	{
+		ImGui::Begin("Components##ComponentView");
+		ImGui::End();
+
+		ImGui::Begin("Material##MaterialWindow");
+		ImGui::End();
+
+		ImGui::Begin("Viewport##RenderView");
+		auto viewportSize = ImGui::GetContentRegionAvail();
+		//m_RenderBuffer->Resize(viewportSize.x, viewportSize.y);
+		ImGui::Image((void*)m_RenderBuffer->GetColorAttachment(), viewportSize, { 0, 1 }, { 1, 0 });
+		ImGui::End();
+
 		ImGui::Begin(("Scene " + m_Name).c_str());
 		for (Layer* layer : m_LayerStack)
 		{
 			layer->DrawImGui();
 		}
 		ImGui::End();
-
+		
 		ImGui::Begin("Light");
 		ImGui::SliderFloat3("Direction", &LightMap[0].Direction[0], -360.0f, 360.0f);
 		ImGui::SliderFloat3("Radiance", &LightMap[0].Radiance[0], 0.0f, 1.0f);

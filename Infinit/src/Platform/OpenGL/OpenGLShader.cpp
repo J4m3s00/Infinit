@@ -1,6 +1,7 @@
 #include "inpch.h"
 #include "OpenGLShader.h"
 
+#include "graphics/Renderer.h"
 #include "graphics/Buffer.h"
 
 #include <glad/glad.h>
@@ -13,6 +14,13 @@ namespace Infinit {
 	OpenGLShader::OpenGLShader(const string& path)
 		: Shader(path), m_RendererID(0), m_UniformBufferSize(0)
 	{
+		Reload(path);
+	}
+
+	OpenGLShader::OpenGLShader(const string& vertexSource, const string& fragmentSource)
+		: Shader("", "Default Shader"), m_UniformBufferSize(0)
+	{
+		m_ShaderSource = "#shader vertex\n" + vertexSource + "#shader fragment\n" + fragmentSource;
 		CompileShader();
 	}
 
@@ -20,20 +28,23 @@ namespace Infinit {
 	{
 		IN_CORE_INFO("OpenGL Shader {0} destroyed!", m_RendererID);
 		delete m_UniformBuffer;
-		glDeleteProgram(m_RendererID);
+		IN_RENDER_S({
+				glDeleteProgram(self->m_RendererID);
+			})
 	}
 
 	bool OpenGLShader::Reload(const string& filepath)
 	{
 		if (filepath != "") m_FilePath = filepath;
 		if (m_RendererID) glDeleteProgram(m_RendererID);
+		LoadShaderFromFile(filepath);
+
 		CompileShader();
 		return true;
 	}
 
 	void OpenGLShader::CompileShader()
 	{
-		LoadShaderFromFile(m_FilePath);
 		string* shaderSources = new string[2];
 
 		const char* typeToken = "#shader";
@@ -53,11 +64,13 @@ namespace Infinit {
 		}
 
 
-		GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
 
 		// Send the vertex shader source code to GL
 		// Note that std::string's .c_str is NULL character terminated.
-		const GLchar *source = (const GLchar *)shaderSources[0].c_str();
+		IN_RENDER_S1(shaderSources, {
+		const GLchar * source = (const GLchar*)shaderSources[0].c_str();
+		GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
+
 		glShaderSource(vertexShader, 1, &source, 0);
 
 		// Compile the vertex shader
@@ -120,29 +133,29 @@ namespace Infinit {
 		// Vertex and fragment shaders are successfully compiled.
 		// Now time to link them together into a m_RendererID.
 		// Get a m_RendererID object.
-		m_RendererID = glCreateProgram();
+		self->m_RendererID = glCreateProgram();
 
 		// Attach our shaders to our m_RendererID
-		glAttachShader(m_RendererID, vertexShader);
-		glAttachShader(m_RendererID, fragmentShader);
+		glAttachShader(self->m_RendererID, vertexShader);
+		glAttachShader(self->m_RendererID, fragmentShader);
 
 		// Link our m_RendererID
-		glLinkProgram(m_RendererID);
+		glLinkProgram(self->m_RendererID);
 
 		// Note the different functions here: glGetProgram* instead of glGetShader*.
 		GLint isLinked = 0;
-		glGetProgramiv(m_RendererID, GL_LINK_STATUS, (int *)&isLinked);
+		glGetProgramiv(self->m_RendererID, GL_LINK_STATUS, (int *)&isLinked);
 		if (isLinked == GL_FALSE)
 		{
 			GLint maxLength = 0;
-			glGetProgramiv(m_RendererID, GL_INFO_LOG_LENGTH, &maxLength);
+			glGetProgramiv(self->m_RendererID, GL_INFO_LOG_LENGTH, &maxLength);
 
 			// The maxLength includes the NULL character
 			std::vector<GLchar> infoLog(maxLength);
-			glGetProgramInfoLog(m_RendererID, maxLength, &maxLength, &infoLog[0]);
+			glGetProgramInfoLog(self->m_RendererID, maxLength, &maxLength, &infoLog[0]);
 
 			// We don't need the m_RendererID anymore.
-			glDeleteProgram(m_RendererID);
+			glDeleteProgram(self->m_RendererID);
 			// Don't leak shaders either.
 			glDeleteShader(vertexShader);
 			glDeleteShader(fragmentShader);
@@ -155,10 +168,10 @@ namespace Infinit {
 		}
 
 		// Always detach shaders after a successful link.
-		glDetachShader(m_RendererID, vertexShader);
-		glDetachShader(m_RendererID, fragmentShader);
+		glDetachShader(self->m_RendererID, vertexShader);
+		glDetachShader(self->m_RendererID, fragmentShader);
+			})
 
-		glUseProgram(m_RendererID);
 		ProcessResources();
 	}
 
@@ -191,12 +204,13 @@ namespace Infinit {
 			ParseUniform(GetStatement(token, &source));
 
 		m_UniformBuffer = (byte*) malloc(m_UniformBufferSize);
+		memset(m_UniformBuffer, 0, m_UniformBufferSize);
 	}
 
-	byte* OpenGLShader::GetUniformBuffer(const string& name)
+	byte* OpenGLShader::GetUniformBuffer(const string& name) const
 	{
 		byte* result = m_UniformBuffer;
-		for (ShaderUniform& uni : m_Uniforms)
+		for (const ShaderUniform& uni : m_Uniforms)
 		{
 			if (uni.Name == name)
 				return result;
@@ -241,7 +255,7 @@ namespace Infinit {
 			count = atoi(c.c_str());
 		}
 
-		
+
 		ShaderDataType type = ShaderDataTypeFromString(typeString);
 		uint size = ShaderDataTypeSize(type);
 
@@ -259,7 +273,7 @@ namespace Infinit {
 				{
 					size = ShaderDataTypeSize(mem.Type);
 					string uniformName = name + "." + mem.Name;
-					m_Uniforms.push_back({uniformName, mem.Type});
+					m_Uniforms.push_back({ uniformName, mem.Type });
 					m_UniformBufferSize += count * size;
 				}
 			}
@@ -269,18 +283,6 @@ namespace Infinit {
 			m_Uniforms.push_back({ name, type });
 			m_UniformBufferSize += count * size;
 		}
-
-
-
-		//m_UniformCache[name] = 1;
-
-
-		//string name = tokens[2];
-
-		//if (const char* s = std::strstr(name.c_str(), ";"))
-		//	name = string(name.c_str(), s - name.c_str());
-		//
-		//m_Resources.push_back(name);
 	}
 
 	bool OpenGLShader::FindStruct(const string& name, ShaderStruct* str)
@@ -338,13 +340,17 @@ namespace Infinit {
 
 	void OpenGLShader::Bind() const
 	{
-		glUseProgram(m_RendererID);
+		IN_RENDER_S({
+				glUseProgram(self->m_RendererID);
+			})
 	}
 
 	void OpenGLShader::Unbind() const
 	{
 #ifdef IN_DEBUG
-		glUseProgram(0);
+		IN_RENDER({
+				glUseProgram(0);
+			})
 #endif
 	}
 
@@ -373,27 +379,29 @@ namespace Infinit {
 
 	void OpenGLShader::UploadUniformBuffer()
 	{
-		byte* buffer = m_UniformBuffer;
-		for (ShaderUniform& uniform : m_Uniforms)
-		{
-			switch (uniform.Type)
+		IN_RENDER_S({
+			byte* buffer = self->m_UniformBuffer;
+			for (ShaderUniform& uniform : self->m_Uniforms)
 			{
-			case ShaderDataType::Matrix3: SetUniformMat3(uniform.Name, *((const glm::mat3*)buffer)); break;
-			case ShaderDataType::Matrix4: SetUniformMat4(uniform.Name, *((const glm::mat4*)buffer)); break;
-			case ShaderDataType::Float: SetUniform1f(uniform.Name, *((const float*)buffer)); break;
-			case ShaderDataType::Float2: SetUniform2f(uniform.Name, *((const glm::vec2*)buffer)); break;
-			case ShaderDataType::Float3: SetUniform3f(uniform.Name, *((const glm::vec3*)buffer)); break;
-			case ShaderDataType::Float4: SetUniform4f(uniform.Name, *((const glm::vec4*)buffer)); break;
-			case ShaderDataType::Int: SetUniform1i(uniform.Name, *((const int*)buffer)); break;
-			case ShaderDataType::Bool: SetUniform1i(uniform.Name, *((const bool*)buffer)); break;
-			case ShaderDataType::Texture2D:
-			case ShaderDataType::TextureCube: SetUniform1i(uniform.Name, (int&)*((int*)buffer)); break;
-			default:
-				IN_CORE_WARN("Cant decide what uniform type to upload");
-				break;
+				switch (uniform.Type)
+				{
+				case ShaderDataType::Matrix3: self->SetUniformMat3(uniform.Name, *((const glm::mat3*)buffer)); break;
+				case ShaderDataType::Matrix4: self->SetUniformMat4(uniform.Name, *((const glm::mat4*)buffer)); break;
+				case ShaderDataType::Float: self->SetUniform1f(uniform.Name, *((const float*)buffer)); break;
+				case ShaderDataType::Float2: self->SetUniform2f(uniform.Name, *((const glm::vec2*)buffer)); break;
+				case ShaderDataType::Float3: self->SetUniform3f(uniform.Name, *((const glm::vec3*)buffer)); break;
+				case ShaderDataType::Float4: self->SetUniform4f(uniform.Name, *((const glm::vec4*)buffer)); break;
+				case ShaderDataType::Int: self->SetUniform1i(uniform.Name, *((const int*)buffer)); break;
+				case ShaderDataType::Bool: self->SetUniform1i(uniform.Name, *((const bool*)buffer)); break;
+				case ShaderDataType::Texture2D:
+				case ShaderDataType::TextureCube: self->SetUniform1i(uniform.Name, (int&)*((int*)buffer)); break;
+				default:
+					IN_CORE_WARN("Cant decide what uniform type to upload");
+					break;
+				}
+				buffer += ShaderDataTypeSize(uniform.Type);
 			}
-			buffer += ShaderDataTypeSize(uniform.Type);
-		}
+		})
 	}
 
 	void OpenGLShader::SetUniform1i(const string& name, const int& value)

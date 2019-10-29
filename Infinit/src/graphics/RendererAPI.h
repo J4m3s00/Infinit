@@ -16,7 +16,7 @@ namespace Infinit {
 
 		virtual void Clear() const = 0;
 		virtual void SetClearColor(const glm::vec4& color) const = 0;
-		virtual void DrawIndexed(uint count) const = 0	;
+		virtual void DrawIndexed(uint count) const = 0;
 
 		static void Init();
 	public:

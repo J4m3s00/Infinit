@@ -14,37 +14,61 @@ namespace Infinit {
 	{
 		if (e.GetEventType() == EventType::AppRender)
 		{
-			if (Instance)
-				Renderer::Draw(Instance, m_GameObject->GetWorldTransform().GetTransformMatrix());
+			if (m_Instance)
+			{
+				Infinit::Renderer::Draw(m_Instance, m_GameObject->GetWorldTransform().GetTransformMatrix());
+			}
 		}
 	}
 
 	void MeshComponent::DrawImGui()
 	{
+		if (m_Instance)
+		{
+			if (m_Instance->UsedMaterial)
+			{
+				ImGui::Begin("Material##MaterialWindow");
+				m_Instance->UsedMaterial->DrawImGui();
+				ImGui::End();
+			}
+		}
+
 		if (ImGui::CollapsingHeader(GetTypeName().c_str()))
 		{
-			if (Instance)
+			if (m_Instance)
 			{
-				Instance->DrawImGui();
+				m_Instance->DrawImGui();
 				ImGui::SameLine();
 			}
-			if (ImGui::Button("Load"))
+			ImGui::Text("Mesh:");
+			ImGui::SameLine();
+			if (ImGui::Button("Load##Mesh"))
 			{
-				std::string filename = Application::Get().OpenFile("");
+				std::string filename = Application::Get().OpenFile(IN_FILE_FILTER_Mesh);
 				
-				std::shared_ptr<Mesh> mesh = std::dynamic_pointer_cast<Mesh>(Application::Get().GetResource(filename));
-				Instance = new MeshInstance(mesh);
-				Instance->Material = std::dynamic_pointer_cast<Material>(Application::Get().GetResource("res/material/TestMaterial.lua"));
-
-				IN_CORE_TRACE("FileName: {0}, {1}", filename, mesh->GetFilePath());
-			}
-			if (Instance)
-			{
-				if (Instance->Material)
+				if (m_Instance)
 				{
-					ImGui::Begin("Material");
-					Instance->Material->DrawImGui();
-					ImGui::End();
+					delete m_Instance;
+					m_Instance = nullptr;
+				}
+				m_Instance = new MeshInstance(Application::Get().GetResource<Mesh>(filename));
+			}
+			if (m_Instance)
+			{
+				if (m_Instance->UsedMaterial)
+				{
+					ImGui::Text(m_Instance->UsedMaterial->GetName().c_str());
+				}
+				else
+				{
+					ImGui::Text("Material:");
+					ImGui::SameLine();
+					if (ImGui::Button("Load##Material"))
+					{
+						string filePath = Application::Get().OpenFile(IN_FILE_FILTER_Material);
+
+						m_Instance->UsedMaterial = Application::Get().GetResource<Material>(filePath);
+					}
 				}
 			}
 		}

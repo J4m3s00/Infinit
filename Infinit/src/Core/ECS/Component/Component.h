@@ -25,7 +25,7 @@ namespace Infinit {
 			OnEvent(e);
 		}
 	protected:
-		virtual void OnEvent(Event& e) {}
+		void OnEvent(Event& e) {}
 		virtual void DrawImGui();
 	protected:
 		GameObject* m_GameObject;

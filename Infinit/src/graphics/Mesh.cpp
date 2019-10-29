@@ -136,7 +136,7 @@ namespace Infinit {
 
 	Mesh::~Mesh()
 	{
-
+		IN_CORE_INFO("Deleted Mesh");
 	}
 
 	MeshInstance::MeshInstance(std::shared_ptr<Mesh> instance)
@@ -144,6 +144,7 @@ namespace Infinit {
 	{
 		m_VertexArray = instance->GetVertexArray();
 		m_VertexCount = m_VertexArray->GetIndexBuffer()->GetCount();
+		//UsedMaterial = Material::DefaultMaterial;
 	}
 
 	void MeshInstance::DrawImGui()

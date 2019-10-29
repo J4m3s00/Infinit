@@ -6,4 +6,4 @@ bin-int/
 *.vcxproj
 *.filters
 *.user
-*.vcxproj
+.travis.yml

@@ -13,16 +13,13 @@
 #include <graphics/Renderer.h>
 #include "Util/StringUtil.h"
 
-#ifdef IN_PLATFORM_WINDOWS
-#include <filesystem>
-#endif
-
 #include <glm/gtc/matrix_transform.hpp>
 
 //Bring imgui for all platforms
 #include <GLFW/glfw3.h>
 
 #ifdef IN_PLATFORM_WINDOWS
+#include <filesystem>
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
 #include <Windows.h>
@@ -37,6 +34,8 @@
 
 namespace Infinit {
 
+	static void SaveResourceInCache(std::unordered_map< string, std::shared_ptr<Resource>>* resourceCache, string relativPath, string absoultePath, std::function<void(std::shared_ptr<Resource>)> callback);
+
 	struct Vertex
 	{
 		glm::vec3 position;
@@ -50,6 +49,10 @@ namespace Infinit {
 	Application::Application(const std::string& name, RendererAPI::Type renderer) 
 		: m_Name(name)
 	{
+		std::filesystem::path path("./");
+		m_ResourcePath = std::filesystem::absolute(path).u8string();
+		std::replace(m_ResourcePath.begin(), m_ResourcePath.end(), '\\', '/');
+
 		RendererAPI::Renderer = renderer;
 		s_Instance = this;
 		m_Running = Init();
@@ -91,7 +94,7 @@ namespace Infinit {
 
 			//OnEvent(AppRenderEvent());
 			m_ActiveScene->Render();
-			
+			Renderer::Get()->WaitAndRender();
 
 			ImGuiBegin();
 			//OnEvent(AppImGuiRenderEvent());
@@ -115,6 +118,7 @@ namespace Infinit {
 		ImGuiInit();
 
 		LoadAllResources("res/");
+		//SaveResourceInCache("res/cerberus.fbx");
 
 		//m_ImGuiLayer = new ImGuiLayer();
 		//PushLayer(m_ImGuiLayer);
@@ -122,6 +126,7 @@ namespace Infinit {
 		return true;
 	}
 
+	//Not working right now!
 	void Application::LoadAllResources(const string& folder)
 	{
 		for (const auto& entry : std::filesystem::directory_iterator(folder))
@@ -130,7 +135,11 @@ namespace Infinit {
 			{
 				string filePath = entry.path().u8string();
 				std::replace(filePath.begin(), filePath.end(), '\\', '/');
-				SaveResourceInCache(filePath);
+				
+				string fileEnding = filePath.substr(filePath.find_last_of(".") + 1, filePath.size());
+
+				m_ResourceLoader.AddResourceToLoad(filePath);
+				//m_Futures.push_back(std::async(std::launch::async, SaveResourceInCache, &m_ResourceCache, filePath, std::filesystem::absolute(std::filesystem::path(filePath)).u8string()));
 			}
 			else
 			{
@@ -139,49 +148,9 @@ namespace Infinit {
 		}
 	}
 
-	void Application::SaveResourceInCache(const string& filePath)
+	void Application::AddResourceLoadFinishCallback(const string& path, ResourceLoadFinishFn fn)
 	{
-		std::unordered_map<string, std::shared_ptr<Resource>>::iterator it = m_ResourceCache.find(filePath);
-		if (it != m_ResourceCache.end())
-			return;
-		string fileEnding = filePath.substr(filePath.find_last_of(".") + 1, filePath.size());
-		//Textures
-		if (fileEnding == "png" || fileEnding == "tga")
-		{
-			m_ResourceCache[filePath] = Texture2D::Create(filePath);
-		}
-		//Cubemaps
-		else if (fileEnding == "cubemap")
-		{
-			m_ResourceCache[filePath] = TextureCube::Create(filePath);
-		}
-		//Materials
-		else if (fileEnding == "lua")
-		{
-			m_ResourceCache[filePath] = std::shared_ptr<Material>(new Material(filePath));
-		}
-		//Meshes
-		else if (fileEnding == "fbx")
-		{
-			m_ResourceCache[filePath] = std::shared_ptr<Mesh>(new Mesh(filePath));
-		}
-		//Shaders
-		else if (fileEnding == "shader")
-		{
-			m_ResourceCache[filePath] = Shader::Create(filePath);
-		}
-	}
-
-	std::shared_ptr<Resource> Application::GetResource(const string& filePath)
-	{
-		std::unordered_map<string, std::shared_ptr<Resource>>::iterator it = m_ResourceCache.find(filePath);
-		if (it != m_ResourceCache.end())
-		{
-			return it->second;
-		}
-		IN_CORE_WARN("Could not find Resource: \"{0}\". Trying to load from Memory!", filePath);
-		SaveResourceInCache(filePath);
-		return m_ResourceCache[filePath];
+		m_ResourceLoader.AddResourceLoadFinishCallback(path, fn);
 	}
 
 	bool Application::OnWindowClose(WindowCloseEvent& e)
@@ -205,7 +174,7 @@ namespace Infinit {
 		//io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoMerge;
 
 		// Setup Dear ImGui style
-		ImGui::StyleColorsLight();
+		ImGui::StyleColorsDark();
 		//ImGui::StyleColorsClassic();
 
 		// When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.
@@ -254,7 +223,7 @@ namespace Infinit {
 		}
 	}
 
-	string Application::OpenFile(const string& filter) const
+	string Application::OpenFile(const LPCSTR& filter) const
 	{
 		OPENFILENAMEA ofn;       // common dialog box structure
 		CHAR szFile[260] = { 0 };       // if using TCHAR macros
@@ -265,20 +234,19 @@ namespace Infinit {
 		ofn.hwndOwner = glfwGetWin32Window((GLFWwindow*)m_Window->GetNativeWindow());
 		ofn.lpstrFile = szFile;
 		ofn.nMaxFile = sizeof(szFile);
-		ofn.lpstrFilter = "All\0*.*\0";
+		ofn.lpstrFilter = filter;
 		ofn.nFilterIndex = 1;
 		ofn.lpstrFileTitle = NULL;
 		ofn.nMaxFileTitle = 0;
 		ofn.lpstrInitialDir = NULL;
-		ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
+		ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST | OFN_NOCHANGEDIR;
 
 		if (GetOpenFileNameA(&ofn) == TRUE)
 		{
 			string result = ofn.lpstrFile;
-			std::filesystem::path path("./../");
-			std::string resourcePath = std::filesystem::absolute(path).u8string();
-			result = result.substr(resourcePath.size(), result.size() - resourcePath.size());
 			std::replace(result.begin(), result.end(), '\\', '/');
+
+			result = result.substr(m_ResourcePath.size(), result.size() - m_ResourcePath.size());
 
 			return result;
 		}

@@ -12,3 +12,6 @@
 #include <memory>
 #include <fstream>
 #include <Commdlg.h>
+#include <future>
+#include <thread>
+#include <stack>

@@ -101,6 +101,8 @@ namespace Infinit {
 		lua_gettable(L, -2);
 		const string& shaderPath = lua_tostring(L, -1);
 		ShaderProgram = app.GetResource<Shader>(shaderPath);
+		if (!ShaderProgram)
+			app.AddResourceLoadFinishCallback(shaderPath, [this](std::shared_ptr<Resource> shader) { this->ShaderProgram = std::dynamic_pointer_cast<Shader>(shader); });
 		lua_pop(L, 1);
 
 		lua_pushstring(L, "textures");
@@ -110,12 +112,22 @@ namespace Infinit {
 		{
 			lua_pushstring(L, "name");
 			lua_gettable(L, -2);
-			string name = lua_tostring(L, -1);
+			string* name = new string(lua_tostring(L, -1));
 			lua_pop(L, 1);
 			lua_pushstring(L, "path");
 			lua_gettable(L, -2);
 			const char* path = lua_tostring(L, -1);
-			AddTexture(name, app.GetResource<Texture2D>(path));
+			std::shared_ptr<Texture2D> texture = app.GetResource<Texture2D>(path);
+			if (!texture)
+				app.AddResourceLoadFinishCallback(path, [this, name](std::shared_ptr<Resource> tex) { 
+				AddTexture(*name, std::dynamic_pointer_cast<Texture2D>(tex)); 
+				delete name;
+					});
+			else
+			{
+				AddTexture(*name, texture);
+				delete name;
+			}
 			lua_pop(L, 2);
 		}
 		
@@ -161,12 +173,24 @@ namespace Infinit {
 		{
 			lua_pushstring(L, "name");
 			lua_gettable(L, -2);
-			string name = lua_tostring(L, -1);
+			string* name = new string(lua_tostring(L, -1));
 			lua_pop(L, 1);
 			lua_pushstring(L, "path");
 			lua_gettable(L, -2);
 			const char* path = lua_tostring(L, -1);
-			AddTexture(name, app.GetResource<TextureCube>(path));
+			std::shared_ptr<TextureCube> cubeMap = app.GetResource<TextureCube>(path);
+			if (!cubeMap)
+			{
+				app.AddResourceLoadFinishCallback(path, [this, name](std::shared_ptr<Resource> tex) { 
+					this->AddTexture(*name, std::dynamic_pointer_cast<TextureCube>(tex)); 
+					delete name;
+					});
+			}
+			else
+			{
+				AddTexture(*name, cubeMap);
+				delete name;
+			}
 			lua_pop(L, 2);
 		}
 

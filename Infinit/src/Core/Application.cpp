@@ -148,73 +148,10 @@ namespace Infinit {
 		}
 	}
 
-	static std::mutex s_ResourceMutex;
-
-	static void SaveResourceInCache(std::unordered_map< string, std::shared_ptr<Resource>>* resourceCache, string relativPath, string absoultePath, std::function<void(std::shared_ptr<Resource>)> callback)
+	void Application::AddResourceLoadFinishCallback(const string& path, ResourceLoadFinishFn fn)
 	{
-		IN_CORE_TRACE("Save resource {0}", relativPath);
-		std::unordered_map<string, std::shared_ptr<Resource>>::iterator it = resourceCache->find(relativPath);
-		if (it != resourceCache->end())
-			return;
-		string fileEnding = relativPath.substr(relativPath.find_last_of(".") + 1, relativPath.size());
-		//Textures
-		std::shared_ptr<Resource> result;
-		if (fileEnding == "png" || fileEnding == "tga")
-		{
-			{
-				result = std::dynamic_pointer_cast<Resource>(Texture2D::Create(absoultePath));
-				std::lock_guard<std::mutex> lock(s_ResourceMutex);
-				resourceCache->insert({ relativPath, result });
-				callback(result);
-				//resourceCache[relativPath] = texture;
-			}
-		}
-		//Cubemaps
-		else if (fileEnding == "cubemap")
-		{
-			{
-				result = std::dynamic_pointer_cast<Resource>(TextureCube::Create(absoultePath));
-				std::lock_guard<std::mutex> lock(s_ResourceMutex);
-				resourceCache->insert({ relativPath, result });
-				callback(result);
-				//resourceCache[relativPath] = texCube;
-			}
-		}
-		//Materials
-		else if (fileEnding == "inm")
-		{
-			{
-				result = std::dynamic_pointer_cast<Resource>(std::shared_ptr <Material>(new Material(absoultePath)));
-				std::lock_guard<std::mutex> lock(s_ResourceMutex);
-				resourceCache->insert({ relativPath, result });
-				callback(result);
-				//resourceCache[relativPath] = material;
-			}
-		}
-		//Meshes
-		else if (fileEnding == "fbx")
-		{
-			{
-				result = std::dynamic_pointer_cast<Resource>(std::shared_ptr<Mesh>(new Mesh(absoultePath)));
-				std::lock_guard<std::mutex> lock(s_ResourceMutex);
-				resourceCache->insert({ relativPath, result });
-				callback(result);
-				//resourceCache[relativPath] = mesh;
-			}
-		}
-		//Shadersm_Futures
-		else if (fileEnding == "shader")
-		{
-			{
-				result = std::dynamic_pointer_cast<Resource>(Shader::Create(absoultePath));
-				std::lock_guard<std::mutex> lock(s_ResourceMutex);
-				resourceCache->insert({ relativPath, result});
-				callback(result);
-				//resourceCache[relativPath] = mesh;
-			}
-		}
+		m_ResourceLoader.AddResourceLoadFinishCallback(path, fn);
 	}
-
 
 	bool Application::OnWindowClose(WindowCloseEvent& e)
 	{
@@ -237,7 +174,7 @@ namespace Infinit {
 		//io.ConfigFlags |= ImGuiConfigFlags_ViewportsNoMerge;
 
 		// Setup Dear ImGui style
-		ImGui::StyleColorsLight();
+		ImGui::StyleColorsDark();
 		//ImGui::StyleColorsClassic();
 
 		// When viewports are enabled we tweak WindowRounding/WindowBg so platform windows can look identical to regular ones.

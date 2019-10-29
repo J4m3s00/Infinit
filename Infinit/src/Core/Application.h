@@ -40,6 +40,8 @@ namespace Infinit {
 			return std::dynamic_pointer_cast<T>(m_ResourceLoader.GetResource(filePath));
 		}
 
+		void AddResourceLoadFinishCallback(const string& path, ResourceLoadFinishFn fn);
+
 		inline Window& GetWindow() { return *m_Window; }
 		inline static Application& Get() { return *s_Instance; }
 	public:

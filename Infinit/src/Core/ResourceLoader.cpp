@@ -45,6 +45,7 @@ namespace Infinit {
 		string absolutePath = filePath;
 		string relativPath = filePath;
 		std::filesystem::path path(filePath);
+		bool hasCallback = m_ResourceLoadFinishCallbacks.find(filePath) != m_ResourceLoadFinishCallbacks.end();
 
 		const string& resourcePath = Application::Get().GetApplicationPath();
 
@@ -121,8 +122,12 @@ namespace Infinit {
 				result->ChangeName(relativPath);
 				std::lock_guard<std::mutex> lock(m_InsertResourceMutex);
 				m_ResourceCache.push_back(result);
-
 			}
+		}
+		if (hasCallback)
+		{
+			m_ResourceLoadFinishCallbacks[filePath](result);
+			m_ResourceLoadFinishCallbacks.erase(filePath);
 		}
 	}
 
@@ -141,6 +146,11 @@ namespace Infinit {
 		if (it != m_ResourceCache.end())
 			return *it;
 		return nullptr;
+	}
+
+	void ResourceLoader::AddResourceLoadFinishCallback(const string& filePath, ResourceLoadFinishFn callback)
+	{
+		m_ResourceLoadFinishCallbacks.insert({ filePath, callback });
 	}
 
 }

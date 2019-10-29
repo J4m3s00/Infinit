@@ -100,9 +100,9 @@ namespace Infinit {
 		lua_pushstring(L, "shader");
 		lua_gettable(L, -2);
 		const string& shaderPath = lua_tostring(L, -1);
-		ShaderProgram = app.GetResource<Shader>(shaderPath);
+		ShaderProgram = app.GetResourceLoader().GetResource<Shader>(shaderPath);
 		if (!ShaderProgram)
-			app.AddResourceLoadFinishCallback(shaderPath, [this](std::shared_ptr<Resource> shader) { this->ShaderProgram = std::dynamic_pointer_cast<Shader>(shader); });
+			app.GetResourceLoader().AddResourceLoadFinishCallback(shaderPath, [this](std::shared_ptr<Resource> shader) { this->ShaderProgram = std::dynamic_pointer_cast<Shader>(shader); });
 		lua_pop(L, 1);
 
 		lua_pushstring(L, "textures");
@@ -117,9 +117,9 @@ namespace Infinit {
 			lua_pushstring(L, "path");
 			lua_gettable(L, -2);
 			const char* path = lua_tostring(L, -1);
-			std::shared_ptr<Texture2D> texture = app.GetResource<Texture2D>(path);
+			std::shared_ptr<Texture2D> texture = app.GetResourceLoader().GetResource<Texture2D>(path);
 			if (!texture)
-				app.AddResourceLoadFinishCallback(path, [this, name](std::shared_ptr<Resource> tex) { 
+				app.GetResourceLoader().AddResourceLoadFinishCallback(path, [this, name](std::shared_ptr<Resource> tex) { 
 				AddTexture(*name, std::dynamic_pointer_cast<Texture2D>(tex)); 
 				delete name;
 					});
@@ -178,10 +178,10 @@ namespace Infinit {
 			lua_pushstring(L, "path");
 			lua_gettable(L, -2);
 			const char* path = lua_tostring(L, -1);
-			std::shared_ptr<TextureCube> cubeMap = app.GetResource<TextureCube>(path);
+			std::shared_ptr<TextureCube> cubeMap = app.GetResourceLoader().GetResource<TextureCube>(path);
 			if (!cubeMap)
 			{
-				app.AddResourceLoadFinishCallback(path, [this, name](std::shared_ptr<Resource> tex) { 
+				app.GetResourceLoader().AddResourceLoadFinishCallback(path, [this, name](std::shared_ptr<Resource> tex) { 
 					this->AddTexture(*name, std::dynamic_pointer_cast<TextureCube>(tex)); 
 					delete name;
 					});
@@ -294,7 +294,7 @@ namespace Infinit {
 				if (ImGui::Button("Load"))
 				{
 					string filePath = Application::Get().OpenFile(IN_FILE_FILTER_Shader);
-					ShaderProgram = Application::Get().GetResource<Shader>(filePath);
+					ShaderProgram = Application::Get().GetResourceLoader().GetResource<Shader>(filePath);
 				}
 				ImGui::TreePop();
 			}

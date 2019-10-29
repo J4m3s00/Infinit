@@ -51,8 +51,6 @@ namespace Infinit {
 		inline uint GetVertexCount() const { return m_VertexCount; }
 
 		void DrawImGui();
-	public:
-		std::shared_ptr<Material> UsedMaterial;
 	private:
 		std::shared_ptr<VertexArray> m_VertexArray;
 		uint m_VertexCount;

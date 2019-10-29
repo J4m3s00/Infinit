@@ -16,6 +16,7 @@ namespace Infinit {
 		virtual void DrawImGui();
 	public:
 		MeshInstance* m_Instance;
+		std::shared_ptr<Material> UsedMaterial;
 	private:
 	};
 

@@ -155,7 +155,7 @@ namespace Infinit {
 					if (tex)
 						tex->Reload(filename);
 					else
-						tex = Application::Get().GetResource<Texture2D>(filename);
+						tex = Application::Get().GetResourceLoader().GetResource<Texture2D>(filename);
 				}
 			}
 		}
@@ -188,7 +188,7 @@ namespace Infinit {
 					if (tex)
 						tex->Reload(filename);
 					else
-						tex = Application::Get().GetResource<TextureCube>(filename);
+						tex = Application::Get().GetResourceLoader().GetResource<TextureCube>(filename);
 				}
 			}
 		}

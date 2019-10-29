@@ -103,8 +103,8 @@ namespace Infinit {
 
 			m_Window->Update();
 		}
-
 		ImGuiDestroy();
+
 	}
 
 	bool Application::Init()
@@ -146,11 +146,6 @@ namespace Infinit {
 				LoadAllResources(entry.path().u8string());
 			}
 		}
-	}
-
-	void Application::AddResourceLoadFinishCallback(const string& path, ResourceLoadFinishFn fn)
-	{
-		m_ResourceLoader.AddResourceLoadFinishCallback(path, fn);
 	}
 
 	bool Application::OnWindowClose(WindowCloseEvent& e)
@@ -251,5 +246,10 @@ namespace Infinit {
 			return result;
 		}
 		return std::string();
+	}
+
+	void Application::DrawResourceLoaderImGui()
+	{
+		m_ResourceLoader.ImGuiDraw();
 	}
 }

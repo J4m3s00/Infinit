@@ -34,16 +34,10 @@ namespace Infinit {
 
 		string OpenFile(const LPCSTR& filter) const;
 
-		template <typename T>
-		std::shared_ptr<T> GetResource(const string& filePath)
-		{
-			return std::dynamic_pointer_cast<T>(m_ResourceLoader.GetResource(filePath));
-		}
-
-		void AddResourceLoadFinishCallback(const string& path, ResourceLoadFinishFn fn);
-
-		inline Window& GetWindow() { return *m_Window; }
-		inline static Application& Get() { return *s_Instance; }
+		
+		inline Window&				GetWindow()			{ return *m_Window; }
+		inline static Application&	Get()				{ return *s_Instance; }
+		ResourceLoader&				GetResourceLoader() { return m_ResourceLoader; }
 	public:
 		bool Init();
 		void LoadAllResources(const string& folder);
@@ -54,6 +48,8 @@ namespace Infinit {
 		void ImGuiDestroy();
 		void ImGuiBegin();
 		void ImGuiEnd();
+
+		void DrawResourceLoaderImGui();
 	private:
 		Scene* m_ActiveScene;
 

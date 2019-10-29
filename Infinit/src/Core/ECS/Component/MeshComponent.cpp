@@ -16,23 +16,20 @@ namespace Infinit {
 		{
 			if (m_Instance)
 			{
-				Infinit::Renderer::Draw(m_Instance, m_GameObject->GetWorldTransform().GetTransformMatrix());
+				Infinit::Renderer::Draw(m_Instance, UsedMaterial, m_GameObject->GetWorldTransform().GetTransformMatrix());
 			}
 		}
 	}
 
 	void MeshComponent::DrawImGui()
 	{
-		if (m_Instance)
+		if (UsedMaterial)
 		{
-			if (m_Instance->UsedMaterial)
-			{
-				ImGui::Begin("Material##MaterialWindow");
-				m_Instance->UsedMaterial->DrawImGui();
-				ImGui::End();
-			}
+			ImGui::Begin("Material##MaterialWindow");
+			UsedMaterial->DrawImGui();
+			ImGui::End();
 		}
-
+	
 		if (ImGui::CollapsingHeader(GetTypeName().c_str()))
 		{
 			if (m_Instance)
@@ -42,34 +39,40 @@ namespace Infinit {
 			}
 			ImGui::Text("Mesh:");
 			ImGui::SameLine();
-			if (ImGui::Button("Load##Mesh"))
+			ImGui::Button("", ImVec2(64, 64));
+			if (ImGui::BeginDragDropTarget())
 			{
-				std::string filename = Application::Get().OpenFile(IN_FILE_FILTER_Mesh);
-				
-				if (m_Instance)
+				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("RESOURCE_NODE"))
 				{
-					delete m_Instance;
-					m_Instance = nullptr;
-				}
-				m_Instance = new MeshInstance(Application::Get().GetResource<Mesh>(filename));
-			}
-			if (m_Instance)
-			{
-				if (m_Instance->UsedMaterial)
-				{
-					ImGui::Text(m_Instance->UsedMaterial->GetName().c_str());
-				}
-				else
-				{
-					ImGui::Text("Material:");
-					ImGui::SameLine();
-					if (ImGui::Button("Load##Material"))
+					ResourceNode* node = (ResourceNode*)payload->Data;
+					if (node->GetType() == ResourceNode::Type::MESH)
 					{
-						string filePath = Application::Get().OpenFile(IN_FILE_FILTER_Material);
-
-						m_Instance->UsedMaterial = Application::Get().GetResource<Material>(filePath);
+						if (m_Instance) delete m_Instance;
+						m_Instance = new MeshInstance(node->GetResource<Mesh>());
 					}
 				}
+				ImGui::EndDragDropTarget();
+			}
+
+			if (UsedMaterial)
+			{
+				ImGui::Text(UsedMaterial->GetName().c_str());
+			}
+
+			ImGui::Text("Material:");
+			ImGui::SameLine();
+			ImGui::Button("##Material", ImVec2(64, 64));
+			if (ImGui::BeginDragDropTarget())
+			{
+				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("RESOURCE_NODE"))
+				{
+					ResourceNode* node = (ResourceNode*)payload->Data;
+					if (node->GetType() == ResourceNode::Type::MATERIAL)
+					{
+						UsedMaterial = node->GetResource<Material>();
+					}
+				}
+				ImGui::EndDragDropTarget();
 			}
 		}
 	}

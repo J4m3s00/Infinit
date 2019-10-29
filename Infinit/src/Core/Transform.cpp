@@ -57,9 +57,9 @@ namespace Infinit {
 
 	void Transform::DrawImGui()
 	{
-		ImGuiProperty("Position", m_Position, PropertyFlags::DragFloat);
-		ImGuiProperty("Rotation", m_Rotation, -360.0f, 360.0f);
-		ImGuiProperty("Scale", m_Scale, PropertyFlags::DragFloat);
+		ImGuiProperty("Position", &m_Position, PropertyFlags::DragFloat);
+		ImGuiProperty("Rotation", &m_Rotation, -360.0f, 360.0f);
+		ImGuiProperty("Scale", &m_Scale, PropertyFlags::DragFloat);
 
 		//ImGui::Text("Position");
 		//ImGui::NextColumn();

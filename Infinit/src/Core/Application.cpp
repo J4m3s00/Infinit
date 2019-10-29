@@ -13,16 +13,13 @@
 #include <graphics/Renderer.h>
 #include "Util/StringUtil.h"
 
-#ifdef IN_PLATFORM_WINDOWS
-#include <filesystem>
-#endif
-
 #include <glm/gtc/matrix_transform.hpp>
 
 //Bring imgui for all platforms
 #include <GLFW/glfw3.h>
 
 #ifdef IN_PLATFORM_WINDOWS
+#include <filesystem>
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
 #include <Windows.h>
@@ -120,7 +117,7 @@ namespace Infinit {
 		Renderer::Init();
 		ImGuiInit();
 
-		//LoadAllResources("res/");
+		LoadAllResources("res/");
 		//SaveResourceInCache("res/cerberus.fbx");
 
 		//m_ImGuiLayer = new ImGuiLayer();
@@ -138,6 +135,10 @@ namespace Infinit {
 			{
 				string filePath = entry.path().u8string();
 				std::replace(filePath.begin(), filePath.end(), '\\', '/');
+				
+				string fileEnding = filePath.substr(filePath.find_last_of(".") + 1, filePath.size());
+
+				m_ResourceLoader.AddResourceToLoad(filePath);
 				//m_Futures.push_back(std::async(std::launch::async, SaveResourceInCache, &m_ResourceCache, filePath, std::filesystem::absolute(std::filesystem::path(filePath)).u8string()));
 			}
 			else
@@ -214,29 +215,6 @@ namespace Infinit {
 		}
 	}
 
-	void Application::GetResource(const string& filePath, std::function<void(std::shared_ptr<Resource>)> callback)
-	{
-		string absolutePath = filePath;
-		string relativPath = filePath;
-		std::filesystem::path path(filePath);
-
-		if (path.is_absolute())
-		{
-			absolutePath = std::filesystem::absolute(path).u8string();
-			relativPath = absolutePath.substr(m_ResourcePath.size(), absolutePath.size() - m_ResourcePath.size());
-
-			std::replace(absolutePath.begin(), absolutePath.end(), '\\', '/');
-			std::replace(relativPath.begin(), relativPath.end(), '\\', '/');
-		}
-		std::unordered_map<string, std::shared_ptr<Resource>>::iterator it = m_ResourceCache.find(relativPath);
-		if (it != m_ResourceCache.end())
-		{
-			callback(it->second);
-			return;
-		}
-		IN_CORE_WARN("Could not find Resource: \"{0}\". Trying to load from Memory!", relativPath);
-		m_Futures.push_back(std::async(std::launch::async, SaveResourceInCache, &m_ResourceCache, relativPath, absolutePath, callback));
-	}
 
 	bool Application::OnWindowClose(WindowCloseEvent& e)
 	{
@@ -331,7 +309,7 @@ namespace Infinit {
 			string result = ofn.lpstrFile;
 			std::replace(result.begin(), result.end(), '\\', '/');
 
-			//result = result.substr(m_ResourcePath.size(), result.size() - m_ResourcePath.size());
+			result = result.substr(m_ResourcePath.size(), result.size() - m_ResourcePath.size());
 
 			return result;
 		}

@@ -68,8 +68,6 @@ namespace Infinit {
 	Material::~Material()
 	{
 		IN_CORE_INFO("Delete Material");
-		for (Parameter* p : m_Params)
-			delete p;
 	}
 
 	bool Material::Reload(const string& filePath)
@@ -101,7 +99,8 @@ namespace Infinit {
 
 		lua_pushstring(L, "shader");
 		lua_gettable(L, -2);
-		app.GetResource(lua_tostring(L, -1), [this](std::shared_ptr<Resource> shader) {this->ShaderProgram = std::dynamic_pointer_cast<Shader>(shader); this->ResolveMaterialParameters(); });
+		const string& shaderPath = lua_tostring(L, -1);
+		ShaderProgram = app.GetResource<Shader>(shaderPath);
 		lua_pop(L, 1);
 
 		lua_pushstring(L, "textures");
@@ -116,7 +115,7 @@ namespace Infinit {
 			lua_pushstring(L, "path");
 			lua_gettable(L, -2);
 			const char* path = lua_tostring(L, -1);
-			app.GetResource(path, [this, &name](std::shared_ptr<Resource> texture) {this->AddTexture(name, std::dynamic_pointer_cast<Texture2D>(texture)); });
+			AddTexture(name, app.GetResource<Texture2D>(path));
 			lua_pop(L, 2);
 		}
 		
@@ -167,7 +166,7 @@ namespace Infinit {
 			lua_pushstring(L, "path");
 			lua_gettable(L, -2);
 			const char* path = lua_tostring(L, -1);
-			app.GetResource(path, [this, &name](std::shared_ptr<Resource> texture) {this->AddTexture(name, std::dynamic_pointer_cast<TextureCube>(texture)); });
+			AddTexture(name, app.GetResource<TextureCube>(path));
 			lua_pop(L, 2);
 		}
 
@@ -176,7 +175,7 @@ namespace Infinit {
 		return true;
 	}
 
-	void Material::ResolveMaterialParameters() const
+	void Material::ResolveMaterialParameters()
 	{
 		if (!ShaderProgram) return;
 		for (Parameter* param : m_Params)
@@ -186,13 +185,18 @@ namespace Infinit {
 		m_Dirty = false;
 	}
 
-	void Material::Bind() const
+	void Material::Bind()
 	{
 		IN_CORE_ASSERT(ShaderProgram, "Pls provide a valid shader for the Material");
 		ShaderProgram->Bind();
 		if (m_Dirty)
 		{
 			ResolveMaterialParameters();
+		}
+
+		for (Parameter* param : m_Params)
+		{
+			param->Bind();
 		}
 		//for (auto tex : m_Textures)
 		//{
@@ -202,30 +206,19 @@ namespace Infinit {
 		//	ShaderProgram->SetUniform1i(tex.first, slot);
 		//	tex.second->Bind(slot);
 		//}
-		for (const auto& tex : m_Textures)
-		{
-			uint slot = ShaderProgram->GetResourceSlot(tex.first);
-			tex.second->Bind(slot);
-		}
 		ShaderProgram->UploadUniformBuffer();
 	}
 
 	void Material::AddTexture(const string& shaderName, std::shared_ptr<Texture2D> texture)
 	{
-		MaterialParameter<int>* param = new MaterialParameter<int>(shaderName);
 		std::lock_guard<std::mutex> lock(m_ParamPushMutex);
-		AddParameter(param);
-		*param->Value = ShaderProgram->GetResourceSlot(shaderName);
-		m_Textures[shaderName] = texture;
+		AddParameter(new MaterialParameter<Texture2D>(shaderName, texture));
 	}
 
 	void Material::AddTexture(const string& shaderName, std::shared_ptr<TextureCube> texture)
 	{
-		MaterialParameter<int>* param = new MaterialParameter<int>(shaderName);
 		std::lock_guard<std::mutex> lock(m_ParamPushMutex);
-		AddParameter(param);
-		*param->Value = ShaderProgram->GetResourceSlot(shaderName);
-		m_Textures[shaderName] = texture;
+		AddParameter(new MaterialParameter<TextureCube>(shaderName, texture));
 	}
 
 	//////////////////IMGUI///////////////////////////////
@@ -277,7 +270,7 @@ namespace Infinit {
 				if (ImGui::Button("Load"))
 				{
 					string filePath = Application::Get().OpenFile(IN_FILE_FILTER_Shader);
-					Application::Get().GetResource(filePath, [this](std::shared_ptr<Resource> shader) { this->ShaderProgram = std::dynamic_pointer_cast<Shader>(shader); this->ResolveMaterialParameters(); });
+					ShaderProgram = Application::Get().GetResource<Shader>(filePath);
 				}
 				ImGui::TreePop();
 			}

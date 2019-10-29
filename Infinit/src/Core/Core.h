@@ -47,6 +47,7 @@ second_t< typename tMap::value_type > second(const tMap& m) { return second_t<  
 #define TO_DEGREES (180.0f / M_PI)
 
 #define IN_FILE_FILTER_All ("All\0*.*\0")
+#define IN_FILE_FILTER_Cubemaps ("Cube map (*.cubemap)\0*.cubemap\0")
 #define IN_FILE_FILTER_Shader ("Shader (*.shader)\0*.shader\0")
 #define IN_FILE_FILTER_Material ("Material (*.inm)\0*.inm*\0")
 #define IN_FILE_FILTER_Mesh ("Models (*.blend, *.fbx)\0*.blend;*.fbx\0")

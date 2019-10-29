@@ -207,10 +207,10 @@ namespace Infinit {
 		memset(m_UniformBuffer, 0, m_UniformBufferSize);
 	}
 
-	byte* OpenGLShader::GetUniformBuffer(const string& name)
+	byte* OpenGLShader::GetUniformBuffer(const string& name) const
 	{
 		byte* result = m_UniformBuffer;
-		for (ShaderUniform& uni : m_Uniforms)
+		for (const ShaderUniform& uni : m_Uniforms)
 		{
 			if (uni.Name == name)
 				return result;

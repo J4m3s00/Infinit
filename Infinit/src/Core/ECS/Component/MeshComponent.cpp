@@ -14,11 +14,6 @@ namespace Infinit {
 	{
 		if (e.GetEventType() == EventType::AppRender)
 		{
-			if (MMesh && !m_Instance)
-			{
-				m_Instance = new MeshInstance(MMesh);
-				//m_Instance->UsedMaterial = Material::DefaultMaterial;
-			}
 			if (m_Instance)
 			{
 				Infinit::Renderer::Draw(m_Instance, m_GameObject->GetWorldTransform().GetTransformMatrix());
@@ -51,7 +46,12 @@ namespace Infinit {
 			{
 				std::string filename = Application::Get().OpenFile(IN_FILE_FILTER_Mesh);
 				
-				Application::Get().GetResource(filename, [this](std::shared_ptr<Resource> mesh) {this->MMesh = std::dynamic_pointer_cast<Mesh>(mesh); });
+				if (m_Instance)
+				{
+					delete m_Instance;
+					m_Instance = nullptr;
+				}
+				m_Instance = new MeshInstance(Application::Get().GetResource<Mesh>(filename));
 			}
 			if (m_Instance)
 			{
@@ -67,7 +67,7 @@ namespace Infinit {
 					{
 						string filePath = Application::Get().OpenFile(IN_FILE_FILTER_Material);
 
-						Application::Get().GetResource(filePath, [this](std::shared_ptr < Resource> material) {this->m_Instance->UsedMaterial = std::dynamic_pointer_cast<Material>(material); });
+						m_Instance->UsedMaterial = Application::Get().GetResource<Material>(filePath);
 					}
 				}
 			}

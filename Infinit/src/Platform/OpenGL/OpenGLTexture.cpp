@@ -105,7 +105,7 @@ namespace Infinit {
 
 //REMOVE srgb??
 	OpenGLTextureCube::OpenGLTextureCube(const string& path, bool srgb)
-		: TextureCube(path)
+		: TextureCube(path), m_Width(0), m_Height(0)
 	{
 		Reload(path);
 	}

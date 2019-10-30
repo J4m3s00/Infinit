@@ -10,9 +10,37 @@
 
 namespace Infinit {
 
+	class Parameter;
+
 	enum class MaterialParameterType
 	{
 		None = 0, Float, Float2, Float3, Float4, Color3, Color4, Int, Bool, Texture2D, TextureCube
+	};
+
+	class ParameterPreset
+	{
+	public:
+		ParameterPreset(const string& name, MaterialParameterType type);
+		~ParameterPreset();
+
+		virtual Parameter* CreateParameter();
+
+		MaterialParameterType GetType() const { return m_Type; }
+		const string& GetName() const { return m_Name; }
+	private:
+		MaterialParameterType m_Type;
+		string m_Name;
+	};
+
+	template <typename T>
+	class MaterialParameterPreset : public ParameterPreset
+	{
+	public:
+		MaterialParameterPreset(const string& name, MaterialParameterType type, T value);
+
+		virtual Parameter* CreateParameter();
+	private:
+		T m_DefaultValue;
 	};
 
 	class Parameter
@@ -23,13 +51,7 @@ namespace Infinit {
 		{
 
 		}
-		Parameter(const Parameter& copy)
-			: m_Name(copy.GetName())
-		{
-			m_Buffer = copy.m_Buffer;
-		}
 
-		virtual Parameter* Copy()
 		virtual void Bind(std::shared_ptr<Shader> shader) { if (!m_Buffer) m_Buffer = shader->GetUniformBuffer(m_Name); }
 		virtual void DrawImGui() {}
 		const string& GetName() const { return m_Name; }
@@ -158,8 +180,22 @@ namespace Infinit {
 
 		void AddTexture(const string& shaderName, std::shared_ptr<Texture2D> texture);
 		void AddTexture(const string& shaderName, std::shared_ptr<TextureCube> texture);
+	public:
+		std::shared_ptr<Shader> ShaderProgram;
+	private:
+		std::mutex m_ParamPushMutex;
+		std::vector<ParameterPreset> m_ParameterPresets;
+	public:
+		static std::shared_ptr<Material> DefaultMaterial;
+	};
 
-		void ResolveMaterialParameters();
+	class MaterialInstance
+	{
+	public:
+		MaterialInstance(std::shared_ptr<Material> instance);
+		~MaterialInstance();
+
+		std::shared_ptr<Shader> GetShaderProgram() { return m_Shader; }
 
 		template <typename T>
 		void AddParameter(MaterialParameter<T>* param)
@@ -175,23 +211,6 @@ namespace Infinit {
 					return (MaterialParameter<T>*) param;
 			return nullptr;
 		}
-
-	public:
-		std::shared_ptr<Shader> ShaderProgram;
-	private:
-		std::mutex m_ParamPushMutex;
-		std::vector<Parameter*> m_Params;
-	public:
-		static std::shared_ptr<Material> DefaultMaterial;
-	};
-
-	class MaterialInstance
-	{
-	public:
-		MaterialInstance(std::shared_ptr<Material> instance);
-		~MaterialInstance();
-
-		std::shared_ptr<Shader> GetShaderProgram() { return m_Shader; }
 
 		void Bind();
 		void DrawImGui();

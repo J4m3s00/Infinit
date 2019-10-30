@@ -33,6 +33,35 @@ namespace Infinit {
 		return MaterialParameterType::None;
 	}
 
+	size_t GetMaterialParameterSize(MaterialParameterType type)
+	{
+		switch (type)
+		{
+		case MaterialParameterType::None:
+			return 0;
+		case MaterialParameterType::Float:
+			return sizeof(float);
+		case MaterialParameterType::Float2:
+			return sizeof(glm::vec2);
+		case MaterialParameterType::Float3:
+			return sizeof(glm::vec3);
+		case MaterialParameterType::Float4:
+			return sizeof(glm::vec4);
+		case MaterialParameterType::Color3:
+			return sizeof(glm::vec3);
+		case MaterialParameterType::Color4:
+			return sizeof(glm::vec4);
+		case MaterialParameterType::Int:
+			return sizeof(int);
+		case MaterialParameterType::Bool:
+			return sizeof(bool);
+		case MaterialParameterType::Texture2D:
+			return sizeof(std::shared_ptr<Texture2D>);
+		case MaterialParameterType::TextureCube:
+			return sizeof(std::shared_ptr<TextureCube>);
+		}
+	}
+
 	bool CheckLuaError(lua_State* L, int err)
 	{
 		if (err != LUA_OK)
@@ -44,6 +73,19 @@ namespace Infinit {
 		return true;
 	}
 
+	ParameterPreset::ParameterPreset(const string& name, MaterialParameterType type)
+		: m_Name(name), m_Type(type)
+	{
+	}
+
+	ParameterPreset::~ParameterPreset()
+	{
+	}
+
+	Parameter* ParameterPreset::CreateParameter()
+	{
+		return new Parameter(m_Name);
+	}
 
 	Material::Material(const string& filePath)
 		: Resource(filePath), m_ParamPushMutex()
@@ -142,18 +184,23 @@ namespace Infinit {
 			lua_gettable(L, -2);
 			const char* type = lua_tostring(L, -1);
 			MaterialParameterType shaderType = MaterialParameterTypeFromString(type);
+
+			ParameterPreset preset(name, shaderType);
+			
+			m_ParameterPresets.push_back(preset);
+
 			switch (shaderType)
 			{
-			case MaterialParameterType::Bool: AddParameter(new MaterialParameter<bool>(name)); break;
-			case MaterialParameterType::Int: AddParameter(new MaterialParameter<int>(name)); break;
-			case MaterialParameterType::Float: AddParameter(new MaterialParameter<float>(name)); break;
-			case MaterialParameterType::Float2: AddParameter(new MaterialParameter<glm::vec2>(name)); break;
-			case MaterialParameterType::Float3: 
-			case MaterialParameterType::Color3: AddParameter(new MaterialParameter<glm::vec3>(name)); break;
-			case MaterialParameterType::Float4: 
-			case MaterialParameterType::Color4: AddParameter(new MaterialParameter<glm::vec4>(name)); break;
-			case MaterialParameterType::Texture2D: 
-			case MaterialParameterType::TextureCube: AddParameter(new MaterialParameter<int>(name)); break;
+			case MaterialParameterType::Bool:   break;
+			case MaterialParameterType::Int:  break;
+			case MaterialParameterType::Float:  break;
+			case MaterialParameterType::Float2: break;
+			case MaterialParameterType::Float3:
+			case MaterialParameterType::Color3:  break;
+			case MaterialParameterType::Float4:
+			case MaterialParameterType::Color4: break;
+			case MaterialParameterType::Texture2D:
+			case MaterialParameterType::TextureCube: break;
 			default:
 				break;
 			}
@@ -211,13 +258,17 @@ namespace Infinit {
 	void Material::AddTexture(const string& shaderName, std::shared_ptr<Texture2D> texture)
 	{
 		std::lock_guard<std::mutex> lock(m_ParamPushMutex);
-		AddParameter(new MaterialParameter<Texture2D>(shaderName, texture));
+		ParameterPreset p(shaderName, MaterialParameterType::Texture2D);
+		p.SetDefaultValue<std::shared_ptr<Texture2D>>(texture);
+		m_ParameterPresets.push_back(p);
 	}
 
 	void Material::AddTexture(const string& shaderName, std::shared_ptr<TextureCube> texture)
 	{
 		std::lock_guard<std::mutex> lock(m_ParamPushMutex);
-		AddParameter(new MaterialParameter<TextureCube>(shaderName, texture));
+		ParameterPreset p(shaderName, MaterialParameterType::TextureCube);
+		p.SetDefaultValue<std::shared_ptr<TextureCube>>(texture);
+		m_ParameterPresets.push_back(p);
 	}
 
 	//////////////////IMGUI///////////////////////////////
@@ -294,9 +345,22 @@ namespace Infinit {
 		: Instance(instance)
 	{
 		m_Shader = instance->ShaderProgram;
-		for (Parameter* param : instance->m_Params)
+		for (ParameterPreset& param : instance->m_ParameterPresets)
 		{
-			m_Params.push_back(param);
+			switch (param.GetType())
+			{
+			case MaterialParameterType::Bool:			AddParameter(new MaterialParameter<bool>(param.GetName())); break;
+			case MaterialParameterType::Int:			AddParameter(new MaterialParameter<int>(param.GetName())); break;
+			case MaterialParameterType::Float:			AddParameter(new MaterialParameter<float>(param.GetName())); break;
+			case MaterialParameterType::Float2:			AddParameter(new MaterialParameter<glm::vec2>(param.GetName())); break;
+			case MaterialParameterType::Float3:
+			case MaterialParameterType::Color3:			AddParameter(new MaterialParameter<glm::vec3>(param.GetName())); break;
+			case MaterialParameterType::Float4:
+			case MaterialParameterType::Color4:			AddParameter(new MaterialParameter<glm::vec4>(param.GetName())); break;
+			case MaterialParameterType::Texture2D:		AddParameter(new MaterialParameter<Texture2D>(param.GetName(), param.GetDefaultValue<std::shared_ptr<Texture2D>>())); break;
+			case MaterialParameterType::TextureCube:	AddParameter(new MaterialParameter<TextureCube>(param.GetName(), param.GetDefaultValue<std::shared_ptr<TextureCube>>())); break;
+			}
+			
 		}
 	}
 

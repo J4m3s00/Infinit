@@ -9,7 +9,7 @@ material = {
         { name = "u_BRDFLUTTexture", path = "res/lightmaps/BRDF_LUT.tga" }
     },
     params = {
-        { name = "u_AlbedoTexToggle", type = "bool"},
+        { name = "u_AlbedoTexToggle", type = "bool", defaultValue = "true"},
         { name = "u_AlbedoColor", type = "vec3"},
         { name = "u_NormalTexToggle", type = "bool"},
         { name = "u_MetalnessTexToggle", type = "bool"},

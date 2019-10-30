@@ -16,7 +16,7 @@ namespace Infinit {
 		static void Init();
 
 		static void Begin(Camera* camera, const LightMap& lights);
-		static void Draw(MeshInstance* mesh, std::shared_ptr<Material>& material, const glm::mat4& modelMatrix = glm::mat4(1.0f));
+		static void Draw(MeshInstance* mesh, MaterialInstance* material, const glm::mat4& modelMatrix = glm::mat4(1.0f));
 		static void* Submit(RenderCommandFn fn, uint size) { return s_Instance->m_CommandQueue.Allocate(fn, size); }
 		static void End();
 

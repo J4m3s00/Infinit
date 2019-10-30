@@ -44,13 +44,9 @@ namespace Infinit {
 		return true;
 	}
 
-	void Parameter::BindToShader(std::shared_ptr<Shader> shader)
-	{
-		m_Buffer = shader->GetUniformBuffer(m_Name);
-	}
 
 	Material::Material(const string& filePath)
-		: Resource(filePath), m_Dirty(true), m_ParamPushMutex()
+		: Resource(filePath), m_ParamPushMutex()
 	{
 		Reload(filePath);
 		//while (isvalid)
@@ -60,7 +56,7 @@ namespace Infinit {
 	}
 
 	Material::Material(const std::shared_ptr<Shader>& shader)
-		: Resource(""), ShaderProgram(shader), m_Dirty(true), m_ParamPushMutex()
+		: Resource(""), ShaderProgram(shader), m_ParamPushMutex()
 	{
 
 	}
@@ -199,38 +195,17 @@ namespace Infinit {
 		return true;
 	}
 
-	void Material::ResolveMaterialParameters()
+	void MaterialInstance::Bind()
 	{
-		if (!ShaderProgram) return;
-		for (Parameter* param : m_Params)
-		{
-			param->BindToShader(ShaderProgram);
-		}
-		m_Dirty = false;
-	}
-
-	void Material::Bind()
-	{
-		IN_CORE_ASSERT(ShaderProgram, "Pls provide a valid shader for the Material");
-		ShaderProgram->Bind();
-		if (m_Dirty)
-		{
-			ResolveMaterialParameters();
-		}
+		IN_CORE_ASSERT(m_Shader, "Pls provide a valid shader for the Material");
+		m_Shader->Bind();
 
 		for (Parameter* param : m_Params)
 		{
-			param->Bind();
+			param->Bind(m_Shader);
 		}
-		//for (auto tex : m_Textures)
-		//{
-		//	uint slot = ShaderProgram->GetResourceSlot(tex.first);
-		//	if (slot == -1) IN_CORE_WARN("Could not find texture {0} in shader", tex.first);
-		//
-		//	ShaderProgram->SetUniform1i(tex.first, slot);
-		//	tex.second->Bind(slot);
-		//}
-		ShaderProgram->UploadUniformBuffer();
+
+		m_Shader->UploadUniformBuffer();
 	}
 
 	void Material::AddTexture(const string& shaderName, std::shared_ptr<Texture2D> texture)
@@ -256,7 +231,7 @@ namespace Infinit {
 		}
 	}
 
-	void Material::DrawImGui()
+	void MaterialInstance::DrawImGui()
 	{
 		if (ImGui::BeginPopupContextWindow())
 		{
@@ -277,13 +252,13 @@ namespace Infinit {
 			delete[] name;
 		}
 
-		if (ShaderProgram)
+		if (m_Shader)
 		{
-			if (ImGui::TreeNode(("Shader " + ShaderProgram->GetFilePath()).c_str()))
+			if (ImGui::TreeNode(("Shader " + m_Shader->GetFilePath()).c_str()))
 			{
-				std::string buttonName = "Reload##" + ShaderProgram->GetFilePath();
+				std::string buttonName = "Reload##" + m_Shader->GetFilePath();
 				if (ImGui::Button(buttonName.c_str()))
-					ShaderProgram->Reload("");
+					m_Shader->Reload("");
 				ImGui::TreePop();
 			}
 		}
@@ -291,10 +266,18 @@ namespace Infinit {
 		{
 			if (ImGui::TreeNode("Shader"))
 			{
-				if (ImGui::Button("Load"))
+				ImGui::Button("", ImVec2(64, 64));
+				if (ImGui::BeginDragDropTarget())
 				{
-					string filePath = Application::Get().OpenFile(IN_FILE_FILTER_Shader);
-					ShaderProgram = Application::Get().GetResourceLoader().GetResource<Shader>(filePath);
+					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("RESOURCE_NODE"))
+					{
+						ResourceNode* node = (ResourceNode*)payload->Data;
+						if (node->GetType() == ResourceNode::Type::MESH)
+						{
+							m_Shader = node->GetResource<Shader>();
+						}
+					}
+					ImGui::EndDragDropTarget();
 				}
 				ImGui::TreePop();
 			}
@@ -305,6 +288,24 @@ namespace Infinit {
 			param->DrawImGui();
 		}
 
+	}
+
+	MaterialInstance::MaterialInstance(std::shared_ptr<Material> instance)
+		: Instance(instance)
+	{
+		m_Shader = instance->ShaderProgram;
+		for (Parameter* param : instance->m_Params)
+		{
+			m_Params.push_back(param);
+		}
+	}
+
+	MaterialInstance::~MaterialInstance()
+	{
+		for (Parameter* param : m_Params)
+		{
+			delete param;
+		}
 	}
 
 }

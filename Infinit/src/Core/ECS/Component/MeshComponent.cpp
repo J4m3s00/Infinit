@@ -56,7 +56,7 @@ namespace Infinit {
 
 			if (UsedMaterial)
 			{
-				ImGui::Text(UsedMaterial->GetName().c_str());
+				ImGui::Text(UsedMaterial->Instance->GetName().c_str());
 			}
 
 			ImGui::Text("Material:");
@@ -69,7 +69,8 @@ namespace Infinit {
 					ResourceNode* node = (ResourceNode*)payload->Data;
 					if (node->GetType() == ResourceNode::Type::MATERIAL)
 					{
-						UsedMaterial = node->GetResource<Material>();
+						if (UsedMaterial) delete UsedMaterial;
+						UsedMaterial = new MaterialInstance(node->GetResource<Material>());
 					}
 				}
 				ImGui::EndDragDropTarget();

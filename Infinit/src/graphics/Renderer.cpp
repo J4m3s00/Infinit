@@ -349,12 +349,11 @@ void main()
 	}
 
 
-	void Renderer::Draw(MeshInstance* mesh, std::shared_ptr<Material>& material, const glm::mat4& modelMatrix)
+	void Renderer::Draw(MeshInstance* mesh, MaterialInstance* material, const glm::mat4& modelMatrix)
 	{
 		IN_CORE_ASSERT(s_Instance, "No Renderer instance set!"); //Forgot to call Renderer::Init(); ?
 		IN_CORE_ASSERT(mesh, "Mesh not valid");
 		IN_CORE_ASSERT(s_Instance->m_LightMap.size() > 0, "No lights set for the scene!");
-		if (!material) material = Material::DefaultMaterial;
 		//IN_CORE_ASSERT(mesh->UsedMaterial, "Pls provide a Material for the model!");
 		if (!material)
 		{
@@ -367,7 +366,7 @@ void main()
 
 		//Clean this up!
 
-		std::weak_ptr<Shader> shader = material->ShaderProgram;
+		std::weak_ptr<Shader> shader = material->GetShaderProgram();
 		if (shader.expired()) return;
 
 		byte* uniformBuffer = shader.lock()->GetUniformBuffer("u_ViewProjectionMatrix");

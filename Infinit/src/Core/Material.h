@@ -23,9 +23,15 @@ namespace Infinit {
 		{
 
 		}
-		virtual void Bind() {}
+		Parameter(const Parameter& copy)
+			: m_Name(copy.GetName())
+		{
+			m_Buffer = copy.m_Buffer;
+		}
+
+		virtual Parameter* Copy()
+		virtual void Bind(std::shared_ptr<Shader> shader) { if (!m_Buffer) m_Buffer = shader->GetUniformBuffer(m_Name); }
 		virtual void DrawImGui() {}
-		virtual void BindToShader(std::shared_ptr<Shader> shader);
 		const string& GetName() const { return m_Name; }
 		void* GetBufferPointer() { return m_Buffer; }
 	protected:
@@ -38,22 +44,31 @@ namespace Infinit {
 	{
 	public:
 		MaterialParameter(const string& name)
-			: Parameter(name), Value(NULL)
+			: Parameter(name), Value()
 		{
 		}
 
-		virtual void BindToShader(std::shared_ptr<Shader> shader)
+		virtual void Bind(std::shared_ptr<Shader> shader)
 		{
-			m_Buffer = shader->GetUniformBuffer(m_Name);
-			Value = ((T*)m_Buffer);
+			if (!shader)
+			{
+				IN_CORE_ERROR("Cant bind MaterialParameter {0} to invalid shader!", GetName());
+				return;
+			}
+
+
+			if (!m_Buffer) m_Buffer = shader->GetUniformBuffer(m_Name);
+
+			* ((T*)m_Buffer) = Value;
 		}
+
 
 		virtual void DrawImGui() override
 		{
-			ImGuiProperty(GetName(), (T*)Value);
+			ImGuiProperty(GetName(), (T*)&Value);
 		}
 	public:
-		T* Value;
+		T Value;
 	};
 
 	template <>
@@ -61,37 +76,34 @@ namespace Infinit {
 	{
 	public:
 		MaterialParameter(const string& name, std::shared_ptr<Texture2D> texture)
-			: Parameter(name), Slot(0), Texture(texture)
+			: Parameter(name), Slot(-1), Texture(texture)
 		{
 
 		}
 
-		virtual void Bind() override
-		{
-			if (this->Texture)
-				this->Texture->Bind(*Slot);
-		}
-
-		virtual void BindToShader(std::shared_ptr<Shader> shader) override
+		virtual void Bind(std::shared_ptr<Shader> shader) override
 		{
 			if (!shader)
 			{
 				IN_CORE_ERROR("Cant bind MaterialParameter {0} to invalid shader!", GetName());
 				return;
 			}
-			m_Buffer = shader->GetUniformBuffer(m_Name);
-			Slot = ((int*)m_Buffer);
-			if (Texture)
-				*Slot = shader->GetResourceSlot(GetName());
+
+			if (!m_Buffer) m_Buffer = shader->GetUniformBuffer(m_Name);
+			if (Slot == -1) Slot = shader->GetResourceSlot(GetName());
+
+			*(int*)m_Buffer = Slot;
+			if (this->Texture)
+				this->Texture->Bind(Slot);
 		}
 
 		virtual void DrawImGui() override
 		{
-			ImGuiProperty(GetName(), Slot);
+			ImGuiProperty(GetName(), &Slot);
 			Texture = ImGuiPropertyTex2D("Texture:", Texture);
 		}
 	public:
-		int* Slot;
+		int Slot;
 		std::shared_ptr<Texture2D> Texture;
 	};
 
@@ -100,43 +112,42 @@ namespace Infinit {
 	{
 	public:
 		MaterialParameter(const string& name, std::shared_ptr<TextureCube> texture)
-			: Parameter(name), Slot(0), Texture(texture)
+			: Parameter(name), Slot(-1), Texture(texture)
 		{
 
 		}
 
-		virtual void Bind() override
-		{
-			if (this->Texture)
-				this->Texture->Bind(*Slot);
-		}
-
-		virtual void BindToShader(std::shared_ptr<Shader> shader) override
+		virtual void Bind(std::shared_ptr<Shader> shader) override
 		{
 			if (!shader)
 			{
 				IN_CORE_ERROR("Cant bind MaterialParameter {0} to invalid shader!", GetName());
 				return;
 			}
-			m_Buffer = shader->GetUniformBuffer(m_Name);
-			Slot = ((int*)m_Buffer);
-			if (Texture)
-				*Slot = shader->GetResourceSlot(GetName());
+
+			if (!m_Buffer) m_Buffer = shader->GetUniformBuffer(m_Name);
+			if (Slot == -1) Slot = shader->GetResourceSlot(GetName());
+
+
+			*(int*)m_Buffer = Slot;
+			if (this->Texture)
+				this->Texture->Bind(Slot);
 		}
 
 		virtual void DrawImGui() override
 		{
-			ImGuiProperty(GetName(), Slot);
+			ImGuiProperty(GetName(), &Slot);
 			//Should be better
 			Texture = ImGuiPropertyTexCube("Texture:", Texture);
 		}
 	public:
-		int* Slot;
+		int Slot;
 		std::shared_ptr<TextureCube> Texture;
 	};
 
 	class Material : public Resource
 	{
+		friend class MaterialInstance;
 	public:
 		Material(const string& filePath);
 		Material(const std::shared_ptr<Shader>& shader);
@@ -144,7 +155,6 @@ namespace Infinit {
 
 		virtual bool Reload(const string& filePath) override;
 
-		void Bind();
 
 		void AddTexture(const string& shaderName, std::shared_ptr<Texture2D> texture);
 		void AddTexture(const string& shaderName, std::shared_ptr<TextureCube> texture);
@@ -155,7 +165,6 @@ namespace Infinit {
 		void AddParameter(MaterialParameter<T>* param)
 		{
 			m_Params.push_back(param);
-			m_Dirty = true;
 		}
 
 		template <typename T>
@@ -167,16 +176,30 @@ namespace Infinit {
 			return nullptr;
 		}
 
-		void DrawImGui();
 	public:
 		std::shared_ptr<Shader> ShaderProgram;
 	private:
 		std::mutex m_ParamPushMutex;
-		std::unordered_map<string, std::shared_ptr<Texture>> m_Textures;
 		std::vector<Parameter*> m_Params;
-		mutable bool m_Dirty;
 	public:
 		static std::shared_ptr<Material> DefaultMaterial;
+	};
+
+	class MaterialInstance
+	{
+	public:
+		MaterialInstance(std::shared_ptr<Material> instance);
+		~MaterialInstance();
+
+		std::shared_ptr<Shader> GetShaderProgram() { return m_Shader; }
+
+		void Bind();
+		void DrawImGui();
+	public:
+		std::shared_ptr<Material> Instance;
+	private:
+		std::shared_ptr<Shader> m_Shader;
+		std::vector<Parameter*> m_Params;
 	};
 
 }

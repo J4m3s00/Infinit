@@ -75,20 +75,13 @@ namespace Infinit {
 			if (!result) return nullptr;
 			return result->GetResource<T>();
 		}
-		void AddResourceLoadFinishCallback(const string& filePath, ResourceLoadFinishFn callback);
 
 		void ImGuiDraw();
 	private:
-		std::thread* m_Thread;
-		std::mutex m_PushPathMutex;
-		std::mutex m_InsertResourceMutex;
 		std::vector<string> m_ResourcesToLoad;
 		std::vector<std::future<void>> m_Futures;
-		std::unordered_map<string, ResourceLoadFinishFn> m_ResourceLoadFinishCallbacks;
-		std::atomic<bool> m_Running;
 		ResourceNode* m_ResourceTree;
 		ResourceNode* m_CurrentNode;
-		int m_CurrentMovedFileType = 0;
 	};
 
 }

@@ -47,11 +47,10 @@ namespace Infinit {
 
 	ResourceLoader::~ResourceLoader()
 	{
-		m_Running = false;
 		delete m_ResourceTree;
 	}
 
-	static void LoadResource(ResourceNode* resourceTree, string filePath, ResourceLoadFinishFn finishCallback)
+	static void LoadResource(ResourceNode* resourceTree, string filePath)
 	{
 		string absolutePath = filePath;
 		string relativPath = filePath;
@@ -72,8 +71,6 @@ namespace Infinit {
 		ResourceNode* node = resourceTree->Find(relativPath);
 		if (node && node->GetResource<Resource>()) return;
 		
-		//m_Futures.push_back(std::async(std::launch::async, SaveResourceInCache, &m_ResourceCache, relativPath, absolutePath, callback));
-
 		IN_CORE_TRACE("Save resource {0}", filePath);
 
 		ResourceNode::Type resourceType = GetResourceTypeByPath(relativPath);
@@ -117,23 +114,11 @@ namespace Infinit {
 			node = AddPathToResourceTree(resourceTree, relativPath);
 		}
 		node->SetResource(result);
-		(finishCallback)(result);
-		if (finishCallback)
-		{
-		}
 	}
 
 	void ResourceLoader::AddResourceToLoad(const string& path, bool bottom)
 	{
-		bool hasCallback = m_ResourceLoadFinishCallbacks.find(path) != m_ResourceLoadFinishCallbacks.end();
-		ResourceLoadFinishFn fn = m_ResourceLoadFinishCallbacks[path];
-		m_Futures.push_back(std::async(std::launch::async, LoadResource, m_ResourceTree, path, fn));
-		//AddPathToResourceTree(m_ResourceTree, path);
-	}
-
-	void ResourceLoader::AddResourceLoadFinishCallback(const string& filePath, ResourceLoadFinishFn callback)
-	{
-		m_ResourceLoadFinishCallbacks.insert({ filePath, callback });
+		m_Futures.push_back(std::async(std::launch::async, LoadResource, m_ResourceTree, path));
 	}
 
 	bool ResourceLoader::ResourceExist(const string& path, ResourceNode::Type resourceType)
@@ -177,7 +162,6 @@ namespace Infinit {
 
 			if (ImGui::BeginDragDropSource())
 			{
-				m_CurrentMovedFileType = displayNode->GetType();
 				ImGui::SetDragDropPayload("RESOURCE_NODE", (const void*) displayNode, sizeof(ResourceNode));
 				ImGui::EndDragDropSource();
 			}

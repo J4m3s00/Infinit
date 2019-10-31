@@ -17,28 +17,29 @@ namespace Infinit {
 		None = 0, Float, Float2, Float3, Float4, Color3, Color4, Int, Bool, Texture2D, TextureCube
 	};
 
-	class ParameterPreset
+	class TPreset
 	{
 	public:
-		ParameterPreset(const string& name, MaterialParameterType type);
-		~ParameterPreset();
-
-		virtual Parameter* CreateParameter();
+		TPreset(const string& name, MaterialParameterType type);
+		~TPreset();
 
 		MaterialParameterType GetType() const { return m_Type; }
 		const string& GetName() const { return m_Name; }
+
 	private:
 		MaterialParameterType m_Type;
 		string m_Name;
 	};
 
 	template <typename T>
-	class MaterialParameterPreset : public ParameterPreset
+	class ParameterPreset : public TPreset
 	{
 	public:
-		MaterialParameterPreset(const string& name, MaterialParameterType type, T value);
+		ParameterPreset(const string& name, MaterialParameterType type);
+		ParameterPreset(const string& name, MaterialParameterType type, const T& value);
 
-		virtual Parameter* CreateParameter();
+		void SetDefaultValue(T value);
+		const T& GetDefaultValue() const;
 	private:
 		T m_DefaultValue;
 	};
@@ -70,19 +71,13 @@ namespace Infinit {
 		{
 		}
 
-		virtual void Bind(std::shared_ptr<Shader> shader)
+		MaterialParameter(const string& name, const T& value)
+			: Parameter(name), Value(value)
 		{
-			if (!shader)
-			{
-				IN_CORE_ERROR("Cant bind MaterialParameter {0} to invalid shader!", GetName());
-				return;
-			}
-
-
-			if (!m_Buffer) m_Buffer = shader->GetUniformBuffer(m_Name);
-
-			* ((T*)m_Buffer) = Value;
+			
 		}
+
+		virtual void Bind(std::shared_ptr<Shader> shader);
 
 
 		virtual void DrawImGui() override
@@ -184,7 +179,7 @@ namespace Infinit {
 		std::shared_ptr<Shader> ShaderProgram;
 	private:
 		std::mutex m_ParamPushMutex;
-		std::vector<ParameterPreset> m_ParameterPresets;
+		std::vector<TPreset*> m_ParameterPresets;
 	public:
 		static std::shared_ptr<Material> DefaultMaterial;
 	};

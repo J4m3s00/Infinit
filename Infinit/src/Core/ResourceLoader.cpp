@@ -41,7 +41,6 @@ namespace Infinit {
 
 	ResourceLoader::ResourceLoader()
 	{
-		m_Thread = new std::thread(&ResourceLoader::Tick, this);
 		m_ResourceTree = new ResourceNode("res");
 		m_CurrentNode = m_ResourceTree;
 	}
@@ -49,34 +48,14 @@ namespace Infinit {
 	ResourceLoader::~ResourceLoader()
 	{
 		m_Running = false;
-		m_Thread->detach();
 		delete m_ResourceTree;
 	}
 
-	void ResourceLoader::Tick()
-	{
-		while (m_Running)
-		{
-			while (m_ResourcesToLoad.size() > 0)
-			{
-				string path = "";
-				{
-					std::lock_guard<std::mutex> lock(m_PushPathMutex);
-					path = m_ResourcesToLoad.back();
-				}
-				LoadResource(path);
-				m_ResourcesToLoad.pop_back();
-			}
-			std::this_thread::sleep_for(std::chrono::microseconds(100));
-		}
-	}
-
-	void ResourceLoader::LoadResource(const string& filePath)
+	static void LoadResource(ResourceNode* resourceTree, string filePath, ResourceLoadFinishFn finishCallback)
 	{
 		string absolutePath = filePath;
 		string relativPath = filePath;
 		std::filesystem::path path(filePath);
-		bool hasCallback = m_ResourceLoadFinishCallbacks.find(filePath) != m_ResourceLoadFinishCallbacks.end();
 
 		const string& resourcePath = Application::Get().GetApplicationPath();
 
@@ -90,7 +69,7 @@ namespace Infinit {
 		}
 
 
-		ResourceNode* node = m_ResourceTree->Find(relativPath);
+		ResourceNode* node = resourceTree->Find(relativPath);
 		if (node && node->GetResource<Resource>()) return;
 		
 		//m_Futures.push_back(std::async(std::launch::async, SaveResourceInCache, &m_ResourceCache, relativPath, absolutePath, callback));
@@ -135,29 +114,33 @@ namespace Infinit {
 		}
 		if (!node)
 		{
-			node = AddPathToResourceTree(m_ResourceTree, relativPath);
+			node = AddPathToResourceTree(resourceTree, relativPath);
 		}
 		node->SetResource(result);
-		if (hasCallback)
+		(finishCallback)(result);
+		if (finishCallback)
 		{
-			m_ResourceLoadFinishCallbacks[filePath](result);
-			m_ResourceLoadFinishCallbacks.erase(filePath);
 		}
 	}
 
 	void ResourceLoader::AddResourceToLoad(const string& path, bool bottom)
 	{
-		std::lock_guard<std::mutex> lock(m_PushPathMutex);
+		bool hasCallback = m_ResourceLoadFinishCallbacks.find(path) != m_ResourceLoadFinishCallbacks.end();
+		ResourceLoadFinishFn fn = m_ResourceLoadFinishCallbacks[path];
+		m_Futures.push_back(std::async(std::launch::async, LoadResource, m_ResourceTree, path, fn));
 		//AddPathToResourceTree(m_ResourceTree, path);
-		if (bottom)
-			m_ResourcesToLoad.insert(m_ResourcesToLoad.begin(), path);
-		else
-			m_ResourcesToLoad.push_back(path);
 	}
 
 	void ResourceLoader::AddResourceLoadFinishCallback(const string& filePath, ResourceLoadFinishFn callback)
 	{
 		m_ResourceLoadFinishCallbacks.insert({ filePath, callback });
+	}
+
+	bool ResourceLoader::ResourceExist(const string& path, ResourceNode::Type resourceType)
+	{
+		std::filesystem::path curr(path);
+		if (!std::filesystem::exists(path)) return false; 
+		return GetResourceTypeByPath(path) == resourceType;
 	}
 
 	void ResourceLoader::ImGuiDraw()
@@ -281,9 +264,11 @@ namespace Infinit {
 		return nullptr;
 	}
 
+	static std::mutex addResourceTreeMutex;
 
 	ResourceNode* AddPathToResourceTree(ResourceNode* tree, const string& path)
 	{
+		std::lock_guard<std::mutex> lock(addResourceTreeMutex);
 		std::vector<string> folders = SplitString(path, "/");
 		ResourceNode* pointer = tree;
 		ResourceNode* found = nullptr;

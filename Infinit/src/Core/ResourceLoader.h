@@ -42,9 +42,9 @@ namespace Infinit {
 
 		template <typename T >
 		std::shared_ptr<T> GetResource() { return std::dynamic_pointer_cast<T>(m_Resource); }
+		void SetResource(std::shared_ptr<Resource> resource);
 	private:
 		ResourceNode* FindRec(ResourceNode* n, const string& name);
-		void SetResource(std::shared_ptr<Resource> resource);
 	protected:
 		string m_Name;
 		Type m_NodeType;
@@ -66,6 +66,7 @@ namespace Infinit {
 		~ResourceLoader();
 
 		void AddResourceToLoad(const string& filePath, bool bottom = false);
+		bool ResourceExist(const string& path, ResourceNode::Type resourceType);
 
 		template <typename T>
 		std::shared_ptr<T> GetResource(const string& localPath) 
@@ -78,13 +79,11 @@ namespace Infinit {
 
 		void ImGuiDraw();
 	private:
-		void Tick();
-		void LoadResource(const string& filePath);
-	private:
 		std::thread* m_Thread;
 		std::mutex m_PushPathMutex;
 		std::mutex m_InsertResourceMutex;
 		std::vector<string> m_ResourcesToLoad;
+		std::vector<std::future<void>> m_Futures;
 		std::unordered_map<string, ResourceLoadFinishFn> m_ResourceLoadFinishCallbacks;
 		std::atomic<bool> m_Running;
 		ResourceNode* m_ResourceTree;

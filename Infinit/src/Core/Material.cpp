@@ -175,9 +175,8 @@ namespace Infinit {
 		lua_pushstring(L, "shader");
 		lua_gettable(L, -2);
 		const string& shaderPath = lua_tostring(L, -1);
-		ShaderProgram = app.GetResourceLoader().GetResource<Shader>(shaderPath);
-		if (!ShaderProgram)
-			app.GetResourceLoader().AddResourceLoadFinishCallback(shaderPath, [this](std::shared_ptr<Resource> shader) { this->ShaderProgram = std::dynamic_pointer_cast<Shader>(shader); });
+		while (!ShaderProgram && app.GetResourceLoader().ResourceExist(shaderPath, ResourceNode::Type::SHADER))
+			ShaderProgram = app.GetResourceLoader().GetResource<Shader>(shaderPath);
 		lua_pop(L, 1);
 
 		lua_pushstring(L, "textures");
@@ -187,22 +186,18 @@ namespace Infinit {
 		{
 			lua_pushstring(L, "name");
 			lua_gettable(L, -2);
-			string* name = new string(lua_tostring(L, -1));
+			string name(lua_tostring(L, -1));
 			lua_pop(L, 1);
 			lua_pushstring(L, "path");
 			lua_gettable(L, -2);
 			const char* path = lua_tostring(L, -1);
-			std::shared_ptr<Texture2D> texture = app.GetResourceLoader().GetResource<Texture2D>(path);
-			if (!texture)
-				app.GetResourceLoader().AddResourceLoadFinishCallback(path, [this, name](std::shared_ptr<Resource> tex) {
-				AddTexture(*name, std::dynamic_pointer_cast<Texture2D>(tex));
-				delete name;
-					});
-			else
+			std::shared_ptr<Texture2D> texture;
+			while (!texture && app.GetResourceLoader().ResourceExist(path, ResourceNode::Type::TEXTURE))
 			{
-				AddTexture(*name, texture);
-				delete name;
+				texture = app.GetResourceLoader().GetResource<Texture2D>(path);
 			}
+			if (texture)
+				AddTexture(name, texture);
 			lua_pop(L, 2);
 		}
 
@@ -249,24 +244,18 @@ namespace Infinit {
 		{
 			lua_pushstring(L, "name");
 			lua_gettable(L, -2);
-			string* name = new string(lua_tostring(L, -1));
+			string name(lua_tostring(L, -1));
 			lua_pop(L, 1);
 			lua_pushstring(L, "path");
 			lua_gettable(L, -2);
 			const char* path = lua_tostring(L, -1);
 			std::shared_ptr<TextureCube> cubeMap = app.GetResourceLoader().GetResource<TextureCube>(path);
-			if (!cubeMap)
+			while (!cubeMap && app.GetResourceLoader().ResourceExist(path, ResourceNode::Type::CUBEMAP))
 			{
-				app.GetResourceLoader().AddResourceLoadFinishCallback(path, [this, name](std::shared_ptr<Resource> tex) {
-					this->AddTexture(*name, std::dynamic_pointer_cast<TextureCube>(tex));
-					delete name;
-					});
+				cubeMap = app.GetResourceLoader().GetResource<TextureCube>(path);
 			}
-			else
-			{
-				AddTexture(*name, cubeMap);
-				delete name;
-			}
+			if (cubeMap)
+				AddTexture(name, cubeMap);
 			lua_pop(L, 2);
 		}
 
@@ -356,7 +345,7 @@ namespace Infinit {
 					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("RESOURCE_NODE"))
 					{
 						ResourceNode* node = (ResourceNode*)payload->Data;
-						if (node->GetType() == ResourceNode::Type::MESH)
+						if (node->GetType() == ResourceNode::Type::SHADER)
 						{
 							m_Shader = node->GetResource<Shader>();
 						}

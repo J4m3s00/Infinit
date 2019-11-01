@@ -142,7 +142,8 @@ namespace Infinit {
 
 	Material::~Material()
 	{
-		IN_CORE_INFO("Delete Material");
+		for (TPreset* preset : m_ParameterPresets)
+			delete preset;
 	}
 
 	bool Material::Reload(const string& filePath)

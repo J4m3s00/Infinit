@@ -125,7 +125,7 @@ namespace Infinit {
 	}
 
 	Material::Material(const string& filePath)
-		: Resource(filePath), m_ParamPushMutex()
+		: Resource(filePath)
 	{
 		Reload(filePath);
 		//while (isvalid)
@@ -135,7 +135,7 @@ namespace Infinit {
 	}
 
 	Material::Material(const std::shared_ptr<Shader>& shader)
-		: Resource(""), ShaderProgram(shader), m_ParamPushMutex()
+		: Resource(""), ShaderProgram(shader)
 	{
 
 	}
@@ -279,7 +279,6 @@ namespace Infinit {
 
 	void Material::AddTexture(const string& shaderName, std::shared_ptr<Texture2D> texture)
 	{
-		std::lock_guard<std::mutex> lock(m_ParamPushMutex);
 		ParameterPreset< std::shared_ptr<Texture2D> >* p = new ParameterPreset< std::shared_ptr<Texture2D>>(shaderName, MaterialParameterType::Texture2D);
 		p->SetDefaultValue(texture);
 		m_ParameterPresets.push_back(p);
@@ -287,7 +286,6 @@ namespace Infinit {
 
 	void Material::AddTexture(const string& shaderName, std::shared_ptr<TextureCube> texture)
 	{
-		std::lock_guard<std::mutex> lock(m_ParamPushMutex);
 		ParameterPreset<std::shared_ptr<TextureCube>>* p = new ParameterPreset<std::shared_ptr<TextureCube>>(shaderName, MaterialParameterType::TextureCube);
 		p->SetDefaultValue(texture);
 		m_ParameterPresets.push_back(p);

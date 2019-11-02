@@ -178,7 +178,6 @@ namespace Infinit {
 	public:
 		std::shared_ptr<Shader> ShaderProgram;
 	private:
-		std::mutex m_ParamPushMutex;
 		std::vector<TPreset*> m_ParameterPresets;
 	public:
 		static std::shared_ptr<Material> DefaultMaterial;

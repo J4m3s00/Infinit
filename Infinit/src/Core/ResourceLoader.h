@@ -7,6 +7,63 @@ namespace Infinit {
 
 	typedef std::function<void(std::shared_ptr<Resource>)> ResourceLoadFinishFn;
 
+	//Editor funktionality
+	class ResourceNode
+	{
+		friend class ResourceLoader;
+	public:
+		enum Type : int
+		{
+			UNKNOWN = 0,
+			FOLDER,
+			MATERIAL,
+			SHADER,
+			TEXTURE,
+			CUBEMAP,
+			MESH
+		};
+	public:
+		ResourceNode(const string& name);
+		~ResourceNode();
+
+		void SetType(Type type) { m_NodeType = type; }
+		Type GetType() { return m_NodeType; }
+
+		ResourceNode* GetNext() { return m_Next; }
+		ResourceNode* GetChild() { return m_Child; }
+		ResourceNode* GetParent() { return m_Parent; }
+		ResourceNode* GetPreviues() { return m_Prev; }
+
+		const string& GetName() const { return m_Name; }
+
+		void AddChild(ResourceNode* child);
+		void AddNext(ResourceNode* next);
+		ResourceNode* Find(const string& name);
+
+		void ForEach(std::function<void(ResourceNode*)> callback);
+		const string& GetFullPath() const;
+
+		template <typename T >
+		std::shared_ptr<T> GetResource() { return std::dynamic_pointer_cast<T>(m_Resource); }
+		void SetResource(std::shared_ptr<Resource> resource);
+	private:
+		ResourceNode* FindRec(ResourceNode* n, const string& name);
+		void ForEachRec(ResourceNode* n, std::function<void(ResourceNode*)> callback);
+	protected:
+		string m_Name;
+		mutable string m_FullPath;
+		Type m_NodeType;
+
+		ResourceNode* m_Parent;
+		ResourceNode* m_Next;
+		ResourceNode* m_Prev;
+		ResourceNode* m_Child;
+
+		std::shared_ptr<Resource> m_Resource;
+	};
+
+
+
 	class ResourceLoader
 	{
 	public:
@@ -14,19 +71,23 @@ namespace Infinit {
 		~ResourceLoader();
 
 		void AddResourceToLoad(const string& filePath, bool bottom = false);
-		std::shared_ptr<Resource> GetResource(const string& localPath);
-		void AddResourceLoadFinishCallback(const string& filePath, ResourceLoadFinishFn callback);
+		bool ResourceExist(const string& path, ResourceNode::Type resourceType);
+		void LoadCompleteResourceTree();
+
+		template <typename T>
+		std::shared_ptr<T> GetResource(const string& localPath) 
+		{
+			ResourceNode* result = m_ResourceTree->Find(localPath);
+			if (!result) return nullptr;
+			return result->GetResource<T>();
+		}
+
+		void ImGuiDraw();
 	private:
-		void Tick();
-		void LoadResource(const string& filePath);
-	private:
-		std::thread* m_Thread;
-		std::mutex m_PushPathMutex;
-		std::mutex m_InsertResourceMutex;
 		std::vector<string> m_ResourcesToLoad;
-		std::unordered_map<string, ResourceLoadFinishFn> m_ResourceLoadFinishCallbacks;
-		std::atomic<bool> m_Running;
-		std::vector<std::shared_ptr<Resource>> m_ResourceCache;
+		std::vector<std::future<void>> m_Futures;
+		ResourceNode* m_ResourceTree;
+		ResourceNode* m_CurrentNode;
 	};
 
 }

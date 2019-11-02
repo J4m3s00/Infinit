@@ -7,12 +7,42 @@
 #include "graphics/Texture.h"
 #include "graphics/Buffer.h"
 #include "Core/ImGui/ImGuiHelper.h"
+#include "graphics/Renderer.h"
 
 namespace Infinit {
+
+	class Parameter;
 
 	enum class MaterialParameterType
 	{
 		None = 0, Float, Float2, Float3, Float4, Color3, Color4, Int, Bool, Texture2D, TextureCube
+	};
+
+	class TPreset
+	{
+	public:
+		TPreset(const string& name, MaterialParameterType type);
+		~TPreset();
+
+		MaterialParameterType GetType() const { return m_Type; }
+		const string& GetName() const { return m_Name; }
+
+	private:
+		MaterialParameterType m_Type;
+		string m_Name;
+	};
+
+	template <typename T>
+	class ParameterPreset : public TPreset
+	{
+	public:
+		ParameterPreset(const string& name, MaterialParameterType type);
+		ParameterPreset(const string& name, MaterialParameterType type, const T& value);
+
+		void SetDefaultValue(const T& value);
+		const T& GetDefaultValue() const;
+	private:
+		T m_DefaultValue;
 	};
 
 	class Parameter
@@ -23,9 +53,9 @@ namespace Infinit {
 		{
 
 		}
-		virtual void Bind() {}
+
+		virtual void Bind(std::shared_ptr<Shader> shader) { if (!m_Buffer) m_Buffer = shader->GetUniformBuffer(m_Name); }
 		virtual void DrawImGui() {}
-		virtual void BindToShader(std::shared_ptr<Shader> shader);
 		const string& GetName() const { return m_Name; }
 		void* GetBufferPointer() { return m_Buffer; }
 	protected:
@@ -38,22 +68,25 @@ namespace Infinit {
 	{
 	public:
 		MaterialParameter(const string& name)
-			: Parameter(name), Value(NULL)
+			: Parameter(name), Value()
 		{
 		}
 
-		virtual void BindToShader(std::shared_ptr<Shader> shader)
+		MaterialParameter(const string& name, const T& value)
+			: Parameter(name), Value(value)
 		{
-			m_Buffer = shader->GetUniformBuffer(m_Name);
-			Value = ((T*)m_Buffer);
+			
 		}
+
+		virtual void Bind(std::shared_ptr<Shader> shader);
+
 
 		virtual void DrawImGui() override
 		{
-			ImGuiProperty(GetName(), (T*)Value);
+			ImGuiProperty(GetName(), (T*)&Value);
 		}
 	public:
-		T* Value;
+		T Value;
 	};
 
 	template <>
@@ -61,37 +94,32 @@ namespace Infinit {
 	{
 	public:
 		MaterialParameter(const string& name, std::shared_ptr<Texture2D> texture)
-			: Parameter(name), Slot(0), Texture(texture)
+			: Parameter(name), Slot(-1), Texture(texture)
 		{
 
 		}
 
-		virtual void Bind() override
-		{
-			if (this->Texture)
-				this->Texture->Bind(*Slot);
-		}
-
-		virtual void BindToShader(std::shared_ptr<Shader> shader) override
+		virtual void Bind(std::shared_ptr<Shader> shader) override
 		{
 			if (!shader)
 			{
 				IN_CORE_ERROR("Cant bind MaterialParameter {0} to invalid shader!", GetName());
 				return;
 			}
-			m_Buffer = shader->GetUniformBuffer(m_Name);
-			Slot = ((int*)m_Buffer);
-			if (Texture)
-				*Slot = shader->GetResourceSlot(GetName());
+			if (Slot == -1) Slot = shader->GetResourceSlot(GetName());
+
+			shader->SetUniformBuffer(m_Name, (byte*) &Slot, sizeof(int));
+			if (this->Texture)
+				this->Texture->Bind(Slot);
 		}
 
 		virtual void DrawImGui() override
 		{
-			ImGuiProperty(GetName(), Slot);
+			ImGuiProperty(GetName(), &Slot);
 			Texture = ImGuiPropertyTex2D("Texture:", Texture);
 		}
 	public:
-		int* Slot;
+		int Slot;
 		std::shared_ptr<Texture2D> Texture;
 	};
 
@@ -100,43 +128,38 @@ namespace Infinit {
 	{
 	public:
 		MaterialParameter(const string& name, std::shared_ptr<TextureCube> texture)
-			: Parameter(name), Slot(0), Texture(texture)
+			: Parameter(name), Slot(-1), Texture(texture)
 		{
 
 		}
 
-		virtual void Bind() override
-		{
-			if (this->Texture)
-				this->Texture->Bind(*Slot);
-		}
-
-		virtual void BindToShader(std::shared_ptr<Shader> shader) override
+		virtual void Bind(std::shared_ptr<Shader> shader) override
 		{
 			if (!shader)
 			{
 				IN_CORE_ERROR("Cant bind MaterialParameter {0} to invalid shader!", GetName());
 				return;
 			}
-			m_Buffer = shader->GetUniformBuffer(m_Name);
-			Slot = ((int*)m_Buffer);
-			if (Texture)
-				*Slot = shader->GetResourceSlot(GetName());
+			if (Slot == -1) Slot = shader->GetResourceSlot(GetName());
+			shader->SetUniformBuffer(m_Name, (byte*)&Slot, sizeof(int));
+			if (this->Texture)
+				this->Texture->Bind(Slot);
 		}
 
 		virtual void DrawImGui() override
 		{
-			ImGuiProperty(GetName(), Slot);
+			ImGuiProperty(GetName(), &Slot);
 			//Should be better
 			Texture = ImGuiPropertyTexCube("Texture:", Texture);
 		}
 	public:
-		int* Slot;
+		int Slot;
 		std::shared_ptr<TextureCube> Texture;
 	};
 
 	class Material : public Resource
 	{
+		friend class MaterialInstance;
 	public:
 		Material(const string& filePath);
 		Material(const std::shared_ptr<Shader>& shader);
@@ -144,18 +167,29 @@ namespace Infinit {
 
 		virtual bool Reload(const string& filePath) override;
 
-		void Bind();
 
 		void AddTexture(const string& shaderName, std::shared_ptr<Texture2D> texture);
 		void AddTexture(const string& shaderName, std::shared_ptr<TextureCube> texture);
+	public:
+		std::shared_ptr<Shader> ShaderProgram;
+	private:
+		std::vector<TPreset*> m_ParameterPresets;
+	public:
+		static std::shared_ptr<Material> DefaultMaterial;
+	};
 
-		void ResolveMaterialParameters();
+	class MaterialInstance
+	{
+	public:
+		MaterialInstance(std::shared_ptr<Material> instance);
+		~MaterialInstance();
+
+		std::shared_ptr<Shader> GetShaderProgram() { return m_Shader; }
 
 		template <typename T>
 		void AddParameter(MaterialParameter<T>* param)
 		{
 			m_Params.push_back(param);
-			m_Dirty = true;
 		}
 
 		template <typename T>
@@ -167,16 +201,13 @@ namespace Infinit {
 			return nullptr;
 		}
 
+		void Bind();
 		void DrawImGui();
 	public:
-		std::shared_ptr<Shader> ShaderProgram;
+		std::shared_ptr<Material> Instance;
 	private:
-		std::mutex m_ParamPushMutex;
-		std::unordered_map<string, std::shared_ptr<Texture>> m_Textures;
+		std::shared_ptr<Shader> m_Shader;
 		std::vector<Parameter*> m_Params;
-		mutable bool m_Dirty;
-	public:
-		static std::shared_ptr<Material> DefaultMaterial;
 	};
 
 }

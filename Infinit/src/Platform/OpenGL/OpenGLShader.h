@@ -7,7 +7,7 @@ namespace Infinit {
 
 	
 
-	class INFINIT_API OpenGLShader : public Shader
+	class OpenGLShader : public Shader
 	{
 	public:
 		OpenGLShader(const string& path);
@@ -28,6 +28,7 @@ namespace Infinit {
 		void SetUniformMat3(const string& name, const glm::mat3& value);
 
 		virtual byte* GetUniformBuffer(const string& name) const override;
+		virtual void SetUniformBuffer(const string& name, byte* data, size_t size) override;
 
 		virtual int GetResourceSlot(const string& name) const override;
 

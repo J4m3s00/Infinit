@@ -232,6 +232,14 @@ namespace Infinit {
 		return nullptr;
 	}
 
+	void OpenGLShader::SetUniformBuffer(const string& name, byte* value, size_t size)
+	{
+		byte* ptr = GetUniformBuffer(name);
+		IN_RENDER3(ptr, value, size, {
+				memcpy(ptr, value, size);
+			});
+	}
+
 	void OpenGLShader::ParseUniform(const string& statement)
 	{
 		std::vector<string> tokens = Tokenize(statement);

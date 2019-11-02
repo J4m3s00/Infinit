@@ -18,8 +18,8 @@
 #include "graphics/Renderer.h"
 #include "graphics/Mesh.h"
 #include "graphics/FrameBuffer.h"
-#include "Core/Material.h"
 #include "Core/Light.h"
+#include "Core/Material.h"
 
 #include "Core/ECS/GameObject.h"
 #include "Core/ECS/Component/Components.h"

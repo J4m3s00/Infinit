@@ -7,6 +7,7 @@
 #include "graphics/Texture.h"
 #include "graphics/Buffer.h"
 #include "Core/ImGui/ImGuiHelper.h"
+#include "graphics/Renderer.h"
 
 namespace Infinit {
 
@@ -105,11 +106,9 @@ namespace Infinit {
 				IN_CORE_ERROR("Cant bind MaterialParameter {0} to invalid shader!", GetName());
 				return;
 			}
-
-			if (!m_Buffer) m_Buffer = shader->GetUniformBuffer(m_Name);
 			if (Slot == -1) Slot = shader->GetResourceSlot(GetName());
 
-			*(int*)m_Buffer = Slot;
+			shader->SetUniformBuffer(m_Name, (byte*) &Slot, sizeof(int));
 			if (this->Texture)
 				this->Texture->Bind(Slot);
 		}
@@ -141,12 +140,8 @@ namespace Infinit {
 				IN_CORE_ERROR("Cant bind MaterialParameter {0} to invalid shader!", GetName());
 				return;
 			}
-
-			if (!m_Buffer) m_Buffer = shader->GetUniformBuffer(m_Name);
 			if (Slot == -1) Slot = shader->GetResourceSlot(GetName());
-
-
-			*(int*)m_Buffer = Slot;
+			shader->SetUniformBuffer(m_Name, (byte*)&Slot, sizeof(int));
 			if (this->Texture)
 				this->Texture->Bind(Slot);
 		}

@@ -44,6 +44,7 @@ namespace Infinit {
 	ResourceLoader::ResourceLoader()
 	{
 		m_ResourceTree = new ResourceNode("res");
+		m_ResourceTree->SetType(ResourceNode::Type::FOLDER);
 		m_CurrentNode = m_ResourceTree;
 	}
 

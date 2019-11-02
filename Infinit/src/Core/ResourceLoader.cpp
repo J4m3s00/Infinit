@@ -19,6 +19,8 @@
 namespace Infinit {
 
 	static ResourceNode* AddPathToResourceTree(ResourceNode* tree, const string& path);
+	std::atomic_bool CancleLoading = false;
+
 	static ResourceNode::Type GetResourceTypeByPath(const string& path)
 	{
 		size_t dotPos = path.find_last_of(".");
@@ -47,6 +49,7 @@ namespace Infinit {
 
 	ResourceLoader::~ResourceLoader()
 	{
+		CancleLoading = true;
 		delete m_ResourceTree;
 	}
 
@@ -109,23 +112,38 @@ namespace Infinit {
 			break;
 		}
 		}
-		if (!node)
+		if (!CancleLoading)
 		{
-			node = AddPathToResourceTree(resourceTree, relativPath);
+			if (!node)
+			{
+				node = AddPathToResourceTree(resourceTree, relativPath);
+			}
+			node->SetResource(result);
 		}
-		node->SetResource(result);
 	}
 
 	void ResourceLoader::AddResourceToLoad(const string& path, bool bottom)
 	{
-		m_Futures.push_back(std::async(std::launch::async, LoadResource, m_ResourceTree, path));
+		//Make check that path is relativ to res folder
+		AddPathToResourceTree(m_ResourceTree, path);
+	}
+
+	void ResourceLoader::LoadCompleteResourceTree()
+	{
+		m_ResourceTree->ForEach([this](ResourceNode* node) 
+			{ 
+				IN_CORE_INFO("Loading node \"{0}\" from type {1}", node->GetName(), node->GetType()); 
+				if (node->GetType() != ResourceNode::Type::FOLDER && node->GetType() != ResourceNode::Type::UNKNOWN) 
+				{ 
+					m_Futures.push_back(std::async(std::launch::async, LoadResource, m_ResourceTree, node->GetFullPath())); 
+				}
+			});
 	}
 
 	bool ResourceLoader::ResourceExist(const string& path, ResourceNode::Type resourceType)
 	{
-		std::filesystem::path curr(path);
-		if (!std::filesystem::exists(path)) return false; 
-		return GetResourceTypeByPath(path) == resourceType;
+		if (GetResourceTypeByPath(path) != resourceType) { return false; }
+		return m_ResourceTree->Find(path);
 	}
 
 	void ResourceLoader::ImGuiDraw()
@@ -173,8 +191,6 @@ namespace Infinit {
 		ImGui::End();
 	}
 
-	////////////////////////////////////////////////////////////////////////////////////////
-	//Editor Stuff
 
 	ResourceNode::ResourceNode(const string& name)
 		: m_Name(name)
@@ -246,6 +262,35 @@ namespace Infinit {
 			if (node->m_Child && (result = FindRec(node->m_Child, name)) != nullptr) return result;
 		}
 		return nullptr;
+	}
+
+	void ResourceNode::ForEach(std::function<void(ResourceNode*)> callback)
+	{
+		ForEachRec(this, callback);
+	}
+
+	void ResourceNode::ForEachRec(ResourceNode* node, std::function<void(ResourceNode*)> callback)
+	{
+		if (node)
+		{
+			callback(node);
+			if (node->m_Next) { ForEachRec(node->m_Next, callback); }
+			if (node->m_Child) { ForEachRec(node->m_Child, callback); }
+		}
+	}
+
+	const string& ResourceNode::GetFullPath() const
+	{
+		const ResourceNode* current = this;
+		m_FullPath.clear();
+		bool first = false;
+		do
+		{
+			m_FullPath = current->GetName() + (first ? "/" : "") + m_FullPath;
+			first = true;
+			current = current->m_Parent;
+		} while (current);
+		return m_FullPath;
 	}
 
 	static std::mutex addResourceTreeMutex;

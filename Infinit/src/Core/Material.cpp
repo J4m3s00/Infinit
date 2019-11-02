@@ -98,7 +98,7 @@ namespace Infinit {
 	}
 
 	template <typename T>
-	void ParameterPreset<T>::SetDefaultValue(T value)
+	void ParameterPreset<T>::SetDefaultValue(const T& value)
 	{
 		m_DefaultValue = value;
 	}

@@ -38,7 +38,7 @@ namespace Infinit {
 		ParameterPreset(const string& name, MaterialParameterType type);
 		ParameterPreset(const string& name, MaterialParameterType type, const T& value);
 
-		void SetDefaultValue(T value);
+		void SetDefaultValue(const T& value);
 		const T& GetDefaultValue() const;
 	private:
 		T m_DefaultValue;

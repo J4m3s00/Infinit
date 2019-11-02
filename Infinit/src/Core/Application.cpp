@@ -34,8 +34,6 @@
 
 namespace Infinit {
 
-	static void SaveResourceInCache(std::unordered_map< string, std::shared_ptr<Resource>>* resourceCache, string relativPath, string absoultePath, std::function<void(std::shared_ptr<Resource>)> callback);
-
 	struct Vertex
 	{
 		glm::vec3 position;
@@ -118,6 +116,7 @@ namespace Infinit {
 		ImGuiInit();
 
 		LoadAllResources("res/");
+		m_ResourceLoader.LoadCompleteResourceTree();
 		//SaveResourceInCache("res/cerberus.fbx");
 
 		//m_ImGuiLayer = new ImGuiLayer();
@@ -135,11 +134,8 @@ namespace Infinit {
 			{
 				string filePath = entry.path().u8string();
 				std::replace(filePath.begin(), filePath.end(), '\\', '/');
-				
-				string fileEnding = filePath.substr(filePath.find_last_of(".") + 1, filePath.size());
 
 				m_ResourceLoader.AddResourceToLoad(filePath);
-				//m_Futures.push_back(std::async(std::launch::async, SaveResourceInCache, &m_ResourceCache, filePath, std::filesystem::absolute(std::filesystem::path(filePath)).u8string()));
 			}
 			else
 			{

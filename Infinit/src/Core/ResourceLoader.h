@@ -40,13 +40,18 @@ namespace Infinit {
 		void AddNext(ResourceNode* next);
 		ResourceNode* Find(const string& name);
 
+		void ForEach(std::function<void(ResourceNode*)> callback);
+		const string& GetFullPath() const;
+
 		template <typename T >
 		std::shared_ptr<T> GetResource() { return std::dynamic_pointer_cast<T>(m_Resource); }
 		void SetResource(std::shared_ptr<Resource> resource);
 	private:
 		ResourceNode* FindRec(ResourceNode* n, const string& name);
+		void ForEachRec(ResourceNode* n, std::function<void(ResourceNode*)> callback);
 	protected:
 		string m_Name;
+		mutable string m_FullPath;
 		Type m_NodeType;
 
 		ResourceNode* m_Parent;
@@ -67,6 +72,7 @@ namespace Infinit {
 
 		void AddResourceToLoad(const string& filePath, bool bottom = false);
 		bool ResourceExist(const string& path, ResourceNode::Type resourceType);
+		void LoadCompleteResourceTree();
 
 		template <typename T>
 		std::shared_ptr<T> GetResource(const string& localPath) 

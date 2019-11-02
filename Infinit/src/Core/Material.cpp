@@ -280,16 +280,12 @@ namespace Infinit {
 
 	void Material::AddTexture(const string& shaderName, std::shared_ptr<Texture2D> texture)
 	{
-		ParameterPreset< std::shared_ptr<Texture2D> >* p = new ParameterPreset< std::shared_ptr<Texture2D>>(shaderName, MaterialParameterType::Texture2D);
-		p->SetDefaultValue(texture);
-		m_ParameterPresets.push_back(p);
+		m_ParameterPresets.push_back(new ParameterPreset< std::shared_ptr<Texture2D>>(shaderName, MaterialParameterType::Texture2D, texture));
 	}
 
 	void Material::AddTexture(const string& shaderName, std::shared_ptr<TextureCube> texture)
 	{
-		ParameterPreset<std::shared_ptr<TextureCube>>* p = new ParameterPreset<std::shared_ptr<TextureCube>>(shaderName, MaterialParameterType::TextureCube);
-		p->SetDefaultValue(texture);
-		m_ParameterPresets.push_back(p);
+		m_ParameterPresets.push_back(new ParameterPreset<std::shared_ptr<TextureCube>>(shaderName, MaterialParameterType::TextureCube, texture));
 	}
 
 	//////////////////IMGUI///////////////////////////////

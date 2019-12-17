@@ -1,11 +1,5 @@
 #pragma once
 
-#include "Core/Core.h"
-#include "Core/Light.h"
-#include "graphics/Camera.h"
-#include "graphics/FrameBuffer.h"
-#include "Core/Layer/LayerStack.h"
-
 namespace Infinit {
 
 	class Scene

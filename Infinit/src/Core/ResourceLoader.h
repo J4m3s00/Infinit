@@ -1,8 +1,5 @@
 #pragma once
 
-#include "Core/Core.h"
-#include "Core/Resource.h"
-
 namespace Infinit {
 
 	typedef std::function<void(std::shared_ptr<Resource>)> ResourceLoadFinishFn;

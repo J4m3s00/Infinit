@@ -1,6 +1,4 @@
 #include <inpch.h>
-#include "RenderCommandQueue.h"
-
 //10mb buffersize
 #define COMMAND_BUFFER_SIZE (10 * 1024 * 1024)
 

@@ -1,8 +1,4 @@
 #pragma once
-
-#include "Core/Core.h"
-#include "Events/Event.h"
-
 struct GLFWwindow;
 
 namespace Infinit {
@@ -17,7 +13,7 @@ namespace Infinit {
 		uint height;
 	};
 
-	class INFINIT_API Window
+	class Window
 	{
 	public:
 		using EventCallback = std::function<void(Event&)>;

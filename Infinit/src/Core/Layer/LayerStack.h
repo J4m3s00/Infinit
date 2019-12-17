@@ -1,8 +1,5 @@
 #pragma once
 
-#include "Core/Core.h"
-#include "inpch.h"
-
 namespace Infinit {
 	class Layer;
 

@@ -1,8 +1,5 @@
 #include "inpch.h"
-#include "OpenGLBuffer.h"
 
-#include "graphics/Renderer.h"
-#include<glad/glad.h>
 
 namespace Infinit {
 	

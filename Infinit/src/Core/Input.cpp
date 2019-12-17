@@ -1,8 +1,4 @@
 #include "inpch.h"
-#include "Input.h"
-
-#include <GLFW/glfw3.h>
-#include "Core/Application.h"
 
 namespace Infinit {
 

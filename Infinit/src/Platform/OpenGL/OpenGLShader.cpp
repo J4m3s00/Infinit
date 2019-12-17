@@ -1,14 +1,4 @@
 #include "inpch.h"
-#include "OpenGLShader.h"
-
-#include "graphics/Renderer.h"
-#include "graphics/Buffer.h"
-
-#include <glad/glad.h>
-#include "Core/Log.h"
-
-#include <Util/StringUtil.h>
-
 namespace Infinit {
 
 	OpenGLShader::OpenGLShader(const string& path)

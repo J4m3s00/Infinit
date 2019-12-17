@@ -1,7 +1,4 @@
 #include "inpch.h"
-#include "LayerStack.h"
-#include "Layer.h"
-
 namespace Infinit {
 
 	LayerStack::LayerStack()

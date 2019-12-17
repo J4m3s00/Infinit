@@ -1,12 +1,4 @@
 #include "inpch.h"
-#include "MeshComponent.h"
-#include "Core/ECS/GameObject.h"
-
-#include "graphics/Renderer.h"
-#include "Core/Application.h"
-
-#include <imgui.h>
-#include <filesystem>
 
 namespace Infinit {
 

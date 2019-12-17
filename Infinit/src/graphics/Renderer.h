@@ -1,13 +1,5 @@
 #pragma once
 
-#include "Core/Core.h"
-#include "Mesh.h"
-//TEMP
-#include "Shader.h"
-#include "Camera.h"
-#include "Core/Light.h"
-#include "RenderCommandQueue.h"
-
 namespace Infinit {
 
 	class Renderer

@@ -1,10 +1,4 @@
 #include "inpch.h"
-#include "Texture.h"
-
-#include "graphics/RendererAPI.h"
-#include "Core/Log.h"
-
-#include "Platform/OpenGL/OpenGLTexture.h"
 
 namespace Infinit {
 

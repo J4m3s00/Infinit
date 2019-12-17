@@ -1,8 +1,5 @@
 #pragma once
 
-#include "Core/Core.h"
-#include "graphics/Buffer.h"
-
 namespace Infinit {
 
 	class INFINIT_API OpenGLVertexBuffer : public VertexBuffer

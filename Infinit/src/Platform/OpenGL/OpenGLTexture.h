@@ -1,7 +1,5 @@
 #pragma once
 
-#include "graphics/Texture.h"
-
 namespace Infinit {
 
 	class OpenGLTexture2D : public Texture2D

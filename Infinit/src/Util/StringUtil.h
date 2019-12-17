@@ -1,8 +1,5 @@
 #pragma once
 
-#include "Core/Core.h"
-#include "inpch.h"
-
 namespace Infinit {
 
 	std::vector<string> SplitString(const string& str, const string& delimiters);

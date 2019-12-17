@@ -1,8 +1,5 @@
 #pragma once
 
-#include "Core/Core.h"
-#include "graphics/VertexArray.h"
-
 namespace Infinit {
 
 	class INFINIT_API OpenGLVertexArray : public VertexArray

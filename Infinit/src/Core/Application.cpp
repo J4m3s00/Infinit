@@ -1,36 +1,8 @@
-#include <inpch.h>
-#include "Application.h"
-#include "Log.h"
-#include "Layer/Layer.h"
+#include "inpch.h"
 
-#include <glad/glad.h>
-
-#include <graphics/Shader.h>
-#include <graphics/VertexArray.h>
-#include <graphics/Buffer.h>
-
-#include <glm/glm.hpp>
-#include <graphics/Renderer.h>
-#include "Util/StringUtil.h"
-
-#include <glm/gtc/matrix_transform.hpp>
-
-//Bring imgui for all platforms
-#include <GLFW/glfw3.h>
-
-#ifdef IN_PLATFORM_WINDOWS
-#include <filesystem>
-#define GLFW_EXPOSE_NATIVE_WIN32
-#include <GLFW/glfw3native.h>
-#include <Windows.h>
-#endif
-
-#include <imgui.h>
+#define IMGUI_IMPL_OPENGL_LOADER_GLAD
 #include "examples/imgui_impl_glfw.h"
 #include "examples/imgui_impl_opengl3.h"
-
-#include "Transform.h"
-#include "Events/AppEvents.h"
 
 namespace Infinit {
 
@@ -115,7 +87,13 @@ namespace Infinit {
 		Renderer::Init();
 		ImGuiInit();
 
-		LoadAllResources("res/");
+		std::filesystem::path resourcePath("res/");
+		if (std::filesystem::exists(resourcePath))
+		{
+			std::filesystem::create_directory(resourcePath);
+		}
+
+		LoadAllResources(resourcePath);
 		m_ResourceLoader.LoadCompleteResourceTree();
 		//SaveResourceInCache("res/cerberus.fbx");
 
@@ -126,7 +104,7 @@ namespace Infinit {
 	}
 
 	//Not working right now!
-	void Application::LoadAllResources(const string& folder)
+	void Application::LoadAllResources(const std::filesystem::path& folder)
 	{
 		for (const auto& entry : std::filesystem::directory_iterator(folder))
 		{

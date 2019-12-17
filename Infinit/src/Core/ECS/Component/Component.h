@@ -1,8 +1,5 @@
 #pragma once
 
-#include "Core/Core.h"
-#include "Events/Events.h"
-
 #define IN_COMPONENT(baseClass, inheritance) public:\
 	virtual string GetTypeName() const { return string(#baseClass); };\
 	static string GetTypeNameStatic() { return string(#baseClass); }\

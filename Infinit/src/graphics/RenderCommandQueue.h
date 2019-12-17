@@ -1,7 +1,4 @@
 #pragma once
-
-#include "Core/Core.h"
-
 namespace Infinit {
 	typedef void(*RenderCommandFn)(void*);
 

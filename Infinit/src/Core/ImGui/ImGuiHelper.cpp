@@ -1,8 +1,4 @@
 #include "inpch.h"
-#include "ImGuiHelper.h"
-
-#include "Core/Application.h"
-#include "graphics/Texture.h"
 
 namespace Infinit {
 

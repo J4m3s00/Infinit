@@ -1,12 +1,5 @@
 #pragma once
 
-#include "inpch.h"
-#include "Core/Core.h"
-#include "Core/Transform.h"
-#include "Core/Log.h"
-
-#include "Core/ECS/Component/Component.h"
-
 namespace Infinit {
 
 	static uint GameObjectID = 0;

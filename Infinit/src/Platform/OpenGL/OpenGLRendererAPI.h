@@ -1,7 +1,5 @@
 #pragma once
 
-#include "graphics/RendererAPI.h"
-
 namespace Infinit {
 
 	class OpenGLRendererAPI : public RendererAPI

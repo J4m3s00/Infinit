@@ -1,8 +1,5 @@
 #pragma once
 
-#include "Core/Core.h"
-#include "Events/Events.h"
-
 namespace Infinit {
 	class Scene;
 	class GameObject;

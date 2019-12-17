@@ -1,12 +1,4 @@
 #include "inpch.h"
-#include "Window.h"
-#include "Core/Log.h"
-
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-#include "Events/WindowEvent.h"
-#include "Events/InputEvent.h"
-#include "Core/KeyCodes.h"
 
 namespace Infinit {
 

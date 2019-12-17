@@ -1,9 +1,5 @@
 #pragma once
 
-#include "inpch.h"
-#include "Core/Core.h"
-#include <glm/glm.hpp>
-
 namespace Infinit {
 
 	struct Light

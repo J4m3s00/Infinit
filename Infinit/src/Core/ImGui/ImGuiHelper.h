@@ -1,9 +1,5 @@
 #pragma once
 
-#include "Core/Core.h"
-#include <imgui.h>
-#include <glm/glm.hpp>
-
 namespace Infinit {
 
 	class Texture;

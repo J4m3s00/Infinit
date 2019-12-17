@@ -1,9 +1,4 @@
 #include "inpch.h"
-#include "Layer.h"
-
-#include "Core/ECS/GameObject.h"
-#include "Core/ECS/Component/Components.h"
-#include <imgui.h>
 #include <imgui_internal.h>
 
 namespace Infinit {

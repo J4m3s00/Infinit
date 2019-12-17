@@ -1,8 +1,5 @@
 #pragma once
 
-#include "Core/Core.h"
-#include "Event.h"
-
 namespace Infinit {
 
 	class INFINIT_API KeyboardEvent : public Event

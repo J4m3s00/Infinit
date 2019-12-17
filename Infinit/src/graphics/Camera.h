@@ -1,9 +1,5 @@
 #pragma once
 
-#include "Events/Event.h"
-#include "Events/InputEvent.h"
-#include <glm/glm.hpp>
-
 namespace Infinit {
 
 	class Camera

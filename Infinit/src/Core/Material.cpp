@@ -1,18 +1,4 @@
 #include "inpch.h"
-#include "Material.h"
-
-#include "Core/Log.h"
-
-#include "Core/ImGui/ImGuiHelper.h"
-#include "Core/Application.h"
-#include "graphics/Renderer.h"
-
-extern "C" {
-	#include <lua.h>
-	#include <lauxlib.h>
-	#include <lualib.h>
-}
-
 
 namespace Infinit {
 
@@ -61,17 +47,6 @@ namespace Infinit {
 		case MaterialParameterType::TextureCube:
 			return sizeof(std::shared_ptr<TextureCube>);
 		}
-	}
-
-	bool CheckLuaError(lua_State* L, int err)
-	{
-		if (err != LUA_OK)
-		{
-			IN_CORE_ERROR("Lua: {0}", lua_tostring(L, -1));
-			lua_pop(L, 1);
-			return false;
-		}
-		return true;
 	}
 
 	TPreset::TPreset(const string& name, MaterialParameterType type)
@@ -148,6 +123,7 @@ namespace Infinit {
 
 	bool Material::Reload(const string& filePath)
 	{
+#if 0
 		lua_State* L = luaL_newstate();
 		int err = 0;
 
@@ -261,7 +237,7 @@ namespace Infinit {
 		}
 
 		lua_close(L);
-
+#endif
 		return true;
 	}
 

@@ -1,8 +1,4 @@
 #pragma once
-
-#include "Event.h"
-#include "Core/Transform.h"
-
 namespace Infinit {
 
 	class AppRenderEvent : public Event

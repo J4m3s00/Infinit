@@ -1,8 +1,4 @@
 #include "inpch.h"
-#include "Transform.h"
-
-#include <glm/gtc/matrix_transform.hpp>
-#include "Core/ImGui/ImGuiHelper.h"
 
 namespace Infinit {
 

@@ -1,9 +1,5 @@
 #pragma once
 
-#include "Core/Core.h"
-#include "Core/Resource.h"
-#include <glm/glm.hpp>
-
 namespace Infinit {
 	
 	class Shader : public Resource

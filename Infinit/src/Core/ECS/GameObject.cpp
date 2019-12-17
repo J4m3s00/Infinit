@@ -1,10 +1,4 @@
 #include "inpch.h"
-#include "GameObject.h"
-
-#include <imgui.h>
-
-//TEMP
-#include "graphics/Renderer.h"
 
 namespace Infinit {
 
@@ -31,7 +25,7 @@ namespace Infinit {
 		{
 			m_Transform = m_LocalTransform + ((AppRenderEvent&)e).GetTransform();
 			for (GameObject* go : m_Childs)
-				go->OnEvent(AppRenderEvent(m_Transform));
+				go->OnEvent((Event&) AppRenderEvent(m_Transform));
 		}
 		else
 		{

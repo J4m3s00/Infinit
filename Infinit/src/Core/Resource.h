@@ -1,7 +1,4 @@
 #pragma once
-
-#include "Core.h"
-
 namespace Infinit {
 
     class Resource

@@ -1,8 +1,5 @@
 #pragma once
 
-#include "Component.h"
-#include "graphics/Mesh.h"
-
 namespace Infinit {
 
 	class MeshComponent : public Component

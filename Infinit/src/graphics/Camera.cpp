@@ -1,12 +1,4 @@
 #include "inpch.h"
-#include "Camera.h"
-
-#define GLM_ENABLE_EXPERIMENTAL
-#include <glm/gtx/quaternion.hpp>
-
-#include <GLFW/glfw3.h>
-#include <Core/Input.h>
-
 
 #define M_PI 3.14159f
 

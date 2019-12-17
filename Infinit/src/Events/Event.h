@@ -1,8 +1,4 @@
 #pragma once
-#include "inpch.h"
-
-#include "Core/Core.h"
-
 namespace Infinit {
 
 	enum class EventType

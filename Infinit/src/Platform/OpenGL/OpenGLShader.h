@@ -1,8 +1,5 @@
 #pragma once
 
-#include "graphics/Shader.h"
-#include "graphics/ShaderUniforms.h"
-
 namespace Infinit {
 
 	

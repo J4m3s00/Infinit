@@ -1,7 +1,5 @@
 #pragma once
 
-#include "graphics/FrameBuffer.h"
-
 namespace Infinit {
 
 	class OpenGLFrameBuffer : public FrameBuffer

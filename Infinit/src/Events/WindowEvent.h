@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Event.h"
-
 namespace Infinit {
 
 	class INFINIT_API WindowResizeEvent : public Event

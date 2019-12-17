@@ -1,8 +1,4 @@
 #include "inpch.h"
-#include "OpenGLVertexArray.h"
-
-#include <glad/glad.h>
-#include "graphics/Renderer.h"
 
 namespace Infinit {
 

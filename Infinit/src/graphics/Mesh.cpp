@@ -1,15 +1,10 @@
 #include "inpch.h"
-#include "Mesh.h"
 
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 #include <assimp/Importer.hpp>
 #include <assimp/DefaultLogger.hpp>
 #include <assimp/LogStream.hpp>
-
-#include <Core/Log.h>
-#include "graphics/Renderer.h"
-#include "Core/ImGui/ImGuiHelper.h"
 
 namespace Infinit {
 

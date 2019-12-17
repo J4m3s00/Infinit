@@ -1,20 +1,4 @@
 #include "inpch.h"
-#include "ResourceLoader.h"
-
-#include "Application.h"
-#include "Resource.h"
-#include "Core/Log.h"
-
-#include "graphics/Texture.h"
-#include "Material.h"
-#include "graphics/Shader.h"
-#include "graphics/Mesh.h"
-
-#include "Util/StringUtil.h"
-
-#ifdef IN_PLATFORM_WINDOWS
-#include <filesystem>
-#endif
 
 namespace Infinit {
 

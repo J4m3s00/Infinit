@@ -1,7 +1,4 @@
 #include "inpch.h"
-#include "Component.h"
-
-#include <imgui.h>
 
 namespace Infinit {
 

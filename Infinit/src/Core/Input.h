@@ -1,8 +1,4 @@
 #pragma once
-
-#include "Core/Core.h"
-#include "Core/KeyCodes.h"
-
 namespace Infinit {
 	
 	class Input

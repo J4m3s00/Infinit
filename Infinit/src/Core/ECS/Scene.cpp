@@ -1,9 +1,4 @@
 #include "inpch.h"
-#include "Scene.h"
-#include "Core/Layer/Layer.h"
-#include "graphics/Renderer.h"
-#include "Core/Application.h"
-#include <imgui.h>
 
 namespace Infinit {
 
@@ -58,14 +53,14 @@ namespace Infinit {
 	{
 		if (ActiveCamera)
 			ActiveCamera->Update();
-		OnEvent(AppUpdateEvent(0.0f));
+		OnEvent((Event&)AppUpdateEvent(0.0f));
 	}
 
 	void Scene::Render()
 	{
 		m_RenderBuffer->Bind();
 		Renderer::Begin(ActiveCamera, LightMap);
-		OnEvent(AppRenderEvent(Transform()));
+		OnEvent((Event&)AppRenderEvent(Transform()));
 		Renderer::End();
 		m_RenderBuffer->Unbind();
 	}
@@ -109,7 +104,7 @@ namespace Infinit {
 		}
 
 		DrawImGui();
-		OnEvent(AppImGuiRenderEvent());
+		OnEvent((Event&)AppImGuiRenderEvent());
 
 		ImGui::End();
 	}

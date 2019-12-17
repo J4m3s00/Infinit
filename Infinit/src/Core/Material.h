@@ -1,14 +1,5 @@
 #pragma once
 
-#include "inpch.h"
-#include "Core/Core.h"
-#include "Core/Resource.h"
-#include "graphics/Shader.h"
-#include "graphics/Texture.h"
-#include "graphics/Buffer.h"
-#include "Core/ImGui/ImGuiHelper.h"
-#include "graphics/Renderer.h"
-
 namespace Infinit {
 
 	class Parameter;

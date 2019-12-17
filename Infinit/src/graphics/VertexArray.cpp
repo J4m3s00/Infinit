@@ -1,9 +1,4 @@
 #include "inpch.h"
-#include "VertexArray.h"
-
-#include <Platform/OpenGL/OpenGLVertexArray.h>
-#include <graphics/RendererAPI.h>
-
 namespace Infinit {
 
 	VertexArray* VertexArray::Create()

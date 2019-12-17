@@ -1,15 +1,4 @@
 #pragma once
-
-#include "Core.h"
-#include "Resource.h"
-#include "graphics/Window.h"
-#include "Events/Event.h"
-#include "Events/WindowEvent.h"
-#include "Layer/LayerStack.h"
-#include "ECS/Scene.h"
-#include "graphics/RendererAPI.h"
-#include "ResourceLoader.h"
-
 namespace Infinit {
 
 	class Shader;
@@ -40,7 +29,7 @@ namespace Infinit {
 		ResourceLoader&				GetResourceLoader() { return m_ResourceLoader; }
 	public:
 		bool Init();
-		void LoadAllResources(const string& folder);
+		void LoadAllResources(const std::filesystem::path& folder);
 		//void SaveResourceInCache(const string& relativPath, const string& absolutePath);
 		bool OnWindowClose(WindowCloseEvent& e);
 

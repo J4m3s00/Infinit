@@ -1,10 +1,4 @@
 #include "inpch.h"
-#include "FrameBuffer.h"
-
-#include "Core/Log.h"
-
-#include <Platform/OpenGL/OpenGLFrameBuffer.h>
-#include <graphics/RendererAPI.h>
 
 namespace Infinit {
 

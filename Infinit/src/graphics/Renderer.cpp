@@ -1,8 +1,4 @@
 #include "inpch.h"
-#include "Renderer.h"
-
-#include "RendererAPI.h"
-
 namespace Infinit {
 
 	Renderer* Renderer::s_Instance = nullptr;

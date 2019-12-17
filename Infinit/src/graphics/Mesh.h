@@ -1,13 +1,5 @@
 #pragma once
 
-#include "Core/Core.h"
-#include "Core/Resource.h"
-#include "inpch.h"
-#include "glm/glm.hpp"
-#include "graphics/VertexArray.h"
-#include "graphics/Texture.h"
-#include "Core/Material.h"
-
 namespace Infinit {
 
 	class Mesh : public Resource

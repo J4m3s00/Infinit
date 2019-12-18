@@ -58,6 +58,21 @@ namespace Infinit {
 	{
 	}
 
+	json TPreset::Serialize() const
+	{
+		json result = {
+			{"Type", m_Type},
+			{"Name", m_Name}
+		};
+		return result;
+	}
+
+	void TPreset::Deserialize(const json& json_object)
+	{
+		m_Type = json_object["Type"];
+		m_Name = json_object["Name"];
+	}
+
 	template <typename T>
 	ParameterPreset<T>::ParameterPreset(const string& name, MaterialParameterType type)
 		: TPreset(name, type), m_DefaultValue()
@@ -82,6 +97,21 @@ namespace Infinit {
 	const T& ParameterPreset<T>::GetDefaultValue() const
 	{
 		return m_DefaultValue;
+	}
+
+	template <typename T>
+	json ParameterPreset<T>::Serialize() const
+	{
+		json result = TPreset::Serialize();
+		//result["DefaultValue"] = m_DefaultValue;
+		return result;
+	}
+
+	template <typename T>
+	void ParameterPreset<T>::Deserialize(const json& json_object)
+	{
+		TPreset::Deserialize(json_object);
+		m_DefaultValue = *(T*)((byte*)&json_object["DefaultValue"]);
 	}
 	
 	template <typename T>
@@ -124,122 +154,42 @@ namespace Infinit {
 
 	bool Material::Reload(const string& filePath)
 	{
-#if 0
-		lua_State* L = luaL_newstate();
-		int err = 0;
-
-		if (luaL_loadfile(L, filePath.c_str()) || lua_pcall(L, 0, 0, 0))
-		{
-			IN_CORE_ERROR("Lua: {0}", lua_tostring(L, -1));
-			lua_pop(L, 1);
-			return false;
-		}
-
-
-
-		Application& app = Application::Get();
-		err = lua_getglobal(L, "material");
-		if (!lua_istable(L, -1))
-			IN_CORE_WARN("Material has no Table");
-
-		lua_pushstring(L, "name");
-		lua_gettable(L, -2);
-
-		ChangeName(lua_tostring(L, -1));
-
-		lua_pop(L, 1);
-
-
-		lua_pushstring(L, "shader");
-		lua_gettable(L, -2);
-		const string& shaderPath = lua_tostring(L, -1);
-		while (!ShaderProgram && app.GetResourceLoader().ResourceExist(shaderPath, ResourceNode::Type::SHADER))
-			ShaderProgram = app.GetResourceLoader().GetResource<Shader>(shaderPath);
-		lua_pop(L, 1);
-
-		lua_pushstring(L, "textures");
-		lua_gettable(L, -2);
-		lua_pushnil(L);
-		while (lua_next(L, -2) != 0)
-		{
-			lua_pushstring(L, "name");
-			lua_gettable(L, -2);
-			string name(lua_tostring(L, -1));
-			lua_pop(L, 1);
-			lua_pushstring(L, "path");
-			lua_gettable(L, -2);
-			const char* path = lua_tostring(L, -1);
-			std::shared_ptr<Texture2D> texture;
-			while (!texture && app.GetResourceLoader().ResourceExist(path, ResourceNode::Type::TEXTURE))
-			{
-				texture = app.GetResourceLoader().GetResource<Texture2D>(path);
-			}
-			if (texture)
-				AddTexture(name, texture);
-			lua_pop(L, 2);
-		}
-
-		lua_pop(L, 1);
-
-		lua_pushstring(L, "params");
-		lua_gettable(L, -2);
-		lua_pushnil(L);
-		while (lua_next(L, -2) != 0)
-		{
-			lua_pushstring(L, "name");
-			lua_gettable(L, -2);
-			string name = lua_tostring(L, -1);
-			lua_pop(L, 1);
-			lua_pushstring(L, "type");
-			lua_gettable(L, -2);
-			const char* type = lua_tostring(L, -1);
-			MaterialParameterType shaderType = MaterialParameterTypeFromString(type);
-
-			switch (shaderType)
-			{
-			case MaterialParameterType::Bool: m_ParameterPresets.push_back(new ParameterPreset<bool>(name, shaderType, true)); break;
-			case MaterialParameterType::Int: m_ParameterPresets.push_back(new ParameterPreset<int>(name, shaderType)); break;
-			case MaterialParameterType::Float: m_ParameterPresets.push_back(new ParameterPreset<float>(name, shaderType)); break;
-			case MaterialParameterType::Float2: m_ParameterPresets.push_back(new ParameterPreset<glm::vec2>(name, shaderType)); break;
-			case MaterialParameterType::Float3:
-			case MaterialParameterType::Color3: m_ParameterPresets.push_back(new ParameterPreset<glm::vec3>(name, shaderType)); break;
-			case MaterialParameterType::Float4:
-			case MaterialParameterType::Color4: m_ParameterPresets.push_back(new ParameterPreset<glm::vec4>(name, shaderType)); break;
-			case MaterialParameterType::Texture2D: m_ParameterPresets.push_back(new ParameterPreset<std::shared_ptr<Texture2D>>(name, shaderType)); break;
-			case MaterialParameterType::TextureCube: m_ParameterPresets.push_back(new ParameterPreset<std::shared_ptr<Texture2D>>(name, shaderType)); break;
-			default:
-				break;
-			}
-			//AddTexture(name, std::dynamic_pointer_cast<Texture2D>(app.GetResource(path)));
-			lua_pop(L, 2);
-		}
-
-		lua_pop(L, 1);
-		lua_pushstring(L, "cubemaps");
-		lua_gettable(L, -2);
-		lua_pushnil(L);
-		while (lua_next(L, -2) != 0)
-		{
-			lua_pushstring(L, "name");
-			lua_gettable(L, -2);
-			string name(lua_tostring(L, -1));
-			lua_pop(L, 1);
-			lua_pushstring(L, "path");
-			lua_gettable(L, -2);
-			const char* path = lua_tostring(L, -1);
-			std::shared_ptr<TextureCube> cubeMap = app.GetResourceLoader().GetResource<TextureCube>(path);
-			while (!cubeMap && app.GetResourceLoader().ResourceExist(path, ResourceNode::Type::CUBEMAP))
-			{
-				cubeMap = app.GetResourceLoader().GetResource<TextureCube>(path);
-			}
-			if (cubeMap)
-				AddTexture(name, cubeMap);
-			lua_pop(L, 2);
-		}
-
-		lua_close(L);
-#endif
 		return true;
+	}
+
+	json Material::Serialize() const
+	{
+		json result;
+		result["Shader"] = {
+			{"Name", m_ShaderProgram->GetName()},
+			{"Path", m_ShaderProgram->GetFilePath()}
+		};
+		json parameterArray;
+		for (auto& param : m_ParameterPresets)
+			parameterArray.push_back(param->Serialize());
+		result["ParameterPresets"] = parameterArray;
+		return result;
+	}
+
+	void Material::Deserialize(const json& json_object)
+	{
+		string path = json_object["Shader"]["Path"];
+		string name = json_object["Shader"]["Name"];
+		std::shared_ptr<Shader> shader;
+		while (!shader && Application::Get().GetResourceLoader().ResourceExist(path, ResourceNode::Type::SHADER))
+		{
+			shader = Application::Get().GetResourceLoader().GetResource<Shader>(path);
+		}
+
+		for (size_t i = 0; i < m_ParameterPresets.size(); i++)
+		{
+			delete m_ParameterPresets[i];
+		}
+		m_ParameterPresets.clear();
+		json presetArray = json_object["ParameterPresets"];
+		for (json::iterator it = presetArray.begin(); it != presetArray.end(); it++)
+		{
+		}
 	}
 
 	void Material::SetShader(std::shared_ptr<Shader> shader)
@@ -251,27 +201,33 @@ namespace Infinit {
 
 		for (const ShaderUniform& uniform : shaderUniforms) 
 		{
-			byte* uniformPtr = shader->GetUniformBuffer(uniform.Name);
-			switch (uniform.Type)
-			{
-			case Infinit::ShaderDataType::Float:		m_ParameterPresets.push_back(new ParameterPreset<float>(uniform.Name, MaterialParameterType::Float));	break;
-			case Infinit::ShaderDataType::Float2:		m_ParameterPresets.push_back(new ParameterPreset<glm::vec2>(uniform.Name, MaterialParameterType::Float2));	break;
-			case Infinit::ShaderDataType::Float3:		m_ParameterPresets.push_back(new ParameterPreset<glm::vec3>(uniform.Name, MaterialParameterType::Float3));	break;
-			case Infinit::ShaderDataType::Float4:		m_ParameterPresets.push_back(new ParameterPreset<glm::vec4>(uniform.Name, MaterialParameterType::Float4));	break;
-			case Infinit::ShaderDataType::Matrix3:		m_ParameterPresets.push_back(new ParameterPreset<glm::mat3>(uniform.Name, MaterialParameterType::Mat3));	break;
-			case Infinit::ShaderDataType::Matrix4:		m_ParameterPresets.push_back(new ParameterPreset<glm::mat4>(uniform.Name, MaterialParameterType::Mat4));	break;
-			case Infinit::ShaderDataType::Int:			m_ParameterPresets.push_back(new ParameterPreset<int>(uniform.Name, MaterialParameterType::Float));	break;
-			case Infinit::ShaderDataType::Texture2D:	m_ParameterPresets.push_back(new ParameterPreset<std::shared_ptr<Texture2D>>(uniform.Name, MaterialParameterType::Texture2D));	break;
-			case Infinit::ShaderDataType::TextureCube:	m_ParameterPresets.push_back(new ParameterPreset<std::shared_ptr<TextureCube>>(uniform.Name, MaterialParameterType::TextureCube));	break;
-			case Infinit::ShaderDataType::Int2:			m_ParameterPresets.push_back(new ParameterPreset<glm::ivec2>(uniform.Name, MaterialParameterType::Int2));	break;
-			case Infinit::ShaderDataType::Int3:			m_ParameterPresets.push_back(new ParameterPreset<glm::ivec3>(uniform.Name, MaterialParameterType::Int3));	break;
-			case Infinit::ShaderDataType::Int4:			m_ParameterPresets.push_back(new ParameterPreset<glm::ivec4>(uniform.Name, MaterialParameterType::Int4));	break;
-			case Infinit::ShaderDataType::UInt:			m_ParameterPresets.push_back(new ParameterPreset<uint>(uniform.Name, MaterialParameterType::Uint));	break;
-			case Infinit::ShaderDataType::Byte4:		m_ParameterPresets.push_back(new ParameterPreset<glm::vec4>(uniform.Name, MaterialParameterType::Color4));	break;
-			case Infinit::ShaderDataType::Bool:			m_ParameterPresets.push_back(new ParameterPreset<bool>(uniform.Name, MaterialParameterType::Bool));	break;
-			}
+			AddPresetFromType(uniform.Type, uniform.Name);
 		}
 	}
+
+
+	void Material::AddPresetFromType(ShaderDataType type, const string& name)
+	{
+		switch (type)
+		{
+		case Infinit::ShaderDataType::Float:		m_ParameterPresets.push_back(new ParameterPreset<float>(name, MaterialParameterType::Float));	break;
+		case Infinit::ShaderDataType::Float2:		m_ParameterPresets.push_back(new ParameterPreset<glm::vec2>(name, MaterialParameterType::Float2));	break;
+		case Infinit::ShaderDataType::Float3:		m_ParameterPresets.push_back(new ParameterPreset<glm::vec3>(name, MaterialParameterType::Float3));	break;
+		case Infinit::ShaderDataType::Float4:		m_ParameterPresets.push_back(new ParameterPreset<glm::vec4>(name, MaterialParameterType::Float4));	break;
+		case Infinit::ShaderDataType::Matrix3:		m_ParameterPresets.push_back(new ParameterPreset<glm::mat3>(name, MaterialParameterType::Mat3));	break;
+		case Infinit::ShaderDataType::Matrix4:		m_ParameterPresets.push_back(new ParameterPreset<glm::mat4>(name, MaterialParameterType::Mat4));	break;
+		case Infinit::ShaderDataType::Int:			m_ParameterPresets.push_back(new ParameterPreset<int>(name, MaterialParameterType::Float));	break;
+		case Infinit::ShaderDataType::Texture2D:	m_ParameterPresets.push_back(new ParameterPreset<std::shared_ptr<Texture2D>>(name, MaterialParameterType::Texture2D));	break;
+		case Infinit::ShaderDataType::TextureCube:	m_ParameterPresets.push_back(new ParameterPreset<std::shared_ptr<TextureCube>>(name, MaterialParameterType::TextureCube));	break;
+		case Infinit::ShaderDataType::Int2:			m_ParameterPresets.push_back(new ParameterPreset<glm::ivec2>(name, MaterialParameterType::Int2));	break;
+		case Infinit::ShaderDataType::Int3:			m_ParameterPresets.push_back(new ParameterPreset<glm::ivec3>(name, MaterialParameterType::Int3));	break;
+		case Infinit::ShaderDataType::Int4:			m_ParameterPresets.push_back(new ParameterPreset<glm::ivec4>(name, MaterialParameterType::Int4));	break;
+		case Infinit::ShaderDataType::UInt:			m_ParameterPresets.push_back(new ParameterPreset<uint>(name, MaterialParameterType::Uint));	break;
+		case Infinit::ShaderDataType::Byte4:		m_ParameterPresets.push_back(new ParameterPreset<glm::vec4>(name, MaterialParameterType::Color4));	break;
+		case Infinit::ShaderDataType::Bool:			m_ParameterPresets.push_back(new ParameterPreset<bool>(name, MaterialParameterType::Bool));	break;
+		}
+	}
+
 
 	void MaterialInstance::Bind()
 	{
@@ -309,25 +265,11 @@ namespace Infinit {
 
 	void MaterialInstance::DrawImGui()
 	{
-		if (ImGui::BeginPopupContextWindow())
+		if (ImGui::Button("Save##SaveMaterial"))
 		{
-			if (ImGui::MenuItem("Texture"))
-			{
-				ImGui::OpenPopup("Set Name");
-			}
-			ImGui::EndPopup();
+			std::ofstream o("pretty.json");
+			o << std::setw(4) << Instance.lock()->Serialize() << std::endl;
 		}
-
-		bool namePopupOpen = true;
-		if (ImGui::BeginPopupModal("Set Name", &namePopupOpen))
-		{
-			char* name = new char[64];
-			ImGui::Button("Close");
-			ImGui::InputText("Unknown", name, 64);
-			ImGui::EndPopup();
-			delete[] name;
-		}
-
 		if (!m_Shader.expired())
 		{
 			if (ImGui::TreeNode(("Shader " + m_Shader.lock()->GetFilePath()).c_str()))

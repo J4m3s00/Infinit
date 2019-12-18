@@ -1,0 +1,92 @@
+{
+    "ParameterPresets": [
+        {
+            "Name": "u_ViewProjectionMatrix",
+            "Type": 11
+        },
+        {
+            "Name": "u_ModelMatrix",
+            "Type": 11
+        },
+        {
+            "Name": "lights.Direction",
+            "Type": 3
+        },
+        {
+            "Name": "lights.Radiance",
+            "Type": 3
+        },
+        {
+            "Name": "u_CameraPosition",
+            "Type": 3
+        },
+        {
+            "Name": "u_AlbedoTexture",
+            "Type": 9
+        },
+        {
+            "Name": "u_NormalTexture",
+            "Type": 9
+        },
+        {
+            "Name": "u_MetalnessTexture",
+            "Type": 9
+        },
+        {
+            "Name": "u_RoughnessTexture",
+            "Type": 9
+        },
+        {
+            "Name": "u_EnvRadianceTex",
+            "Type": 10
+        },
+        {
+            "Name": "u_EnvIrradianceTex",
+            "Type": 10
+        },
+        {
+            "Name": "u_BRDFLUTTexture",
+            "Type": 9
+        },
+        {
+            "Name": "u_AlbedoColor",
+            "Type": 3
+        },
+        {
+            "Name": "u_Metalness",
+            "Type": 1
+        },
+        {
+            "Name": "u_Roughness",
+            "Type": 1
+        },
+        {
+            "Name": "u_EnvMapRotation",
+            "Type": 1
+        },
+        {
+            "Name": "u_RadiancePrefilter",
+            "Type": 1
+        },
+        {
+            "Name": "u_AlbedoTexToggle",
+            "Type": 8
+        },
+        {
+            "Name": "u_NormalTexToggle",
+            "Type": 8
+        },
+        {
+            "Name": "u_MetalnessTexToggle",
+            "Type": 8
+        },
+        {
+            "Name": "u_RoughnessTexToggle",
+            "Type": 8
+        }
+    ],
+    "Shader": {
+        "Name": "res/shaders/pbr.shader",
+        "Path": "res/shaders/pbr.shader"
+    }
+}

@@ -300,6 +300,7 @@
     <ClInclude Include="src\Platform\OpenGL\OpenGLShader.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLTexture.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLVertexArray.h" />
+    <ClInclude Include="src\Serialization\Serializable.h" />
     <ClInclude Include="src\Util\StringUtil.h" />
     <ClInclude Include="vendor\Glad\include\glad\glad.h" />
     <ClInclude Include="vendor\Glad\include\KHR\khrplatform.h" />

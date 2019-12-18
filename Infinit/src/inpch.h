@@ -37,9 +37,13 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 
+#include <nlohmann/json.hpp>
+
+using json = nlohmann::json;
 
 //////INFINIT HEADER/////////
 #include "Core/Core.h"
+#include "Serialization/Serializable.h"
 
 #include "Util/StringUtil.h"
 

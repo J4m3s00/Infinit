@@ -9,7 +9,7 @@ namespace Infinit {
 		None = 0, Float, Float2, Float3, Float4, Color3, Color4, Int, Bool, Texture2D, TextureCube, Mat4, Mat3, Int2, Int3, Int4, Uint
 	};
 
-	class TPreset
+	class TPreset : public Serializable
 	{
 	public:
 		TPreset(const string& name, MaterialParameterType type);
@@ -18,6 +18,8 @@ namespace Infinit {
 		MaterialParameterType GetType() const { return m_Type; }
 		const string& GetName() const { return m_Name; }
 
+		virtual json Serialize() const override;
+		virtual void Deserialize(const json& json_object) override;
 	private:
 		MaterialParameterType m_Type;
 		string m_Name;
@@ -29,6 +31,9 @@ namespace Infinit {
 	public:
 		ParameterPreset(const string& name, MaterialParameterType type);
 		ParameterPreset(const string& name, MaterialParameterType type, const T& value);
+
+		virtual json Serialize() const override;
+		virtual void Deserialize(const json& json_object) override;
 
 		void SetDefaultValue(const T& value);
 		const T& GetDefaultValue() const;
@@ -149,7 +154,7 @@ namespace Infinit {
 		std::shared_ptr<TextureCube> Texture;
 	};
 
-	class Material : public Resource
+	class Material : public Resource, Serializable
 	{
 		friend class MaterialInstance;
 	public:
@@ -157,12 +162,17 @@ namespace Infinit {
 		Material(const std::shared_ptr<Shader>& shader);
 		virtual ~Material();
 
+		virtual json Serialize() const override;
+		virtual void Deserialize(const json& json_object) override;
+
 		void SetShader(std::shared_ptr<Shader> shader);
 
 		virtual bool Reload(const string& filePath) override;
 
 		void AddTexture(const string& shaderName, std::shared_ptr<Texture2D> texture);
 		void AddTexture(const string& shaderName, std::shared_ptr<TextureCube> texture);
+	private:
+		void AddPresetFromType(ShaderDataType type, const string& name);
 	private:
 		std::shared_ptr<Shader> m_ShaderProgram;
 		std::vector<TPreset*> m_ParameterPresets;

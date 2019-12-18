@@ -26,6 +26,9 @@ namespace Infinit {
 
 		virtual int GetResourceSlot(const string& name) const = 0;
 
+		virtual const std::vector<ShaderUniform>& GetUniforms() const = 0;
+		virtual const std::vector<ShaderStruct>& GetStructs() const = 0;
+
 		virtual bool Reload(const string& filePath) = 0;
 
 		static std::shared_ptr<Shader> Create(const string& filePath);

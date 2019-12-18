@@ -79,12 +79,15 @@ namespace Infinit {
 			return result->GetResource<T>();
 		}
 
+		void AddNotSavedResource(std::shared_ptr<Resource> resource);
+
 		void ImGuiDraw();
 	private:
 		std::vector<string> m_ResourcesToLoad;
 		std::vector<std::future<void>> m_Futures;
 		ResourceNode* m_ResourceTree;
 		ResourceNode* m_CurrentNode;
+		std::vector<std::shared_ptr<Resource>> m_NotSaved;
 	};
 
 }

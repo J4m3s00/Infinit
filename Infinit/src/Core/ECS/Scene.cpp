@@ -124,6 +124,7 @@ namespace Infinit {
 	{
 		Application::Get().DrawResourceLoaderImGui();
 
+
 		ImGui::Begin("Components##ComponentView");
 		ImGui::End();
 
@@ -147,6 +148,7 @@ namespace Infinit {
 		ImGui::SliderFloat3("Direction", &LightMap[0].Direction[0], -360.0f, 360.0f);
 		ImGui::SliderFloat3("Radiance", &LightMap[0].Radiance[0], 0.0f, 1.0f);
 		ImGui::End();
+		 
 	}
 
 }

@@ -12,12 +12,13 @@ out DATA
 	vec2 texCoord;
 } vs_out;
 
-uniform mat4 vp_matrix;
+uniform mat4 u_ViewProjectionMatrix;
+uniform mat4 u_ModelMatrix;
 
 void main()
 {
 	vs_out.texCoord = texCoords;
-	gl_Position = vp_matrix * vec4(position, 1.0);
+	gl_Position = u_ViewProjectionMatrix * u_ModelMatrix * vec4(position, 1.0);
 }
 
 #shader fragment

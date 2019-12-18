@@ -6,7 +6,7 @@ namespace Infinit {
 
 	enum class MaterialParameterType
 	{
-		None = 0, Float, Float2, Float3, Float4, Color3, Color4, Int, Bool, Texture2D, TextureCube
+		None = 0, Float, Float2, Float3, Float4, Color3, Color4, Int, Bool, Texture2D, TextureCube, Mat4, Mat3, Int2, Int3, Int4, Uint
 	};
 
 	class TPreset
@@ -97,7 +97,11 @@ namespace Infinit {
 				IN_CORE_ERROR("Cant bind MaterialParameter {0} to invalid shader!", GetName());
 				return;
 			}
-			if (Slot == -1) Slot = shader->GetResourceSlot(GetName());
+			if (Slot == -1)
+			{
+				Slot = shader->GetResourceSlot(GetName());
+				IN_CORE_INFO("Could not find resource slot {0}", m_Name);
+			}
 
 			shader->SetUniformBuffer(m_Name, (byte*) &Slot, sizeof(int));
 			if (this->Texture)
@@ -196,6 +200,7 @@ namespace Infinit {
 		void DrawImGui();
 	private:
 		void ReloadPresets();
+		void AddParamFromPreset(TPreset* preset);
 	public:
 		std::weak_ptr<Material> Instance;
 	private:

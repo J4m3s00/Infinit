@@ -32,6 +32,10 @@ namespace Infinit {
 	extern void ImGuiProperty(const string& name, glm::vec3* value, PropertyFlags flags);
 	extern void ImGuiProperty(const string& name, glm::vec4* value, float min = -1.0f, float max = 1.0f, PropertyFlags flags = PropertyFlags::None);
 	extern void ImGuiProperty(const string& name, glm::vec4* value, PropertyFlags flags);
+	extern void ImGuiProperty(const string& name, glm::mat3* value, float min = -1.0f, float max = 1.0f, PropertyFlags flags = PropertyFlags::None);
+	extern void ImGuiProperty(const string& name, glm::mat3* value, PropertyFlags flags);
+	extern void ImGuiProperty(const string& name, glm::mat4* value, float min = -1.0f, float max = 1.0f, PropertyFlags flags = PropertyFlags::None);
+	extern void ImGuiProperty(const string& name, glm::mat4* value, PropertyFlags flags);
 	extern std::shared_ptr<Texture2D> ImGuiPropertyTex2D(const string& name, std::shared_ptr<Texture2D> tex);
 	extern std::shared_ptr<TextureCube> ImGuiPropertyTexCube(const string& name, std::shared_ptr<TextureCube> tex);
 

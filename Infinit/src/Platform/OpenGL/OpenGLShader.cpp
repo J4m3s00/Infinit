@@ -1,4 +1,7 @@
 #include "inpch.h"
+
+#define IN_SHOW_UNIFORM_WARN 0
+
 namespace Infinit {
 
 	OpenGLShader::OpenGLShader(const string& path)
@@ -218,7 +221,9 @@ namespace Infinit {
 		
 			result += ShaderDataTypeSize(uni.Type);
 		}
+#if IN_SHOW_UNIFORM_WARN
 		IN_CORE_WARN("Could not find Uniform {0} in uniformBuffer", name);
+#endif
 		return nullptr;
 	}
 
@@ -226,6 +231,7 @@ namespace Infinit {
 	{
 		byte* ptr = GetUniformBuffer(name);
 		IN_RENDER3(ptr, value, size, {
+			if (ptr)
 				memcpy(ptr, value, size);
 			});
 	}
@@ -369,7 +375,11 @@ namespace Infinit {
 
 		int result = glGetUniformLocation(m_RendererID, name.c_str());
 		if (result == -1)
+		{
+#if IN_SHOW_UNIFORM_WARN
 			IN_CORE_WARN("Could not find Uniform {0}", name);
+#endif
+		}
 		else
 			m_UniformCache[name] = result;
 		return result;

@@ -258,15 +258,15 @@ namespace Infinit {
 			case Infinit::ShaderDataType::Float2:		m_ParameterPresets.push_back(new ParameterPreset<glm::vec2>(uniform.Name, MaterialParameterType::Float2));	break;
 			case Infinit::ShaderDataType::Float3:		m_ParameterPresets.push_back(new ParameterPreset<glm::vec3>(uniform.Name, MaterialParameterType::Float3));	break;
 			case Infinit::ShaderDataType::Float4:		m_ParameterPresets.push_back(new ParameterPreset<glm::vec4>(uniform.Name, MaterialParameterType::Float4));	break;
-			case Infinit::ShaderDataType::Matrix3:		m_ParameterPresets.push_back(new ParameterPreset<glm::mat3>(uniform.Name, MaterialParameterType::Float4));	break;
-			case Infinit::ShaderDataType::Matrix4:		m_ParameterPresets.push_back(new ParameterPreset<glm::mat4>(uniform.Name, MaterialParameterType::Float4));	break;
+			case Infinit::ShaderDataType::Matrix3:		m_ParameterPresets.push_back(new ParameterPreset<glm::mat3>(uniform.Name, MaterialParameterType::Mat3));	break;
+			case Infinit::ShaderDataType::Matrix4:		m_ParameterPresets.push_back(new ParameterPreset<glm::mat4>(uniform.Name, MaterialParameterType::Mat4));	break;
 			case Infinit::ShaderDataType::Int:			m_ParameterPresets.push_back(new ParameterPreset<int>(uniform.Name, MaterialParameterType::Float));	break;
 			case Infinit::ShaderDataType::Texture2D:	m_ParameterPresets.push_back(new ParameterPreset<std::shared_ptr<Texture2D>>(uniform.Name, MaterialParameterType::Texture2D));	break;
 			case Infinit::ShaderDataType::TextureCube:	m_ParameterPresets.push_back(new ParameterPreset<std::shared_ptr<TextureCube>>(uniform.Name, MaterialParameterType::TextureCube));	break;
-			case Infinit::ShaderDataType::Int2:			m_ParameterPresets.push_back(new ParameterPreset<glm::ivec2>(uniform.Name, MaterialParameterType::Float2));	break;
-			case Infinit::ShaderDataType::Int3:			m_ParameterPresets.push_back(new ParameterPreset<glm::ivec3>(uniform.Name, MaterialParameterType::Float3));	break;
-			case Infinit::ShaderDataType::Int4:			m_ParameterPresets.push_back(new ParameterPreset<glm::ivec4>(uniform.Name, MaterialParameterType::Float4));	break;
-			case Infinit::ShaderDataType::UInt:			m_ParameterPresets.push_back(new ParameterPreset<uint>(uniform.Name, MaterialParameterType::Int));	break;
+			case Infinit::ShaderDataType::Int2:			m_ParameterPresets.push_back(new ParameterPreset<glm::ivec2>(uniform.Name, MaterialParameterType::Int2));	break;
+			case Infinit::ShaderDataType::Int3:			m_ParameterPresets.push_back(new ParameterPreset<glm::ivec3>(uniform.Name, MaterialParameterType::Int3));	break;
+			case Infinit::ShaderDataType::Int4:			m_ParameterPresets.push_back(new ParameterPreset<glm::ivec4>(uniform.Name, MaterialParameterType::Int4));	break;
+			case Infinit::ShaderDataType::UInt:			m_ParameterPresets.push_back(new ParameterPreset<uint>(uniform.Name, MaterialParameterType::Uint));	break;
 			case Infinit::ShaderDataType::Byte4:		m_ParameterPresets.push_back(new ParameterPreset<glm::vec4>(uniform.Name, MaterialParameterType::Color4));	break;
 			case Infinit::ShaderDataType::Bool:			m_ParameterPresets.push_back(new ParameterPreset<bool>(uniform.Name, MaterialParameterType::Bool));	break;
 			}
@@ -352,7 +352,6 @@ namespace Infinit {
 						{
 							m_Shader = node->GetResource<Shader>();
 							Instance.lock()->SetShader(node->GetResource<Shader>());
-							ReloadPresets();
 						}
 					}
 					ImGui::EndDragDropTarget();
@@ -366,6 +365,24 @@ namespace Infinit {
 			param->DrawImGui();
 		}
 
+		if (ImGui::Button("+##SelectShaderResource"))
+		{
+			ImGui::OpenPopup("Select Shader Resource##ResourceSelect");
+		}
+
+		static TPreset* currSelection = NULL;
+		bool open = true;
+		if (ImGui::BeginPopupModal("Select Shader Resource##ResourceSelect", &open))
+		{
+			for (auto& param : Instance.lock()->m_ParameterPresets)
+			{
+				if (ImGui::Selectable(param->GetName().c_str(), (param == currSelection))) {
+					currSelection = param;
+					AddParamFromPreset(param);
+				}
+			}
+			ImGui::EndPopup();
+		}
 	}
 
 	MaterialInstance::MaterialInstance(std::weak_ptr<Material> instance)
@@ -388,21 +405,26 @@ namespace Infinit {
 		if (m_Shader.expired()) return;
 		for (TPreset* p : Instance.lock()->m_ParameterPresets)
 		{
-
-			switch (p->GetType())
-			{
-			case MaterialParameterType::Bool: { ParameterPreset<bool>* parameter = static_cast<ParameterPreset<bool>*>							(p); AddParameter(new MaterialParameter<bool>(parameter->GetName(), parameter->GetDefaultValue())); break; }
-			case MaterialParameterType::Int: { ParameterPreset<int>* parameter = static_cast<ParameterPreset<int>*>							(p); AddParameter(new MaterialParameter<int>(parameter->GetName(), parameter->GetDefaultValue())); break; }
-			case MaterialParameterType::Float: { ParameterPreset<float>* parameter = static_cast<ParameterPreset<float>*>						(p); AddParameter(new MaterialParameter<float>(parameter->GetName(), parameter->GetDefaultValue())); break; }
-			case MaterialParameterType::Float2: { ParameterPreset<glm::vec2>* parameter = static_cast<ParameterPreset<glm::vec2>*>					(p); AddParameter(new MaterialParameter<glm::vec2>(parameter->GetName(), parameter->GetDefaultValue())); break; }
-			case MaterialParameterType::Float3:
-			case MaterialParameterType::Color3: { ParameterPreset<glm::vec3>* parameter = static_cast<ParameterPreset<glm::vec3>*>					(p); AddParameter(new MaterialParameter<glm::vec3>(parameter->GetName(), parameter->GetDefaultValue())); break; }
-			case MaterialParameterType::Float4:
-			case MaterialParameterType::Color4: { ParameterPreset<glm::vec4>* parameter = static_cast<ParameterPreset<glm::vec4>*>					(p); AddParameter(new MaterialParameter<glm::vec4>(parameter->GetName(), parameter->GetDefaultValue())); break; }
-			case MaterialParameterType::Texture2D: { ParameterPreset<std::shared_ptr<Texture2D>>* parameter = static_cast<ParameterPreset<std::shared_ptr<Texture2D>>*>	(p); AddParameter(new MaterialParameter<Texture2D>(parameter->GetName(), parameter->GetDefaultValue())); break; }
-			case MaterialParameterType::TextureCube: { ParameterPreset<std::shared_ptr<TextureCube>>* parameter = static_cast<ParameterPreset<std::shared_ptr<TextureCube>>*>	(p); AddParameter(new MaterialParameter<TextureCube>(parameter->GetName(), parameter->GetDefaultValue())); break; }
-			}
+			AddParamFromPreset(p);
 		}
 	}
 
+	void MaterialInstance::AddParamFromPreset(TPreset* preset)
+	{
+		switch (preset->GetType())
+		{
+		case MaterialParameterType::Bool: { ParameterPreset<bool>* parameter = static_cast<ParameterPreset<bool>*>							(preset); AddParameter(new MaterialParameter<bool>(parameter->GetName(), parameter->GetDefaultValue())); break; }
+		case MaterialParameterType::Int: { ParameterPreset<int>* parameter = static_cast<ParameterPreset<int>*>							(preset); AddParameter(new MaterialParameter<int>(parameter->GetName(), parameter->GetDefaultValue())); break; }
+		case MaterialParameterType::Float: { ParameterPreset<float>* parameter = static_cast<ParameterPreset<float>*>						(preset); AddParameter(new MaterialParameter<float>(parameter->GetName(), parameter->GetDefaultValue())); break; }
+		case MaterialParameterType::Float2: { ParameterPreset<glm::vec2>* parameter = static_cast<ParameterPreset<glm::vec2>*>					(preset); AddParameter(new MaterialParameter<glm::vec2>(parameter->GetName(), parameter->GetDefaultValue())); break; }
+		case MaterialParameterType::Float3:
+		case MaterialParameterType::Color3: { ParameterPreset<glm::vec3>* parameter = static_cast<ParameterPreset<glm::vec3>*>					(preset); AddParameter(new MaterialParameter<glm::vec3>(parameter->GetName(), parameter->GetDefaultValue())); break; }
+		case MaterialParameterType::Float4:
+		case MaterialParameterType::Color4: { ParameterPreset<glm::vec4>* parameter = static_cast<ParameterPreset<glm::vec4>*>					(preset); AddParameter(new MaterialParameter<glm::vec4>(parameter->GetName(), parameter->GetDefaultValue())); break; }
+		case MaterialParameterType::Texture2D: { ParameterPreset<std::shared_ptr<Texture2D>>* parameter = static_cast<ParameterPreset<std::shared_ptr<Texture2D>>*>	(preset); AddParameter(new MaterialParameter<Texture2D>(parameter->GetName(), parameter->GetDefaultValue())); break; }
+		case MaterialParameterType::TextureCube: { ParameterPreset<std::shared_ptr<TextureCube>>* parameter = static_cast<ParameterPreset<std::shared_ptr<TextureCube>>*>	(preset); AddParameter(new MaterialParameter<TextureCube>(parameter->GetName(), parameter->GetDefaultValue())); break; }
+		case MaterialParameterType::Mat3: { ParameterPreset<glm::mat3>* parameter = static_cast<ParameterPreset<glm::mat3>*> (preset);  AddParameter(new MaterialParameter<glm::mat3>(parameter->GetName(), parameter->GetDefaultValue())); break; }
+		case MaterialParameterType::Mat4: { ParameterPreset<glm::mat4>* parameter = static_cast<ParameterPreset<glm::mat4>*> (preset);  AddParameter(new MaterialParameter<glm::mat4>(parameter->GetName(), parameter->GetDefaultValue())); break; }
+		}
+	}
 }

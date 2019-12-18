@@ -10,7 +10,7 @@ namespace Infinit {
 
 	void Log::Init()
 	{
-		spdlog::set_pattern("%^[%T] %n: %v%$");
+		spdlog::set_pattern("%^[%T] %s (l.%#) %n: %v%$");
 
 		s_CoreLogger = spdlog::stdout_color_mt("INFINIT", spdlog::color_mode::always);
 		s_CoreLogger->set_level(spdlog::level::trace);

@@ -9,11 +9,11 @@
 
 #pragma once
 
-#include "spdlog/common.h"
-#include "spdlog/details/registry.h"
-#include "spdlog/logger.h"
-#include "spdlog/version.h"
-#include "spdlog/details/synchronous_factory.h"
+#include <spdlog/common.h>
+#include <spdlog/details/registry.h>
+#include <spdlog/logger.h>
+#include <spdlog/version.h>
+#include <spdlog/details/synchronous_factory.h>
 
 #include <chrono>
 #include <functional>
@@ -285,7 +285,7 @@ inline void critical(wstring_view_t fmt, const Args &... args)
 // SPDLOG_LEVEL_OFF
 //
 
-#define SPDLOG_LOGGER_CALL(logger, level, ...) (logger)->log(spdlog::source_loc{__FILE__, __LINE__, SPDLOG_FUNCTION}, level, __VA_ARGS__);
+#define SPDLOG_LOGGER_CALL(logger, level, ...) (logger)->log(spdlog::source_loc{__FILE__, __LINE__, SPDLOG_FUNCTION}, level, __VA_ARGS__)
 
 #if SPDLOG_ACTIVE_LEVEL <= SPDLOG_LEVEL_TRACE
 #define SPDLOG_LOGGER_TRACE(logger, ...) SPDLOG_LOGGER_CALL(logger, spdlog::level::trace, __VA_ARGS__)

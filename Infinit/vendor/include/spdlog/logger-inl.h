@@ -4,12 +4,12 @@
 #pragma once
 
 #ifndef SPDLOG_HEADER_ONLY
-#include "spdlog/logger.h"
+#include <spdlog/logger.h>
 #endif
 
-#include "spdlog/sinks/sink.h"
-#include "spdlog/details/backtracer.h"
-#include "spdlog/details/pattern_formatter.h"
+#include <spdlog/sinks/sink.h>
+#include <spdlog/details/backtracer.h>
+#include <spdlog/details/pattern_formatter.h>
 
 #include <cstdio>
 
@@ -150,7 +150,7 @@ SPDLOG_INLINE std::vector<sink_ptr> &logger::sinks()
 // error handler
 SPDLOG_INLINE void logger::set_error_handler(err_handler handler)
 {
-    custom_err_handler_ = handler;
+    custom_err_handler_ = std::move(handler);
 }
 
 // create new logger with same sinks and configuration.

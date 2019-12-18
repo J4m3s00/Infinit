@@ -131,6 +131,11 @@ namespace Infinit {
 		return m_ResourceTree->Find(path);
 	}
 
+	void ResourceLoader::AddNotSavedResource(std::shared_ptr<Resource> resource)
+	{
+		m_NotSaved.push_back(resource);
+	}
+
 	void ResourceLoader::ImGuiDraw()
 	{
 		ImGui::Begin("Resources##ResourceManager");

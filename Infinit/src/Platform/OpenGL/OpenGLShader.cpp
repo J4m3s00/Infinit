@@ -375,6 +375,16 @@ namespace Infinit {
 		return result;
 	}
 
+	const std::vector<ShaderUniform>& OpenGLShader::GetUniforms() const
+	{
+		return m_Uniforms;
+	}
+
+	const std::vector<ShaderStruct>& OpenGLShader::GetStructs() const
+	{
+		return m_Structs;
+	}
+
 	void OpenGLShader::UploadUniformBuffer()
 	{
 		IN_RENDER_S({

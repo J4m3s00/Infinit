@@ -152,18 +152,18 @@ namespace Infinit {
 	{
 		friend class MaterialInstance;
 	public:
-		Material(const string& filePath);
+		Material(const string& name, const string& filepath = "");
 		Material(const std::shared_ptr<Shader>& shader);
 		virtual ~Material();
 
-		virtual bool Reload(const string& filePath) override;
+		void SetShader(std::shared_ptr<Shader> shader);
 
+		virtual bool Reload(const string& filePath) override;
 
 		void AddTexture(const string& shaderName, std::shared_ptr<Texture2D> texture);
 		void AddTexture(const string& shaderName, std::shared_ptr<TextureCube> texture);
-	public:
-		std::shared_ptr<Shader> ShaderProgram;
 	private:
+		std::shared_ptr<Shader> m_ShaderProgram;
 		std::vector<TPreset*> m_ParameterPresets;
 	public:
 		static std::shared_ptr<Material> DefaultMaterial;
@@ -172,10 +172,10 @@ namespace Infinit {
 	class MaterialInstance
 	{
 	public:
-		MaterialInstance(std::shared_ptr<Material> instance);
+		MaterialInstance(std::weak_ptr<Material> instance);
 		~MaterialInstance();
 
-		std::shared_ptr<Shader> GetShaderProgram() { return m_Shader; }
+		std::shared_ptr<Shader> GetShaderProgram() { return m_Shader.lock(); }
 
 		template <typename T>
 		void AddParameter(MaterialParameter<T>* param)
@@ -194,10 +194,12 @@ namespace Infinit {
 
 		void Bind();
 		void DrawImGui();
-	public:
-		std::shared_ptr<Material> Instance;
 	private:
-		std::shared_ptr<Shader> m_Shader;
+		void ReloadPresets();
+	public:
+		std::weak_ptr<Material> Instance;
+	private:
+		std::weak_ptr<Shader> m_Shader;
 		std::vector<Parameter*> m_Params;
 	};
 

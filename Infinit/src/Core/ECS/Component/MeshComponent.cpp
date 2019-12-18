@@ -2,6 +2,7 @@
 
 namespace Infinit {
 
+	//TODO: Delete instances
 	void MeshComponent::OnEvent(Event& e)
 	{
 		if (e.GetEventType() == EventType::AppRender)
@@ -48,12 +49,15 @@ namespace Infinit {
 
 			if (UsedMaterial)
 			{
-				ImGui::Text(UsedMaterial->Instance->GetName().c_str());
+				ImGui::Text(UsedMaterial->Instance.lock()->GetName().c_str());
 			}
 
 			ImGui::Text("Material:");
 			ImGui::SameLine();
-			ImGui::Button("##Material", ImVec2(64, 64));
+			if (ImGui::Button("Create##Material", ImVec2(64, 64)))
+			{
+				ImGui::OpenPopup("Create Material##NewMatrial");
+			}
 			if (ImGui::BeginDragDropTarget())
 			{
 				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("RESOURCE_NODE"))
@@ -66,6 +70,22 @@ namespace Infinit {
 					}
 				}
 				ImGui::EndDragDropTarget();
+			}
+			bool open = true;
+			if (ImGui::BeginPopupModal("Create Material##NewMatrial", &open, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize))
+			{
+				char* materialName = new char[512]; // 512 chars long name
+				memset(materialName, 0, 512);
+				ImGui::InputText("Name", materialName, 512);
+				if (ImGui::Button("Ok"))
+				{
+					std::shared_ptr<Material> material = std::make_shared<Material>(materialName);
+					Application::Get().GetResourceLoader().AddNotSavedResource(material);
+					UsedMaterial = new MaterialInstance(material);
+
+					ImGui::CloseCurrentPopup();
+				}
+				ImGui::EndPopup();
 			}
 		}
 	}

@@ -29,6 +29,9 @@ namespace Infinit {
 
 		virtual int GetResourceSlot(const string& name) const override;
 
+		virtual const std::vector<ShaderUniform>& GetUniforms() const override;
+		virtual const std::vector<ShaderStruct>& GetStructs() const override;
+
 		virtual bool Reload(const string& filePath) override;
 	private:
 		int GetUniformLocation(const string& name);

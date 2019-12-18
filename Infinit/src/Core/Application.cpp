@@ -108,14 +108,11 @@ namespace Infinit {
 	{
 		for (const auto& entry : std::filesystem::directory_iterator(folder))
 		{
-			if (!entry.is_directory())
-			{
-				string filePath = entry.path().u8string();
-				std::replace(filePath.begin(), filePath.end(), '\\', '/');
+			string filePath = entry.path().u8string();
+			std::replace(filePath.begin(), filePath.end(), '\\', '/');
 
-				m_ResourceLoader.AddResourceToLoad(filePath);
-			}
-			else
+			m_ResourceLoader.AddResourceToLoad(filePath);
+			if (entry.is_directory())
 			{
 				LoadAllResources(entry.path().u8string());
 			}

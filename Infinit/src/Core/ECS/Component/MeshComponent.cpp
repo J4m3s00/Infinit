@@ -74,9 +74,8 @@ namespace Infinit {
 			bool open = true;
 			if (ImGui::BeginPopupModal("Create Material##NewMatrial", &open, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize))
 			{
-				char* materialName = new char[512]; // 512 chars long name
-				memset(materialName, 0, 512);
-				ImGui::InputText("Name", materialName, 512);
+				static string materialName;
+				ImGui::InputText("Name", &materialName[0], 512);
 				if (ImGui::Button("Ok"))
 				{
 					std::shared_ptr<Material> material = std::make_shared<Material>(materialName);

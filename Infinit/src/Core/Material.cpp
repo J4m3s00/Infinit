@@ -160,10 +160,13 @@ namespace Infinit {
 	json Material::Serialize() const
 	{
 		json result;
-		result["Shader"] = {
-			{"Name", m_ShaderProgram->GetName()},
-			{"Path", m_ShaderProgram->GetFilePath()}
-		};
+		if (m_ShaderProgram)
+		{
+			result["Shader"] = {
+				{"Name", m_ShaderProgram->GetName()},
+				{"Path", m_ShaderProgram->GetFilePath()}
+			};
+		}
 		json parameterArray;
 		for (auto& param : m_ParameterPresets)
 			parameterArray.push_back(param->Serialize());
@@ -265,11 +268,40 @@ namespace Infinit {
 
 	void MaterialInstance::DrawImGui()
 	{
+		bool showFileDialog = true;
 		if (ImGui::Button("Save##SaveMaterial"))
 		{
-			std::ofstream o("pretty.json");
-			o << std::setw(4) << Instance.lock()->Serialize() << std::endl;
+			if (!Application::Get().GetResourceLoader().ResourceExist(Instance.lock()->GetFilePath(), ResourceNode::MATERIAL))
+			{
+				ImGui::OpenPopup("Open File##FileDialog");
+			}
+			else
+			{
+				std::ofstream o(Instance.lock()->GetFilePath());
+				o << std::setw(4) << Instance.lock()->Serialize() << std::endl;
+			}
 		}
+		if (!Application::Get().GetResourceLoader().ResourceExist(Instance.lock()->GetFilePath(), ResourceNode::MATERIAL))
+		{
+			ResourceNode* node;
+			if (Application::Get().GetResourceLoader().ShowFileDialog(ResourceNode::Type::FOLDER, &node, &showFileDialog))
+			{
+				if (node)
+				{
+					string materialName = node->GetFullPath().c_str();
+					materialName.append("/");
+					materialName.append(Instance.lock()->GetName().c_str());
+					materialName.append(".inm");
+
+					Instance.lock()->m_FilePath = materialName;
+
+					std::ofstream o(materialName);
+					o << std::setw(4) << Instance.lock()->Serialize() << std::endl;
+				}
+				else { IN_CORE_ERROR("Returned an invalid node from the file dialog!"); }
+			}
+		}
+		
 		if (!m_Shader.expired())
 		{
 			if (ImGui::TreeNode(("Shader " + m_Shader.lock()->GetFilePath()).c_str()))

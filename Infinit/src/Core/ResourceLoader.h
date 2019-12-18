@@ -81,12 +81,14 @@ namespace Infinit {
 
 		void AddNotSavedResource(std::shared_ptr<Resource> resource);
 
+		bool ShowFileDialog(ResourceNode::Type filter, ResourceNode** currentDirectory, bool* open = NULL);
 		void ImGuiDraw();
 	private:
 		std::vector<string> m_ResourcesToLoad;
 		std::vector<std::future<void>> m_Futures;
 		ResourceNode* m_ResourceTree;
 		ResourceNode* m_CurrentNode;
+		ResourceNode* m_CurrentFileDialogNode;
 		std::vector<std::shared_ptr<Resource>> m_NotSaved;
 	};
 

@@ -30,6 +30,7 @@ namespace Infinit {
 		m_ResourceTree = new ResourceNode("res");
 		m_ResourceTree->SetType(ResourceNode::Type::FOLDER);
 		m_CurrentNode = m_ResourceTree;
+		m_CurrentFileDialogNode = m_ResourceTree;
 	}
 
 	ResourceLoader::~ResourceLoader()
@@ -134,6 +135,68 @@ namespace Infinit {
 	void ResourceLoader::AddNotSavedResource(std::shared_ptr<Resource> resource)
 	{
 		m_NotSaved.push_back(resource);
+	}
+
+	bool ResourceLoader::ShowFileDialog(ResourceNode::Type filter, ResourceNode** currentDirectory, bool* open)
+	{
+		if (ImGui::BeginPopupModal("Open File##FileDialog", open))
+		{
+			ResourceNode* displayNode = m_CurrentFileDialogNode;
+			if (displayNode)
+			{
+				if (displayNode->GetParent())
+				{
+					if (ImGui::Button("Back##bbutton"))
+					{
+						m_CurrentFileDialogNode = displayNode->GetParent();
+						while (m_CurrentFileDialogNode->GetPreviues())
+						{
+							m_CurrentFileDialogNode = m_CurrentFileDialogNode->GetPreviues();
+						}
+						displayNode = m_CurrentFileDialogNode;
+					}
+				}
+
+				do
+				{
+					if (displayNode->GetType() != filter)
+					{
+						displayNode = displayNode->GetNext();
+						continue;
+					}
+
+					if (ImGui::Button(displayNode->GetName().c_str(), { 64, 32 }))
+					{
+						*currentDirectory = m_CurrentFileDialogNode;
+
+						m_CurrentFileDialogNode = displayNode->GetChild();
+
+						if (!m_CurrentFileDialogNode) {
+							m_CurrentFileDialogNode = new ResourceNode("..");
+							m_CurrentFileDialogNode->m_Parent = displayNode;
+						}
+
+						ImGui::EndPopup();
+						return false;
+					}
+
+					displayNode = displayNode->GetNext();
+				} while (displayNode);
+			}
+
+
+			if (ImGui::Button("Ok##FileDialog_OK"))
+			{
+				*currentDirectory = m_CurrentFileDialogNode->GetParent();
+				ImGui::CloseCurrentPopup();
+				ImGui::EndPopup();
+				return true;
+			}
+
+
+			ImGui::EndPopup();
+		}
+		return false;
 	}
 
 	void ResourceLoader::ImGuiDraw()
@@ -298,6 +361,8 @@ namespace Infinit {
 				ResourceNode* temp = new ResourceNode(current);
 				temp->SetType(GetResourceTypeByPath(current));
 				pointer->AddChild(temp);
+
+
 				pointer = temp;
 			}
 			else

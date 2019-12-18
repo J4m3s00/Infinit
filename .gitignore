@@ -2,9 +2,3 @@
 .git
 bin/
 bin-int/
-*.sln
-*.vcxproj
-*.filters
-*.user
-.travis.yml
-*Makefile

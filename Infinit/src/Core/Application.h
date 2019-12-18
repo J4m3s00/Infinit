@@ -5,6 +5,7 @@ namespace Infinit {
 	class VertexArray;
 	class VertexBuffer;
 	class IndexBuffer;
+	class Scene;
 
 	class Application 
 	{

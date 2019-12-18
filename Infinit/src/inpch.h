@@ -3,16 +3,14 @@
 
 
 //
-#ifndef EXCLUDE_LIBS
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-#endif
 
 
 #ifdef IN_PLATFORM_WINDOWS
 #include <windows.h>
 #include <filesystem>
 #include <Commdlg.h>
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
 #endif
@@ -53,11 +51,12 @@
 #include "graphics/Window.h"
 #include "Core/Resource.h"
 #include "Core/ResourceLoader.h"
+#include "graphics/RendererAPI.h"
+#include "Core/Application.h"
 
 #include "Core/Light.h"
 #include "Core/ImGui/ImGuiHelper.h"
 
-#include "graphics/RendererAPI.h"
 #include "graphics/Buffer.h"
 #include "graphics/VertexArray.h"
 #include "graphics/ShaderUniforms.h"
@@ -80,7 +79,6 @@
 #include "Core/ECS/GameObject.h"
 
 
-#include "Core/Application.h"
 
 
 //PLATFORMS

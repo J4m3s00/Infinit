@@ -127,27 +127,27 @@ namespace Infinit {
 
 	void ImGuiProperty(const string& name, glm::mat4* value, float min, float max, PropertyFlags flags)
 	{
-		glm::vec4 r0 = (*value)[0];
-		glm::vec4 r1 = (*value)[1];
-		glm::vec4 r2 = (*value)[2];
-		glm::vec4 r3 = (*value)[3];
+		glm::vec4* r0 = &(*value)[0];
+		glm::vec4* r1 = &(*value)[1];
+		glm::vec4* r2 = &(*value)[2];
+		glm::vec4* r3 = &(*value)[3];
 		ImGui::Text(name.c_str());
 		ImGui::NextColumn();
 		ImGui::PushItemWidth(-1);
 		string id = "##" + name;
 		if ((int)flags & (int)PropertyFlags::DragFloat)
 		{
-			ImGui::DragFloat4((id + "r0").c_str(), &r0.x, min, max);
-			ImGui::DragFloat4((id + "r1").c_str(), &r1.x, min, max);
-			ImGui::DragFloat4((id + "r2").c_str(), &r2.x, min, max);
-			ImGui::DragFloat4((id + "r3").c_str(), &r3.x, min, max);
+			ImGui::DragFloat4((id + "r0").c_str(), &r0->x, min, max);
+			ImGui::DragFloat4((id + "r1").c_str(), &r1->x, min, max);
+			ImGui::DragFloat4((id + "r2").c_str(), &r2->x, min, max);
+			ImGui::DragFloat4((id + "r3").c_str(), &r3->x, min, max);
 		}
 		else
 		{
-			ImGui::SliderFloat4((id + "r0").c_str(), &r0.x, min, max);
-			ImGui::SliderFloat4((id + "r1").c_str(), &r1.x, min, max);
-			ImGui::SliderFloat4((id + "r2").c_str(), &r2.x, min, max);
-			ImGui::SliderFloat4((id + "r3").c_str(), &r3.x, min, max);
+			ImGui::SliderFloat4((id + "r0").c_str(), &r0->x, min, max);
+			ImGui::SliderFloat4((id + "r1").c_str(), &r1->x, min, max);
+			ImGui::SliderFloat4((id + "r2").c_str(), &r2->x, min, max);
+			ImGui::SliderFloat4((id + "r3").c_str(), &r3->x, min, max);
 		}
 
 		ImGui::PopItemWidth();
@@ -161,24 +161,24 @@ namespace Infinit {
 
 	void ImGuiProperty(const string& name, glm::mat3* value, float min, float max, PropertyFlags flags)
 	{
-		glm::vec3 r0 = (*value)[0];
-		glm::vec3 r1 = (*value)[1];
-		glm::vec3 r2 = (*value)[2];
+		glm::vec3* r0 = &(*value)[0];
+		glm::vec3* r1 = &(*value)[1];
+		glm::vec3* r2 = &(*value)[2];
 		ImGui::Text(name.c_str());
 		ImGui::NextColumn();
 		ImGui::PushItemWidth(-1);
 		string id = "##" + name;
 		if ((int)flags & (int)PropertyFlags::DragFloat)
 		{
-			ImGui::DragFloat3((id + "r0").c_str(), &r0.x, min, max);
-			ImGui::DragFloat3((id + "r1").c_str(), &r1.x, min, max);
-			ImGui::DragFloat3((id + "r2").c_str(), &r2.x, min, max);
+			ImGui::DragFloat3((id + "r0").c_str(), &r0->x, min, max);
+			ImGui::DragFloat3((id + "r1").c_str(), &r1->x, min, max);
+			ImGui::DragFloat3((id + "r2").c_str(), &r2->x, min, max);
 		}
 		else
 		{
-			ImGui::SliderFloat3((id + "r0").c_str(), &r0.x, min, max);
-			ImGui::SliderFloat3((id + "r1").c_str(), &r1.x, min, max);
-			ImGui::SliderFloat3((id + "r2").c_str(), &r2.x, min, max);
+			ImGui::SliderFloat3((id + "r0").c_str(), &r0->x, min, max);
+			ImGui::SliderFloat3((id + "r1").c_str(), &r1->x, min, max);
+			ImGui::SliderFloat3((id + "r2").c_str(), &r2->x, min, max);
 		}
 
 		ImGui::PopItemWidth();

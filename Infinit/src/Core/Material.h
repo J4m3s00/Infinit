@@ -98,10 +98,7 @@ namespace Infinit {
 				return;
 			}
 			if (Slot == -1)
-			{
 				Slot = shader->GetResourceSlot(GetName());
-				IN_CORE_INFO("Could not find resource slot {0}", m_Name);
-			}
 
 			shader->SetUniformBuffer(m_Name, (byte*) &Slot, sizeof(int));
 			if (this->Texture)

@@ -173,6 +173,7 @@ namespace Infinit {
 		void AddTexture(const string& shaderName, std::shared_ptr<TextureCube> texture);
 	private:
 		void AddPresetFromType(ShaderDataType type, const string& name);
+		void AddPresetFromType(MaterialParameterType type, const string& name);
 	private:
 		std::shared_ptr<Shader> m_ShaderProgram;
 		std::vector<TPreset*> m_ParameterPresets;
@@ -188,6 +189,8 @@ namespace Infinit {
 
 		std::shared_ptr<Shader> GetShaderProgram() { return m_Shader.lock(); }
 
+		void AddParameter(const string& name);
+
 		template <typename T>
 		void AddParameter(MaterialParameter<T>* param)
 		{
@@ -200,8 +203,11 @@ namespace Infinit {
 			for (auto& param : m_Params)
 				if (param->GetName() == name)
 					return (MaterialParameter<T>*) param;
+			IN_CORE_WARN("Could not find material parameter \"{0}\"", name);
 			return nullptr;
 		}
+
+		void UpdateShader(bool reloadParams = false);
 
 		void Bind();
 		void DrawImGui();

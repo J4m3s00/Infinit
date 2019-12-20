@@ -12,7 +12,7 @@ namespace Infinit {
 
 		string fileEnding = path.substr(dotPos + 1, path.size());
 
-		if (fileEnding == "png" || fileEnding == "tga") return ResourceNode::Type::TEXTURE;
+		if (fileEnding == "png" || fileEnding == "tga" || fileEnding == "jpg") return ResourceNode::Type::TEXTURE;
 		//Cubemaps
 		else if (fileEnding == "cubemap")return ResourceNode::Type::CUBEMAP;
 		//Materials
@@ -81,8 +81,7 @@ namespace Infinit {
 		}
 		case ResourceNode::Type::MATERIAL:
 		{
-			result = std::dynamic_pointer_cast<Resource>(std::shared_ptr <Material>(new Material(absolutePath)));
-			result->ChangeName(relativPath);
+			result = std::dynamic_pointer_cast<Resource>(std::make_shared<Material>("", absolutePath));
 			break;
 		}
 		case ResourceNode::Type::MESH:

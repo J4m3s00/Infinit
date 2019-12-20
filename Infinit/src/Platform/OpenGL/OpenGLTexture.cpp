@@ -57,7 +57,7 @@ namespace Infinit {
 		IN_CORE_INFO("Loading texture {0}", m_FilePath);
 		stbi_set_flip_vertically_on_load(false);
 		m_ImageData = stbi_load(m_FilePath.c_str(), &width, &height, &channels, STBI_rgb_alpha);
-		IN_CORE_INFO("Ready reading data");
+		IN_CORE_INFO("Ready reading data {0}", m_FilePath);
 
 		m_Width = width;
 		m_Height = height;

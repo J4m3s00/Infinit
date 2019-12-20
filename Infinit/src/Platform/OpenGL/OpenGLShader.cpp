@@ -28,9 +28,22 @@ namespace Infinit {
 
 	bool OpenGLShader::Reload(const string& filepath)
 	{
+		//Init all to zero
+		m_UniformBufferSize = 0;
+		m_UniformCache.clear();
+		delete[] m_UniformBuffer;
+		m_UniformBuffer = nullptr;
+		m_Uniforms.clear();
+		m_Structs.clear();
+		m_Resources.clear();
+		m_ShaderSource = "";
+		////////
 		if (filepath != "") m_FilePath = filepath;
-		if (m_RendererID) glDeleteProgram(m_RendererID);
-		LoadShaderFromFile(filepath);
+		if (m_RendererID != 0) {
+			glDeleteProgram(m_RendererID); 
+			m_RendererID = 0;
+		}
+		LoadShaderFromFile(m_FilePath);
 
 		CompileShader();
 		return true;
@@ -175,6 +188,7 @@ namespace Infinit {
 		if (in)
 		{
 			in.seekg(0, std::ios::end);
+			m_ShaderSource.clear();
 			m_ShaderSource.resize(in.tellg());
 			in.seekg(0, std::ios::beg);
 			in.read(&m_ShaderSource[0], m_ShaderSource.size());

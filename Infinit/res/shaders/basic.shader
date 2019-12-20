@@ -15,9 +15,11 @@ out DATA
 uniform mat4 u_ViewProjectionMatrix;
 uniform mat4 u_ModelMatrix;
 
+uniform float textureTiling = 1.0;
+
 void main()
 {
-	vs_out.texCoord = texCoords;
+	vs_out.texCoord = texCoords / textureTiling;
 	gl_Position = u_ViewProjectionMatrix * u_ModelMatrix * vec4(position, 1.0);
 }
 

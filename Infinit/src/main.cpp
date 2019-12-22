@@ -34,7 +34,7 @@ public:
 			usedMesh = resourceLoader.GetResource<Mesh>("res/cube.fbx");
 		}
 		//Set the mesh to the meshcomponent meshinstance
-		meshComponent->m_Instance = new MeshInstance(usedMesh);
+		meshComponent->m_Mesh = usedMesh;
 
 
 		//Create the material
@@ -86,7 +86,7 @@ public:
 			usedMesh = resourceLoader.GetResource<Mesh>("res/cube.fbx");
 		}
 		//Set the mesh to the meshcomponent meshinstance
-		meshComponent->m_Instance = new MeshInstance(usedMesh);
+		meshComponent->m_Mesh = usedMesh;
 
 
 		//Create the material

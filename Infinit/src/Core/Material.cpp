@@ -270,6 +270,7 @@ namespace Infinit {
 			}
 			else
 			{
+
 				std::ofstream o(Instance.lock()->GetFilePath());
 				o << std::setw(4) << Instance.lock()->Serialize() << std::endl;
 			}
@@ -362,7 +363,6 @@ namespace Infinit {
 		: Instance(instance)
 	{
 		m_Shader = instance.lock()->m_ShaderProgram;
-		ReloadPresets();
 	}
 
 	MaterialInstance::~MaterialInstance()

@@ -345,10 +345,10 @@ void main()
 	}
 
 
-	void Renderer::Draw(MeshInstance* mesh, MaterialInstance* material, const glm::mat4& modelMatrix)
+	void Renderer::Draw(std::weak_ptr<Mesh> mesh, MaterialInstance* material, const glm::mat4& modelMatrix)
 	{
 		IN_CORE_ASSERT(s_Instance, "No Renderer instance set!"); //Forgot to call Renderer::Init(); ?
-		IN_CORE_ASSERT(mesh, "Mesh not valid");
+		IN_CORE_ASSERT(!mesh.expired(), "Mesh not valid");
 		IN_CORE_ASSERT(s_Instance->m_LightMap.size() > 0, "No lights set for the scene!");
 		//IN_CORE_ASSERT(mesh->UsedMaterial, "Pls provide a Material for the model!");
 		if (!material)
@@ -377,8 +377,8 @@ void main()
 		//shader.lock()->SetUniform3f("lights.Direction", s_Instance->m_LightMap[0].Direction * TO_RADIANS);
 		material->Bind();
 
-		mesh->GetVertexArray()->Bind();
-		uint vertexCount = mesh->GetVertexCount();
+		mesh.lock()->GetVertexArray()->Bind();
+		uint vertexCount = mesh.lock()->GetVertexArray()->GetIndexBuffer()->GetCount();
 		IN_RENDER1(vertexCount, {
 				RendererAPI::s_Instance->DrawIndexed(vertexCount);
 			})

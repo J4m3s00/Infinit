@@ -7,9 +7,9 @@ namespace Infinit {
 	{
 		if (e.GetEventType() == EventType::AppRender)
 		{
-			if (m_Instance)
+			if (m_Mesh)
 			{
-				Infinit::Renderer::Draw(m_Instance, UsedMaterial, m_GameObject->GetWorldTransform().GetTransformMatrix());
+				Infinit::Renderer::Draw(m_Mesh, UsedMaterial, m_GameObject->GetWorldTransform().GetTransformMatrix());
 			}
 		}
 	}
@@ -25,9 +25,9 @@ namespace Infinit {
 	
 		if (ImGui::CollapsingHeader(GetTypeName().c_str()))
 		{
-			if (m_Instance)
+			if (m_Mesh)
 			{
-				m_Instance->DrawImGui();
+				ImGui::Text(m_Mesh->GetName().c_str());
 				ImGui::SameLine();
 			}
 			ImGui::Text("Mesh:");
@@ -40,8 +40,7 @@ namespace Infinit {
 					ResourceNode* node = (ResourceNode*)payload->Data;
 					if (node->GetType() == ResourceNode::Type::MESH)
 					{
-						if (m_Instance) delete m_Instance;
-						m_Instance = new MeshInstance(node->GetResource<Mesh>());
+						m_Mesh = node->GetResource<Mesh>();
 					}
 				}
 				ImGui::EndDragDropTarget();

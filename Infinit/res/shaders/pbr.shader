@@ -288,7 +288,7 @@ void main()
 	m_Params.Normal = normalize(vs_Input.Normal);
 	if (u_NormalTexToggle)
 	{
-		m_Params.Normal = normalize(-2.0 * texture(u_NormalTexture, vs_Input.TexCoord).rgb + 1.0);
+		m_Params.Normal = normalize(2.0 * texture(u_NormalTexture, vs_Input.TexCoord).rgb - 1.0);
 		m_Params.Normal = normalize(vs_Input.WorldNormals * m_Params.Normal);
 	}
 

@@ -363,14 +363,18 @@ void main()
 		//Clean this up!
 
 		std::weak_ptr<Shader> shader = material->GetShaderProgram();
-		if (shader.expired()) return;
+		if (shader.expired())
+		{
+			IN_CORE_WARN("Cant render mesh with invalid shader from Material \"{0}\"!");
+			return;
+		}
 
 		shader.lock()->SetUniformBuffer("u_ViewProjectionMatrix", (byte*)&s_Instance->m_ViewProjectionMatrix[0][0], sizeof(float) * 4 * 4);
 		shader.lock()->SetUniformBuffer("u_ModelMatrix", (byte*)&modelMatrix[0][0], sizeof(float) * 4 * 4);
 		shader.lock()->SetUniformBuffer("lights", (byte*) &s_Instance->m_LightMap[0], sizeof(Light));
 		shader.lock()->SetUniformBuffer("u_CameraPosition", (byte*)&s_Instance->m_CameraPosition, sizeof(glm::vec3));
 		
-		shader.lock()->SetUniform3f("lights.Direction", s_Instance->m_LightMap[0].Direction * TO_RADIANS);
+		//shader.lock()->SetUniform3f("lights.Direction", s_Instance->m_LightMap[0].Direction * TO_RADIANS);
 		material->Bind();
 
 		mesh->GetVertexArray()->Bind();
@@ -382,6 +386,7 @@ void main()
 
 	void Renderer::WaitAndRender()
 	{
+
 		m_CommandQueue.Execute();
 	}
 

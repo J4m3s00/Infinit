@@ -25,8 +25,8 @@ public:
 
 		//Get the mesh
 		std::shared_ptr<Mesh> usedMesh;
-		while (resourceLoader.ResourceExist("res/cerberus.fbx", ResourceNode::Type::MESH) && !usedMesh) {
-			usedMesh = resourceLoader.GetResource<Mesh>("res/cerberus.fbx");
+		while (resourceLoader.ResourceExist("res/cube.fbx", ResourceNode::Type::MESH) && !usedMesh) {
+			usedMesh = resourceLoader.GetResource<Mesh>("res/cube.fbx");
 		}
 		//Set the mesh to the meshcomponent meshinstance
 		meshComponent->m_Instance = new MeshInstance(usedMesh);
@@ -60,6 +60,7 @@ public:
 		meshComponent->UsedMaterial->GetParameter<Texture2D>("colorTex")->Texture = colorTex;
 		//Set the texturetiling
 		meshComponent->UsedMaterial->GetParameter<float>("textureTiling")->Value = 0.5f;
+
 	}
 };
 

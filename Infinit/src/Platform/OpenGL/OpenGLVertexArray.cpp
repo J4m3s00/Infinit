@@ -45,12 +45,14 @@ namespace Infinit {
 	{
 		IN_RENDER_S({
 		glBindVertexArray(self->m_RendererID);
+		self->m_IndexBuffer->Bind();
 			});
 	}
 
 	void OpenGLVertexArray::Unbind() const
 	{
-		IN_RENDER({
+		IN_RENDER_S({
+		self->m_IndexBuffer->Unbind();
 		glBindVertexArray(0);
 			});
 	}

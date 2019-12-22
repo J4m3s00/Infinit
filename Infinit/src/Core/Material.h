@@ -9,7 +9,7 @@ namespace Infinit {
 		None = 0, Float, Float2, Float3, Float4, Color3, Color4, Int, Bool, Texture2D, TextureCube, Mat4, Mat3, Int2, Int3, Int4, Uint
 	};
 
-	class TPreset : public Serializable
+	class TPreset
 	{
 	public:
 		TPreset(const string& name, MaterialParameterType type);
@@ -18,8 +18,6 @@ namespace Infinit {
 		MaterialParameterType GetType() const { return m_Type; }
 		const string& GetName() const { return m_Name; }
 
-		virtual json Serialize() const override;
-		virtual void Deserialize(const json& json_object) override;
 	private:
 		MaterialParameterType m_Type;
 		string m_Name;
@@ -31,9 +29,6 @@ namespace Infinit {
 	public:
 		ParameterPreset(const string& name, MaterialParameterType type);
 		ParameterPreset(const string& name, MaterialParameterType type, const T& value);
-
-		virtual json Serialize() const override;
-		virtual void Deserialize(const json& json_object) override;
 
 		void SetDefaultValue(const T& value);
 		const T& GetDefaultValue() const;

@@ -58,21 +58,6 @@ namespace Infinit {
 	{
 	}
 
-	json TPreset::Serialize() const
-	{
-		json result = {
-			{"Type", m_Type},
-			{"Name", m_Name}
-		};
-		return result;
-	}
-
-	void TPreset::Deserialize(const json& json_object)
-	{
-		m_Type = json_object["Type"];
-		m_Name = json_object["Name"];
-	}
-
 	template <typename T>
 	ParameterPreset<T>::ParameterPreset(const string& name, MaterialParameterType type)
 		: TPreset(name, type), m_DefaultValue()
@@ -98,22 +83,7 @@ namespace Infinit {
 	{
 		return m_DefaultValue;
 	}
-
-	template <typename T>
-	json ParameterPreset<T>::Serialize() const
-	{
-		json result = TPreset::Serialize();
-		//result["DefaultValue"] = m_DefaultValue;
-		return result;
-	}
-
-	template <typename T>
-	void ParameterPreset<T>::Deserialize(const json& json_object)
-	{
-		TPreset::Deserialize(json_object);
-		m_DefaultValue = *(T*)((byte*)&json_object["DefaultValue"]);
-	}
-	
+		
 	template <typename T>
 	void MaterialParameter<T>::Bind(std::shared_ptr < Shader> shader)
 	{
@@ -168,16 +138,12 @@ namespace Infinit {
 				{"Path", m_ShaderProgram->GetFilePath()}
 			};
 		}
-		json parameterArray;
-		for (auto& param : m_ParameterPresets)
-			parameterArray.push_back(param->Serialize());
-		result["ParameterPresets"] = parameterArray;
 		return result;
 	}
 
 	void Material::Deserialize(const json& json_object)
 	{
-		/*json shader_json = json_object["Shader"];
+		json shader_json = json_object["Shader"];
 		string path = "";
 		string name = "";
 		if (!shader_json.is_null())
@@ -189,20 +155,8 @@ namespace Infinit {
 		while (!shader && Application::Get().GetResourceLoader().ResourceExist(path, ResourceNode::Type::SHADER))
 		{
 			shader = Application::Get().GetResourceLoader().GetResource<Shader>(path);
-		}*/
-
-		for (size_t i = 0; i < m_ParameterPresets.size(); i++)
-		{
-			delete m_ParameterPresets[i];
 		}
-		m_ParameterPresets.clear();
-		json presetArray = json_object["ParameterPresets"];
-		for (json::iterator it = presetArray.begin(); it != presetArray.end(); it++)
-		{
-			MaterialParameterType type = (*it)["Type"];
-			string name = (*it)["Name"];
-			AddPresetFromType(type, name);
-		}
+		SetShader(shader);
 	}
 
 	void Material::SetShader(std::shared_ptr<Shader> shader)

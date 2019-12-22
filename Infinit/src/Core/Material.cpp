@@ -123,10 +123,7 @@ namespace Infinit {
 			return;
 		}
 
-		if (!m_Buffer) m_Buffer = shader->GetUniformBuffer(m_Name);
-		IN_RENDER_S({
-		*((T*)self->m_Buffer) = self->Value;
-		});
+		shader->SetUniformBuffer(m_Name, (byte*) &Value, sizeof(T));
 	}
 
 	Material::Material(const string& name, const string& filepath)

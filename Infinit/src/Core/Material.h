@@ -45,17 +45,15 @@ namespace Infinit {
 	{
 	public:
 		Parameter(const string& name)
-			: m_Name(name), m_Buffer(NULL)
+			: m_Name(name)
 		{
 
 		}
 
-		virtual void Bind(std::shared_ptr<Shader> shader) { if (!m_Buffer) m_Buffer = shader->GetUniformBuffer(m_Name); }
+		virtual void Bind(std::shared_ptr<Shader> shader) { }
 		virtual void DrawImGui() {}
 		const string& GetName() const { return m_Name; }
-		void* GetBufferPointer() { return m_Buffer; }
 	protected:
-		byte* m_Buffer;
 		string m_Name;
 	};
 

@@ -75,7 +75,11 @@ namespace Infinit {
 		std::shared_ptr<T> GetResource(const string& localPath) 
 		{
 			ResourceNode* result = m_ResourceTree->Find(localPath);
-			if (!result) return nullptr;
+			if (!result)
+			{
+				IN_CORE_ERROR("Could not find resource \"{0}\"!", localPath);
+				return nullptr;
+			}
 			return result->GetResource<T>();
 		}
 

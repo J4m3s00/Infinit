@@ -12,7 +12,7 @@ public:
 
 	virtual void OnAttach() override
 	{
-		SetUpCubeWithPbrMaterial();
+		SetupRayMarchingTest();
 	}
 
 	void SetupCubeWithBasicMaterial()
@@ -167,6 +167,47 @@ public:
 		meshComponent->UsedMaterial->GetParameter<bool>("u_MetalnessTexToggle")->Value = true;
 		meshComponent->UsedMaterial->AddParameter("u_RoughnessTexToggle");
 		meshComponent->UsedMaterial->GetParameter<bool>("u_RoughnessTexToggle")->Value = true;
+	}
+
+	
+
+
+	void SetupRayMarchingTest()
+	{
+		static std::vector<Infinit::Mesh::Vertex> planeVertex = {
+		{{-100.0f, -100.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}, {}, {}},
+		{{-100.0f,  100.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}, {}, {}},
+		{{ 100.0f,  100.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}, {}, {}},
+		{{ 100.0f, -100.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 0.0f}, {}, {}}
+		};
+
+		static std::vector<Infinit::Mesh::Index> planeIndices = {
+			{0, 1, 2},
+			{2, 3, 0}
+		};
+
+
+		using namespace Infinit;
+		std::shared_ptr<Mesh> mesh = std::make_shared<Mesh>(planeVertex, planeIndices);
+
+		ResourceLoader& resourceLoader = Application::Get().GetResourceLoader();
+
+		GameObject* gameObject = new GameObject("Hello World");
+
+		MeshComponent* meshComponent = gameObject->AddComponent<MeshComponent>();
+		meshComponent->m_Mesh = mesh;
+
+		std::shared_ptr<Shader> shader;
+		while (resourceLoader.ResourceExist("res/shaders/RayMarching.shader", ResourceNode::Type::SHADER) && !shader) {
+			shader = resourceLoader.GetResource<Shader>("res/shaders/RayMarching.shader");
+		}
+		std::shared_ptr<Material> material = std::make_shared<Material>("Ray Marching Material");
+		resourceLoader.AddNotSavedResource(material);
+		material->SetShader(shader);
+
+		meshComponent->UsedMaterial = new MaterialInstance(material);
+
+		AddGameObject(gameObject);
 	}
 };
 

@@ -45,7 +45,8 @@ namespace Infinit {
 	{
 		IN_RENDER_S({
 		glBindVertexArray(self->m_RendererID);
-		self->m_IndexBuffer->Bind();
+		if (self->m_IndexBuffer)
+			self->m_IndexBuffer->Bind();
 			});
 	}
 
@@ -87,7 +88,8 @@ namespace Infinit {
 
 		IN_RENDER_S({
 			glBindVertexArray(self->m_RendererID);
-			self->m_IndexBuffer->Bind();
+			if (self->m_IndexBuffer)
+				self->m_IndexBuffer->Bind();
 			});
 
 	}

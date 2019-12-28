@@ -340,8 +340,7 @@ void main()
 		s_Instance->m_LightMap = lightMap;
 	}
 
-	void Renderer::End()
-	{
+	void Renderer::End(){
 	}
 
 

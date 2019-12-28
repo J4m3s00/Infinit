@@ -59,7 +59,7 @@ namespace Infinit {
 		m_VertexArray->AddVertexBuffer(vertexBuffer);
 
 		std::shared_ptr<IndexBuffer> indexBuffer;
-		indexBuffer.reset(IndexBuffer::Create((const uint*)m_Indices.data(), 3));
+		indexBuffer.reset(IndexBuffer::Create((const uint*)m_Indices.data(), indices.size() * 3));
 		m_VertexArray->SetIndexBuffer(indexBuffer);
 	}
 

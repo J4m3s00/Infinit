@@ -7,7 +7,7 @@ namespace Infinit {
 		IN_COMPONENT(MeshComponent, Component)
 	public:
 		MeshComponent() : m_Mesh(nullptr), UsedMaterial(nullptr){}
-		virtual ~MeshComponent() {  }
+		virtual ~MeshComponent() { if (UsedMaterial) { delete UsedMaterial; UsedMaterial = nullptr; } }
 
 		virtual void OnEvent(Event& e);
 		virtual void DrawImGui();

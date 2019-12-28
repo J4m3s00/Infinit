@@ -207,6 +207,12 @@ public:
 
 		meshComponent->UsedMaterial = new MaterialInstance(material);
 
+
+		meshComponent->UsedMaterial->AddParameter("resolution");
+		meshComponent->UsedMaterial->GetParameter<glm::vec2>("resolution")->Value = {1.0f, 1.0f};
+		meshComponent->UsedMaterial->AddParameter("iTime");
+		meshComponent->UsedMaterial->GetParameter<float>("iTime")->Value = 1.0f;
+
 		AddGameObject(gameObject);
 	}
 };

@@ -133,8 +133,14 @@ vec3 phongIllumination(vec3 k_a, vec3 k_d, vec3 k_s, float alpha, vec3 p, vec3 e
     return color;
 }
 
+uniform vec3 K_a = vec3(0.2, 0.4, 0.2);
+uniform vec3 K_d = vec3(0.1, 0.2, 0.8);
+uniform vec3 K_s = vec3(1.0, 1.0, 1.0);
+
 void main()
 {
+    /* RAY MARCHING
+
     vec3 dir = rayDirection(45.0, resolution.xy, fs_in.texCoord);
     vec3 eye = vec3(0.0, 0.0, 5.0);
     float dist = shortestDistanceToSurface(eye, dir, MIN_DIST, MAX_DIST);
@@ -148,12 +154,14 @@ void main()
     // The closest point on the surface to the eyepoint along the view ray
     vec3 p = eye + dist * dir;
     
-    vec3 K_a = vec3(0.2, 0.2, 0.2);
-    vec3 K_d = vec3(0.7, 0.2, 0.2);
-    vec3 K_s = vec3(1.0, 1.0, 1.0);
+   
+    
+    
     float shininess = 10.0;
     
     vec3 color = phongIllumination(K_a, K_d, K_s, shininess, p, eye);
     
-    fragColor = vec4(color, 1.0);
+    fragColor = vec4(color, 1.0); */
+
+    fragColor = vec4(sin(fs_in.texCoord * 300), 0.0, 1.0);
 }

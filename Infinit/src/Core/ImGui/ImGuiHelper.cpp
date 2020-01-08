@@ -203,7 +203,7 @@ namespace Infinit {
 			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("RESOURCE_NODE"))
 			{
 				ResourceNode* node = (ResourceNode*)payload->Data;
-				if (node->GetType() == ResourceNode::Type::TEXTURE)
+				if (node->GetType() == Resource::Type::TEXTURE)
 				{
 					tex = node->GetResource<Texture2D>();
 				}
@@ -226,7 +226,7 @@ namespace Infinit {
 			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("RESOURCE_NODE"))
 			{
 				ResourceNode* node = (ResourceNode*)payload->Data;
-				if (node->GetType() == ResourceNode::Type::CUBEMAP)
+				if (node->GetType() == Resource::Type::CUBEMAP)
 				{
 					tex = node->GetResource<TextureCube>();
 				}

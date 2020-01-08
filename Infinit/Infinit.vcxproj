@@ -171,6 +171,7 @@
     <ClCompile Include="src\Core\Layer\LayerStack.cpp" />
     <ClCompile Include="src\Core\Log.cpp" />
     <ClCompile Include="src\Core\Material.cpp" />
+    <ClCompile Include="src\Core\Resource.cpp" />
     <ClCompile Include="src\Core\ResourceLoader.cpp" />
     <ClCompile Include="src\Core\Transform.cpp" />
     <ClCompile Include="src\graphics\Buffer.cpp" />

@@ -38,7 +38,7 @@ namespace Infinit {
 				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("RESOURCE_NODE"))
 				{
 					ResourceNode* node = (ResourceNode*)payload->Data;
-					if (node->GetType() == ResourceNode::Type::MESH)
+					if (node->GetResource<Resource>() && node->GetResource<Resource>()->GetType() == Resource::Type::MESH)
 					{
 						m_Mesh = node->GetResource<Mesh>();
 					}
@@ -62,7 +62,7 @@ namespace Infinit {
 				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("RESOURCE_NODE"))
 				{
 					ResourceNode* node = (ResourceNode*)payload->Data;
-					if (node->GetType() == ResourceNode::Type::MATERIAL)
+					if (node->GetResource<Resource>() && node->GetResource<Resource>()->GetType() == Resource::Type::MATERIAL)
 					{
 						if (UsedMaterial) delete UsedMaterial;
 						UsedMaterial = new MaterialInstance(node->GetResource<Material>());

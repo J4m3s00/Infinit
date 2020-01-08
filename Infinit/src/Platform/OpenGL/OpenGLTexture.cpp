@@ -25,14 +25,21 @@ namespace Infinit {
 	}
 
 	//Remove srgb??
+
+	OpenGLTexture2D::OpenGLTexture2D()
+		: Texture2D(""), m_Format(TextureFormat::None), m_Width(0), m_Height(0), m_ImageData(NULL), m_RendererID(0), m_Channels(0)
+	{
+
+	}
+
 	OpenGLTexture2D::OpenGLTexture2D(const string& path, bool srgb)
-		: Texture2D(path)
+		: Texture2D(path), m_Format(TextureFormat::None), m_Width(0), m_Height(0), m_ImageData(NULL), m_RendererID(0), m_Channels(0)
 	{
 		Reload(path);
 	}
 
 	OpenGLTexture2D::OpenGLTexture2D(TextureFormat format, uint width, uint height)
-		: Texture2D(""), m_Format(format), m_Width(width), m_Height(height)
+		: Texture2D(""), m_Format(format), m_Width(width), m_Height(height), m_ImageData(NULL), m_RendererID(0), m_Channels(0)
 	{
 		IN_RENDER_S({
 			glGenTextures(1, &self->m_RendererID);
@@ -50,6 +57,43 @@ namespace Infinit {
 		})
 	}
 
+
+	json OpenGLTexture2D::Serialize() const
+	{
+		json result = Texture2D::Serialize();
+		result["Width"] = m_Width;
+		result["Height"] = m_Height;
+		result["Format"] = m_Format;
+		result["Channles"] = m_Channels;
+
+		json pixelArray = json::array();
+		for (uint i = 0; i < m_Width * m_Height * m_Channels; i++) {
+			pixelArray.push_back(m_ImageData[i]);
+		}
+		result["ImageData"] = pixelArray;
+		return result;
+	}
+
+	void OpenGLTexture2D::Deserialize(const json& json_object)
+	{
+		m_Width = json_object["Width"]; 
+		m_Height = json_object["Height"];
+		m_Format= json_object["Format"];
+		m_Channels = json_object["Channels"];
+
+		if (m_ImageData)
+			delete[] m_ImageData;
+		m_ImageData = (byte*) malloc(m_Width * m_Height * m_Channels);
+		json json_imageData = json_object["ImageData"];
+		if (json_imageData)
+		{
+			for (uint i = 0; i < m_Width * m_Height * m_Channels; i++)
+			{
+				m_ImageData[i] = json_imageData[i];
+			}
+		}
+	}
+
 	bool OpenGLTexture2D::Reload(const string& filePath)
 	{
 		m_FilePath = filePath;
@@ -61,6 +105,7 @@ namespace Infinit {
 
 		m_Width = width;
 		m_Height = height;
+		m_Channels = channels;
 		m_Format = TextureFormat::RGBA;
 
 		IN_RENDER_S({
@@ -99,7 +144,21 @@ namespace Infinit {
 
 	}
 
+	void OpenGLTexture2D::ImGuiDraw()
+	{
+		Texture::ImGuiDraw();
+		auto viewportSize = ImGui::GetContentRegionAvail();
+		ImGui::Image((void*)m_RendererID, viewportSize);
+	}
+
 //REMOVE srgb??
+
+	OpenGLTextureCube::OpenGLTextureCube()
+		: TextureCube(""), m_Width(0), m_Height(0), m_ImageData(NULL)
+	{
+
+	}
+
 	OpenGLTextureCube::OpenGLTextureCube(const string& path, bool srgb)
 		: TextureCube(path), m_Width(0), m_Height(0)
 	{

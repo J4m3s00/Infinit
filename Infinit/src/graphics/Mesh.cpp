@@ -38,14 +38,20 @@ namespace Infinit {
 		}
 	};
 	
+	Mesh::Mesh()
+		: Resource("", Resource::Type::MESH)
+	{
+	}
+
+
 	Mesh::Mesh(const string& filename)
-		: Resource(filename)
+		: Resource(filename, Resource::Type::MESH)
 	{
 		Reload(filename);
 	}
 
 	Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<Index>& indices)
-		: Resource(""), m_Vertices(vertices), m_Indices(indices)
+		: Resource("", Resource::Type::MESH), m_Vertices(vertices), m_Indices(indices)
 	{
 		m_VertexArray.reset(VertexArray::Create());
 		std::shared_ptr<VertexBuffer> vertexBuffer;

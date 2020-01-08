@@ -5,6 +5,7 @@ namespace Infinit {
 	class OpenGLTexture2D : public Texture2D
 	{
 	public:
+		OpenGLTexture2D();
 		OpenGLTexture2D(const string& path, bool srgb);
 		OpenGLTexture2D(TextureFormat format, uint width, uint height);
 
@@ -20,18 +21,24 @@ namespace Infinit {
 		virtual bool Reload(const string& filepath);
 
 		virtual const string& GetPath() const override { return m_FilePath; }
+
+		virtual void ImGuiDraw() override;
+
+		virtual json Serialize() const override;
+		virtual void Deserialize(const json& json_object) override;
 	private:
 		uint m_RendererID;
 		TextureFormat m_Format;
 		uint m_Width;
 		uint m_Height;
-		string m_FilePath;
+		uint m_Channels;
 		byte* m_ImageData;
 	};
 
 	class OpenGLTextureCube : public TextureCube
 	{
 	public:
+		OpenGLTextureCube();
 		OpenGLTextureCube(const string& path, bool srgb = false);
 
 		virtual ~OpenGLTextureCube();

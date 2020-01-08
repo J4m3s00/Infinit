@@ -27,4 +27,15 @@ namespace Infinit {
 		return nullptr;
 	}
 
+	std::shared_ptr<Shader> Shader::Create(const json& json_object)
+	{
+		IN_CORE_ASSERT((bool)RendererAPI::Renderer, "No RenderAPI selected");
+		switch (RendererAPI::Renderer)
+		{
+		case RendererAPI::Type::OpenGL: { std::shared_ptr<OpenGLShader> result = std::make_shared<OpenGLShader>(); result->Deserialize(json_object); return result; }
+		}
+
+		return nullptr;
+	}
+
 }

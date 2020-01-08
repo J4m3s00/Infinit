@@ -4,6 +4,11 @@
 
 namespace Infinit {
 
+	OpenGLShader::OpenGLShader()
+		: Shader(""), m_RendererID(0), m_UniformBufferSize(0), m_UniformBuffer(nullptr)
+	{
+	}
+
 	OpenGLShader::OpenGLShader(const string& path)
 		: Shader(path), m_RendererID(0), m_UniformBufferSize(0)
 	{
@@ -26,6 +31,37 @@ namespace Infinit {
 			})
 	}
 
+	json OpenGLShader::Serialize() const
+	{
+		json result = Shader::Serialize();
+		result["GLSource"] = m_ShaderSource;
+		return result;
+	}
+
+	void OpenGLShader::Deserialize(const json& json_object)
+	{
+		//Init all to zero
+		m_UniformBufferSize = 0;
+		m_UniformCache.clear();
+		m_Uniforms.clear();
+		m_Structs.clear();
+		m_Resources.clear();
+		if (m_UniformBuffer)
+			delete[] m_UniformBuffer;
+		m_UniformBuffer = nullptr;
+		m_ShaderSource = "";
+		////////
+		if (m_RendererID != 0) {
+			glDeleteProgram(m_RendererID);
+			m_RendererID = 0;
+		}
+
+		Shader::Deserialize(json_object);
+		m_ShaderSource = json_object["GLSource"];
+		CompileShader();
+	}
+
+
 	bool OpenGLShader::Reload(const string& filepath)
 	{
 		//Init all to zero
@@ -43,7 +79,8 @@ namespace Infinit {
 			glDeleteProgram(m_RendererID); 
 			m_RendererID = 0;
 		}
-		LoadShaderFromFile(m_FilePath);
+		if (m_FilePath != "")
+			LoadShaderFromFile(m_FilePath);
 
 		CompileShader();
 		return true;
@@ -477,5 +514,12 @@ namespace Infinit {
 		if (it == m_Resources.end())
 			return -1;
 		return std::distance(m_Resources.begin(), it);
+	}
+
+	void OpenGLShader::ImGuiDraw()
+	{
+		Shader::ImGuiDraw();
+		auto viewportSize = ImGui::GetContentRegionAvail();
+		ImGui::InputTextMultiline("Source", &m_ShaderSource[0], m_ShaderSource.size() * 2, viewportSize);
 	}
 }

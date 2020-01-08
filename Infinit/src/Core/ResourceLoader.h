@@ -9,22 +9,11 @@ namespace Infinit {
 	{
 		friend class ResourceLoader;
 	public:
-		enum Type : int
-		{
-			UNKNOWN = 0,
-			FOLDER,
-			MATERIAL,
-			SHADER,
-			TEXTURE,
-			CUBEMAP,
-			MESH
-		};
-	public:
 		ResourceNode(const string& name);
 		~ResourceNode();
 
-		void SetType(Type type) { m_NodeType = type; }
-		Type GetType() { return m_NodeType; }
+		void SetType(Resource::Type type) { m_NodeType = type; }
+		Resource::Type GetType() { return m_NodeType; }
 
 		ResourceNode* GetNext() { return m_Next; }
 		ResourceNode* GetChild() { return m_Child; }
@@ -49,7 +38,7 @@ namespace Infinit {
 	protected:
 		string m_Name;
 		mutable string m_FullPath;
-		Type m_NodeType;
+		Resource::Type m_NodeType;
 
 		ResourceNode* m_Parent;
 		ResourceNode* m_Next;
@@ -68,30 +57,38 @@ namespace Infinit {
 		~ResourceLoader();
 
 		void AddResourceToLoad(const string& filePath, bool bottom = false);
-		bool ResourceExist(const string& path, ResourceNode::Type resourceType);
+		bool ResourceExist(const string& path, Resource::Type resourceType);
 		void LoadCompleteResourceTree();
 
 		template <typename T>
 		std::shared_ptr<T> GetResource(const string& localPath) 
 		{
-			ResourceNode* result = m_ResourceTree->Find(localPath);
+			ResourceNode* result = m_ResourceTree->Find(ChangeFileEnding(localPath, ".inr"));
 			if (!result)
 			{
-				IN_CORE_ERROR("Could not find resource \"{0}\"!", localPath);
-				return nullptr;
+				result = m_ResourceTree->Find(localPath);
+				if (!result)
+				{
+					IN_CORE_ERROR("Could not find resource \"{0}\"!", localPath);
+					return nullptr;
+				}
 			}
 			return result->GetResource<T>();
 		}
 
 		void AddNotSavedResource(std::shared_ptr<Resource> resource);
+		void SaveResource(Resource* resource);
 
-		bool ShowFileDialog(ResourceNode::Type filter, ResourceNode** currentDirectory, bool* open = NULL);
+		bool ShowFileDialog(Resource::Type filter, ResourceNode** currentDirectory, bool* open = NULL);
 		void ImGuiDraw();
+	private:
+		string ChangeFileEnding(const string& path, const string& fileEnding);
 	private:
 		std::vector<string> m_ResourcesToLoad;
 		std::vector<std::future<void>> m_Futures;
 		ResourceNode* m_ResourceTree;
 		ResourceNode* m_CurrentNode;
+		ResourceNode* m_LastClickedResource;
 		ResourceNode* m_CurrentFileDialogNode;
 		std::vector<std::shared_ptr<Resource>> m_NotSaved;
 	};

@@ -20,6 +20,7 @@ namespace Infinit {
 			uint V1, V2, V3;
 		};
 
+		Mesh();
 		Mesh(const string& filename);
 		Mesh(const std::vector<Vertex>& vertices, const std::vector<Index>& indices);
 		~Mesh();

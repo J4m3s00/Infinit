@@ -151,6 +151,7 @@ namespace Infinit {
 	{
 		friend class MaterialInstance;
 	public:
+		Material();
 		Material(const string& name, const string& filepath = "");
 		Material(const std::shared_ptr<Shader>& shader);
 		virtual ~Material();

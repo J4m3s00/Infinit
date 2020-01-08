@@ -30,7 +30,7 @@ public:
 
 		//Get the mesh
 		std::shared_ptr<Mesh> usedMesh;
-		while (resourceLoader.ResourceExist("res/cube.fbx", ResourceNode::Type::MESH) && !usedMesh) {
+		while (resourceLoader.ResourceExist("res/cube.fbx", Resource::Type::MESH) && !usedMesh) {
 			usedMesh = resourceLoader.GetResource<Mesh>("res/cube.fbx");
 		}
 		//Set the mesh to the meshcomponent meshinstance
@@ -45,7 +45,7 @@ public:
 
 		//Get the shader
 		std::shared_ptr<Shader> materialShader;
-		while (resourceLoader.ResourceExist("res/shaders/basic.shader", ResourceNode::Type::SHADER) && !materialShader) {
+		while (resourceLoader.ResourceExist("res/shaders/basic.shader", Resource::Type::SHADER) && !materialShader) {
 			materialShader = resourceLoader.GetResource<Shader>("res/shaders/basic.shader");
 		}
 		//Set the shader to the material
@@ -58,7 +58,7 @@ public:
 
 		//Get the texture
 		std::shared_ptr<Texture2D> colorTex;
-		while (resourceLoader.ResourceExist("res/textures/Pebbles_012_SD/Pebbles_012_baseColor.jpg", ResourceNode::Type::TEXTURE) && !colorTex) {
+		while (resourceLoader.ResourceExist("res/textures/Pebbles_012_SD/Pebbles_012_baseColor.jpg", Resource::Type::TEXTURE) && !colorTex) {
 			colorTex = resourceLoader.GetResource<Texture2D>("res/textures/Pebbles_012_SD/Pebbles_012_baseColor.jpg");
 		}
 		//Set the texture
@@ -82,7 +82,7 @@ public:
 
 		//Get the mesh
 		std::shared_ptr<Mesh> usedMesh;
-		while (resourceLoader.ResourceExist("res/cube.fbx", ResourceNode::Type::MESH) && !usedMesh) {
+		while (resourceLoader.ResourceExist("res/cube.fbx", Resource::Type::MESH) && !usedMesh) {
 			usedMesh = resourceLoader.GetResource<Mesh>("res/cube.fbx");
 		}
 		//Set the mesh to the meshcomponent meshinstance
@@ -97,7 +97,7 @@ public:
 
 		//Get the shader
 		std::shared_ptr<Shader> materialShader;
-		while (resourceLoader.ResourceExist("res/shaders/pbr.shader", ResourceNode::Type::SHADER) && !materialShader) {
+		while (resourceLoader.ResourceExist("res/shaders/pbr.shader", Resource::Type::SHADER) && !materialShader) {
 			materialShader = resourceLoader.GetResource<Shader>("res/shaders/pbr.shader");
 		}
 		//Set the shader to the material
@@ -108,37 +108,37 @@ public:
 		////LOAD ALL THE TEXTURES////
 
 		std::shared_ptr<TextureCube> envRadianceTex;
-		while (resourceLoader.ResourceExist("res/lightmaps/Arches_E_PineTree_Radiance.cubemap", ResourceNode::Type::CUBEMAP) && !envRadianceTex) {
+		while (resourceLoader.ResourceExist("res/lightmaps/Arches_E_PineTree_Radiance.cubemap", Resource::Type::CUBEMAP) && !envRadianceTex) {
 			envRadianceTex = resourceLoader.GetResource<TextureCube>("res/lightmaps/Arches_E_PineTree_Radiance.cubemap");
 		}
 
 		std::shared_ptr<TextureCube> envIrradianceTex;
-		while (resourceLoader.ResourceExist("res/lightmaps/Arches_E_PineTree_Irradiance.cubemap", ResourceNode::Type::CUBEMAP) && !envIrradianceTex) {
+		while (resourceLoader.ResourceExist("res/lightmaps/Arches_E_PineTree_Irradiance.cubemap", Resource::Type::CUBEMAP) && !envIrradianceTex) {
 			envIrradianceTex = resourceLoader.GetResource<TextureCube>("res/lightmaps/Arches_E_PineTree_Irradiance.cubemap");
 		}
 
 		std::shared_ptr<Texture2D> brdf_LUT;
-		while (resourceLoader.ResourceExist("res/lightmaps/BRDF_LUT.tga", ResourceNode::Type::TEXTURE) && !brdf_LUT) {
+		while (resourceLoader.ResourceExist("res/lightmaps/BRDF_LUT.tga", Resource::Type::TEXTURE) && !brdf_LUT) {
 			brdf_LUT = resourceLoader.GetResource<Texture2D>("res/lightmaps/BRDF_LUT.tga");
 		}
 		
 		std::shared_ptr<Texture2D> albedo;
-		while (resourceLoader.ResourceExist("res/textures/Pebbles_012_SD/Pebbles_012_baseColor.jpg", ResourceNode::Type::TEXTURE) && !albedo) {
+		while (resourceLoader.ResourceExist("res/textures/Pebbles_012_SD/Pebbles_012_baseColor.jpg", Resource::Type::TEXTURE) && !albedo) {
 			albedo = resourceLoader.GetResource<Texture2D>("res/textures/Pebbles_012_SD/Pebbles_012_baseColor.jpg");
 		}
 
 		std::shared_ptr<Texture2D> normal;
-		while (resourceLoader.ResourceExist("res/textures/Pebbles_012_SD/Pebbles_012_normal.jpg", ResourceNode::Type::TEXTURE) && !normal) {
+		while (resourceLoader.ResourceExist("res/textures/Pebbles_012_SD/Pebbles_012_normal.jpg", Resource::Type::TEXTURE) && !normal) {
 			normal = resourceLoader.GetResource<Texture2D>("res/textures/Pebbles_012_SD/Pebbles_012_normal.jpg");
 		}
 
 		std::shared_ptr<Texture2D> metalness;
-		while (resourceLoader.ResourceExist("res/textures/Pebbles_012_SD/Pebbles_012_ambientOcclusion.jpg", ResourceNode::Type::TEXTURE) && !metalness) {
+		while (resourceLoader.ResourceExist("res/textures/Pebbles_012_SD/Pebbles_012_ambientOcclusion.jpg", Resource::Type::TEXTURE) && !metalness) {
 			metalness = resourceLoader.GetResource<Texture2D>("res/textures/Pebbles_012_SD/Pebbles_012_ambientOcclusion.jpg");
 		}
 
 		std::shared_ptr<Texture2D> roughness;
-		while (resourceLoader.ResourceExist("res/textures/Pebbles_012_SD/Pebbles_012_roughness.jpg", ResourceNode::Type::TEXTURE) && !roughness) {
+		while (resourceLoader.ResourceExist("res/textures/Pebbles_012_SD/Pebbles_012_roughness.jpg", Resource::Type::TEXTURE) && !roughness) {
 			roughness = resourceLoader.GetResource<Texture2D>("res/textures/Pebbles_012_SD/Pebbles_012_roughness.jpg");
 		}
 
@@ -198,7 +198,7 @@ public:
 		meshComponent->m_Mesh = mesh;
 
 		std::shared_ptr<Shader> shader;
-		while (resourceLoader.ResourceExist("res/shaders/RayMarching.shader", ResourceNode::Type::SHADER) && !shader) {
+		while (resourceLoader.ResourceExist("res/shaders/RayMarching.shader", Resource::Type::SHADER) && !shader) {
 			shader = resourceLoader.GetResource<Shader>("res/shaders/RayMarching.shader");
 		}
 		std::shared_ptr<Material> material = std::make_shared<Material>("Ray Marching Material");

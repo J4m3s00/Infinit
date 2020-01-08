@@ -96,8 +96,13 @@ namespace Infinit {
 		shader->SetUniformBuffer(m_Name, (byte*) &Value, sizeof(T));
 	}
 
+	Material::Material()
+		: Resource("", Resource::Type::MATERIAL)
+	{
+	}
+
 	Material::Material(const string& name, const string& filepath)
-		: Resource(filepath, name)
+		: Resource(filepath, Resource::Type::MATERIAL, name)
 	{
 		if (filepath != "")
 			Reload(m_FilePath);
@@ -108,7 +113,7 @@ namespace Infinit {
 	}
 
 	Material::Material(const std::shared_ptr<Shader>& shader)
-		: Resource(""), m_ShaderProgram(shader)
+		: Resource("", Resource::Type::MATERIAL), m_ShaderProgram(shader)
 	{
 
 	}
@@ -152,7 +157,7 @@ namespace Infinit {
 			name = shader_json["Name"];
 		}
 		std::shared_ptr<Shader> shader;
-		while (!shader && Application::Get().GetResourceLoader().ResourceExist(path, ResourceNode::Type::SHADER))
+		while (!shader && Application::Get().GetResourceLoader().ResourceExist(path, Resource::Type::SHADER))
 		{
 			shader = Application::Get().GetResourceLoader().GetResource<Shader>(path);
 		}
@@ -264,7 +269,7 @@ namespace Infinit {
 		bool showFileDialog = true;
 		if (ImGui::Button("Save##SaveMaterial"))
 		{
-			if (!Application::Get().GetResourceLoader().ResourceExist(Instance.lock()->GetFilePath(), ResourceNode::MATERIAL))
+			if (!Application::Get().GetResourceLoader().ResourceExist(Instance.lock()->GetFilePath(), Resource::MATERIAL))
 			{
 				ImGui::OpenPopup("Open File##FileDialog");
 			}
@@ -277,10 +282,10 @@ namespace Infinit {
 		}
 		if (!Instance.expired())
 		{
-			if (!Application::Get().GetResourceLoader().ResourceExist(Instance.lock()->GetFilePath(), ResourceNode::MATERIAL))
+			if (!Application::Get().GetResourceLoader().ResourceExist(Instance.lock()->GetFilePath(), Resource::MATERIAL))
 			{
 				ResourceNode* node;
-				if (Application::Get().GetResourceLoader().ShowFileDialog(ResourceNode::Type::FOLDER, &node, &showFileDialog))
+				if (Application::Get().GetResourceLoader().ShowFileDialog(Resource::Type::FOLDER, &node, &showFileDialog))
 				{
 					if (node)
 					{
@@ -306,7 +311,11 @@ namespace Infinit {
 				std::string buttonName = "Reload##" + m_Shader.lock()->GetFilePath();
 				if (ImGui::Button(buttonName.c_str()))
 				{
-					m_Shader.lock()->Reload("");
+					std::ifstream i(m_Shader.lock()->GetFilePath());
+					json json_object;
+					i >> json_object;
+					m_Shader.lock()->Deserialize(json_object);
+
 					Instance.lock()->SetShader(Instance.lock()->m_ShaderProgram);
 				}
 				ImGui::TreePop();
@@ -322,7 +331,7 @@ namespace Infinit {
 					if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("RESOURCE_NODE"))
 					{
 						ResourceNode* node = (ResourceNode*)payload->Data;
-						if (node->GetType() == ResourceNode::Type::SHADER)
+						if (node->GetResource<Resource>() && node->GetResource<Resource>().get()->GetType())
 						{
 							m_Shader = node->GetResource<Shader>();
 							Instance.lock()->SetShader(node->GetResource<Shader>());

@@ -75,14 +75,24 @@ namespace Infinit {
 		m_ShaderSource = "";
 		////////
 		if (filepath != "") m_FilePath = filepath;
-		if (m_RendererID != 0) {
-			glDeleteProgram(m_RendererID); 
-			m_RendererID = 0;
+		std::ifstream inFile(m_FilePath);
+		json json_object;
+		if (!json_object.is_null())
+		{
+			inFile >> json_object;
+			Deserialize(json_object);
 		}
-		if (m_FilePath != "")
-			LoadShaderFromFile(m_FilePath);
+		else
+		{
+			if (m_RendererID != 0) {
+				glDeleteProgram(m_RendererID);
+				m_RendererID = 0;
+			}
+			if (m_FilePath != "")
+				LoadShaderFromFile(m_FilePath);
 
-		CompileShader();
+			CompileShader();
+		}
 		return true;
 	}
 

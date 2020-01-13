@@ -53,12 +53,17 @@ namespace Infinit {
 		virtual bool Reload(const string& filePath);
 
 		virtual const string& GetPath() const override { return m_FilePath; }
+
+		virtual json Serialize() const override;
+		virtual void Deserialize(const json& json_object) override;
+	private:
+		void CreateCubeMap();
 	private:
 		uint m_RendererID;
 		TextureFormat m_Format;
 		uint m_Width;
 		uint m_Height;
-		string m_FilePath;
+		uint m_Channels;
 		byte* m_ImageData;
 	};
 

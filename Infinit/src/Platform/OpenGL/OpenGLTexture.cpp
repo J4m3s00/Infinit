@@ -96,35 +96,44 @@ namespace Infinit {
 
 	bool OpenGLTexture2D::Reload(const string& filePath)
 	{
-		m_FilePath = filePath;
-		int width, height, channels;
-		IN_CORE_INFO("Loading texture {0}", m_FilePath);
-		stbi_set_flip_vertically_on_load(false);
-		m_ImageData = stbi_load(m_FilePath.c_str(), &width, &height, &channels, STBI_rgb_alpha);
-		IN_CORE_INFO("Ready reading data {0}", m_FilePath);
+		if (filePath != "")
+			m_FilePath = filePath;
+		std::ifstream inFile(m_FilePath);
+		json json_object;
+		if (!json_object.is_null())
+		{
+			inFile >> json_object;
+			Deserialize(json_object);
+		}
+		else
+		{
+			int width, height, channels;
+			IN_CORE_INFO("Loading texture {0}", m_FilePath);
+			stbi_set_flip_vertically_on_load(false);
+			m_ImageData = stbi_load(m_FilePath.c_str(), &width, &height, &channels, STBI_rgb_alpha);
+			IN_CORE_INFO("Ready reading data {0}", m_FilePath);
 
-		m_Width = width;
-		m_Height = height;
-		m_Channels = channels;
-		m_Format = TextureFormat::RGBA;
+			m_Width = width;
+			m_Height = height;
+			m_Channels = channels;
+			m_Format = TextureFormat::RGBA;
 
-		IN_RENDER_S({
+			IN_RENDER_S({
 
-				glGenTextures(1, &self->m_RendererID);
-				glBindTexture(GL_TEXTURE_2D, self->m_RendererID);
+					glGenTextures(1, &self->m_RendererID);
+					glBindTexture(GL_TEXTURE_2D, self->m_RendererID);
 
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-				glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-				glTexImage2D(GL_TEXTURE_2D, 0, InfinitToOpenGLTextureFormat(self->m_Format), self->m_Width, self->m_Height, 0, InfinitToOpenGLTextureFormat(self->m_Format), GL_UNSIGNED_BYTE, self->m_ImageData);
-				glGenerateMipmap(GL_TEXTURE_2D);
+					glTexImage2D(GL_TEXTURE_2D, 0, InfinitToOpenGLTextureFormat(self->m_Format), self->m_Width, self->m_Height, 0, InfinitToOpenGLTextureFormat(self->m_Format), GL_UNSIGNED_BYTE, self->m_ImageData);
+					glGenerateMipmap(GL_TEXTURE_2D);
 
-				glBindTexture(GL_TEXTURE_2D, 0);
-
-				stbi_image_free(self->m_ImageData);
-			})
+					glBindTexture(GL_TEXTURE_2D, 0);
+				})
+		}
 		return true;
 	}
 
@@ -134,6 +143,7 @@ namespace Infinit {
 		IN_RENDER_S({
 				glDeleteTextures(1, &self->m_RendererID);
 			})
+		stbi_image_free(self->m_ImageData);
 	}
 
 	void OpenGLTexture2D::Bind(uint slot) const
@@ -154,28 +164,44 @@ namespace Infinit {
 //REMOVE srgb??
 
 	OpenGLTextureCube::OpenGLTextureCube()
-		: TextureCube(""), m_Width(0), m_Height(0), m_ImageData(NULL)
+		: TextureCube(""), m_Width(0), m_Height(0), m_ImageData(NULL), m_Format(TextureFormat::None)
 	{
 
 	}
 
 	OpenGLTextureCube::OpenGLTextureCube(const string& path, bool srgb)
-		: TextureCube(path), m_Width(0), m_Height(0)
+		: TextureCube(path), m_Width(0), m_Height(0), m_Format(TextureFormat::None)
 	{
 		Reload(path);
 	}
 
 	bool OpenGLTextureCube::Reload(const string& filePath)
 	{
-		int width, height, channels;
-		stbi_set_flip_vertically_on_load(false);
-		m_ImageData = stbi_load(filePath.c_str(), &width, &height, &channels, STBI_rgb);
+		std::ifstream inFile(filePath);
+		json json_object;
+		if (!json_object.is_null())
+		{
+			inFile >> json_object;
+			Deserialize(json_object);
+		}
+		else
+		{
+			int width, height, channels;
+				stbi_set_flip_vertically_on_load(false);
+				m_ImageData = stbi_load(filePath.c_str(), &width, &height, &channels, STBI_rgb);
 
-		m_Width = width;
-		m_Height = height;
-		m_Format = TextureFormat::RGB;
-		m_FilePath = filePath;
+				m_Width = width;
+				m_Height = height;
+				m_Format = TextureFormat::RGB;
+				m_FilePath = filePath;
 
+				CreateCubeMap();
+			}
+		return true;
+	}
+
+	void OpenGLTextureCube::CreateCubeMap()
+	{
 		unsigned int faceWidth = m_Width / 4;
 		unsigned int faceHeight = m_Height / 3;
 		IN_CORE_ASSERT(faceWidth == faceHeight, "Non-square faces!");
@@ -249,10 +275,43 @@ namespace Infinit {
 			for (size_t i = 0; i < faces.size(); i++)
 				delete[] faces[i];
 
-			stbi_image_free(self->m_ImageData);
-		})
+			})
+	}
 
-		return true;
+	json OpenGLTextureCube::Serialize() const
+	{
+		json result = TextureCube::Serialize();
+		result["Width"] = m_Width;
+		result["Height"] = m_Height;
+		result["Format"] = m_Format;
+		result["Channles"] = m_Channels;
+
+		json pixelArray = json::array();
+		for (uint i = 0; i < m_Width * m_Height * m_Channels; i++) {
+			pixelArray.push_back(m_ImageData[i]);
+		}
+		result["ImageData"] = pixelArray;
+		return result;
+	}
+
+	void OpenGLTextureCube::Deserialize(const json& json_object)
+	{
+		m_Width = json_object["Width"];
+		m_Height = json_object["Height"];
+		m_Format = json_object["Format"];
+		m_Channels = json_object["Channels"];
+
+		if (m_ImageData)
+			delete[] m_ImageData;
+		m_ImageData = (byte*)malloc(m_Width * m_Height * m_Channels);
+		json json_imageData = json_object["ImageData"];
+		if (json_imageData)
+		{
+			for (uint i = 0; i < m_Width * m_Height * m_Channels; i++)
+			{
+				m_ImageData[i] = json_imageData[i];
+			}
+		}
 	}
 
 	OpenGLTextureCube::~OpenGLTextureCube()
@@ -261,6 +320,7 @@ namespace Infinit {
 		IN_RENDER_S({
 				glDeleteTextures(1, &self->m_RendererID);
 			})
+		stbi_image_free(self->m_ImageData);
 	}
 
 	void OpenGLTextureCube::Bind(uint slot) const

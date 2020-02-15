@@ -198,8 +198,8 @@ public:
 		meshComponent->m_Mesh = mesh;
 
 		std::shared_ptr<Shader> shader;
-		while (resourceLoader.ResourceExist("res/shaders/RayMarching.shader", Resource::Type::SHADER) && !shader) {
-			shader = resourceLoader.GetResource<Shader>("res/shaders/RayMarching.shader");
+		while (resourceLoader.ResourceExist("res/shaders/RayMarching.inr", Resource::Type::ENGINE_RESOURCE) && !shader) {
+			shader = resourceLoader.GetResource<Shader>("res/shaders/RayMarching.inr");
 		}
 		std::shared_ptr<Material> material = std::make_shared<Material>("Ray Marching Material");
 		resourceLoader.AddNotSavedResource(material);

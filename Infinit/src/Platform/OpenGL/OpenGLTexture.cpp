@@ -100,9 +100,9 @@ namespace Infinit {
 			m_FilePath = filePath;
 		std::ifstream inFile(m_FilePath);
 		json json_object;
+		inFile >> json_object;
 		if (!json_object.is_null())
 		{
-			inFile >> json_object;
 			Deserialize(json_object);
 		}
 		else
@@ -179,9 +179,9 @@ namespace Infinit {
 	{
 		std::ifstream inFile(filePath);
 		json json_object;
+		inFile >> json_object;
 		if (!json_object.is_null())
 		{
-			inFile >> json_object;
 			Deserialize(json_object);
 		}
 		else

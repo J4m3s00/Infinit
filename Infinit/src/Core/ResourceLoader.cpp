@@ -74,13 +74,13 @@ namespace Infinit {
 		case Resource::Type::TEXTURE:
 		{
 			result = std::dynamic_pointer_cast<Resource>(Texture2D::Create(absolutePath));
-			result->ChangeName(relativPath);
+			result->ChangeName(node->GetName());
 			break;
 		}
 		case Resource::Type::CUBEMAP:
 		{
 			result = std::dynamic_pointer_cast<Resource>(TextureCube::Create(absolutePath));
-			result->ChangeName(relativPath);
+			result->ChangeName(node->GetName());
 			break;
 		}
 		case Resource::Type::MATERIAL:
@@ -91,13 +91,13 @@ namespace Infinit {
 		case Resource::Type::MESH:
 		{
 			result = std::dynamic_pointer_cast<Resource>(std::make_shared<Mesh>(absolutePath));
-			result->ChangeName(relativPath);
+			result->ChangeName(node->GetName());
 			break;
 		}
 		case Resource::Type::SHADER:
 		{
 			result = std::dynamic_pointer_cast<Resource>(Shader::Create(absolutePath));
-			result->ChangeName(relativPath);
+			result->ChangeName(node->GetName());
 			break;
 		}
 		case Resource::Type::ENGINE_RESOURCE:
@@ -152,29 +152,42 @@ namespace Infinit {
 
 	void ResourceLoader::AddResourceToLoad(const string& path, bool bottom)
 	{
+		//Check if engine resource exist
+		Resource::Type resType = GetResourceTypeByPath(path);
+		if (resType != Resource::Type::ENGINE_RESOURCE && resType != Resource::Type::UNKNOWN && resType != Resource::Type::FOLDER)
+		{
+			string engineResourcePath = ChangeFileEnding(path, ".inr");
+			if (std::filesystem::exists(std::filesystem::path(engineResourcePath)))
+			{
+				//Dont add the resource if an engine resource exist
+				return;
+			}
+		}
+
 		//Make check that path is relativ to res folder
 		AddPathToResourceTree(m_ResourceTree, path);
 	}
 
 	void ResourceLoader::SaveResource(Resource* resource)
 	{
-		json json_resource = resource->Serialize();
 
 		if (GetResource<Resource>(resource->GetFilePath()))
 		{
 			//Change filepath with propper ending
-			Resource::Type resourcePathType = GetResourceTypeByPath(resource->GetFilePath());
+			string resourcePath = resource->GetFilePath();
+			Resource::Type resourcePathType = GetResourceTypeByPath(resourcePath);
 			if (resourcePathType != Resource::Type::ENGINE_RESOURCE)
 			{
-				string resourcePath = resource->GetFilePath();
 				size_t dotPos = resourcePath.find_last_of(".");
 				resourcePath = resourcePath.substr(0, dotPos);
 				resourcePath += ".inr";
 				resource->m_FilePath = resourcePath;
+			} 
+			json json_resource = resource->Serialize();
 
-				std::ofstream o(resourcePath);
-				o << std::setw(4) << json_resource << std::endl;
-			}
+			std::ofstream o(resourcePath);
+			o << std::setw(4) << json_resource << std::endl;
+			resource->Reload(resourcePath);
 		}
 	}
 

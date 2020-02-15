@@ -34,6 +34,7 @@ namespace Infinit {
 	json OpenGLShader::Serialize() const
 	{
 		json result = Shader::Serialize();
+		IN_CORE_INFO("Serialize Shader {0}", m_ShaderSource);
 		result["GLSource"] = m_ShaderSource;
 		return result;
 	}
@@ -77,9 +78,9 @@ namespace Infinit {
 		if (filepath != "") m_FilePath = filepath;
 		std::ifstream inFile(m_FilePath);
 		json json_object;
+		inFile >> json_object;
 		if (!json_object.is_null())
 		{
-			inFile >> json_object;
 			Deserialize(json_object);
 		}
 		else

@@ -24,8 +24,6 @@ namespace Infinit {
 		
 
 		virtual bool Reload(const string& filePath) = 0;
-
-		virtual const string& GetPath() const = 0;
 	};
 
 	class Texture2D : public Texture

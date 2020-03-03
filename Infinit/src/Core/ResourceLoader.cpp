@@ -63,8 +63,6 @@ namespace Infinit {
 
 		ResourceNode* node = resourceTree->Find(relativPath);
 		if (node && node->GetResource<Resource>()) return;
-		
-		IN_CORE_TRACE("Save resource {0}", filePath);
 
 		Resource::Type resourceType = GetResourceTypeByPath(relativPath);
 		//Textures

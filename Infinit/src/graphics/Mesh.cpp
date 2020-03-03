@@ -72,9 +72,7 @@ namespace Infinit {
 	bool Mesh::Reload(const string& filePath)
 	{
 		LogStream::Initialize();
-
-		IN_CORE_INFO("Loading mesh: {0}", filePath.c_str());
-
+		
 		Assimp::Importer importer;
 
 		const aiScene* scene = importer.ReadFile(filePath, ImportFlags);

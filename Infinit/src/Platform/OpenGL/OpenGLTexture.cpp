@@ -27,19 +27,19 @@ namespace Infinit {
 	//Remove srgb??
 
 	OpenGLTexture2D::OpenGLTexture2D()
-		: Texture2D(""), m_Format(TextureFormat::None), m_Width(0), m_Height(0), m_ImageData(NULL), m_RendererID(0), m_Channels(0)
+		: Texture2D(""), m_Format(TextureFormat::None), m_Width(0), m_Height(0), m_RendererID(0), m_Channels(0)
 	{
 
 	}
 
 	OpenGLTexture2D::OpenGLTexture2D(const string& path, bool srgb)
-		: Texture2D(path), m_Format(TextureFormat::None), m_Width(0), m_Height(0), m_ImageData(NULL), m_RendererID(0), m_Channels(0)
+		: Texture2D(path), m_Format(TextureFormat::None), m_Width(0), m_Height(0), m_RendererID(0), m_Channels(0), m_TexturePath(path)
 	{
 		Reload(path);
 	}
 
 	OpenGLTexture2D::OpenGLTexture2D(TextureFormat format, uint width, uint height)
-		: Texture2D(""), m_Format(format), m_Width(width), m_Height(height), m_ImageData(NULL), m_RendererID(0), m_Channels(0)
+		: Texture2D(""), m_Format(format), m_Width(width), m_Height(height), m_RendererID(0), m_Channels(0)
 	{
 		IN_RENDER_S({
 			glGenTextures(1, &self->m_RendererID);
@@ -61,64 +61,26 @@ namespace Infinit {
 	json OpenGLTexture2D::Serialize() const
 	{
 		json result = Texture2D::Serialize();
-		result["Width"] = m_Width;
-		result["Height"] = m_Height;
-		result["Format"] = m_Format;
-		result["Channles"] = m_Channels;
 
-		json pixelArray = json::array();
-		for (uint i = 0; i < m_Width * m_Height * m_Channels; i++) {
-			pixelArray.push_back(m_ImageData[i]);
-		}
-		result["ImageData"] = pixelArray;
+		result["TexturePath"] = m_TexturePath;
+
 		return result;
 	}
 
 	void OpenGLTexture2D::Deserialize(const json& json_object)
 	{
-		m_Width = json_object["Width"]; 
-		m_Height = json_object["Height"];
-		m_Format= json_object["Format"];
-		m_Channels = json_object["Channels"];
+		m_TexturePath = json_object["TexturePath"];
 
-		if (m_ImageData)
-			delete[] m_ImageData;
-		m_ImageData = (byte*) malloc(m_Width * m_Height * m_Channels);
-		json json_imageData = json_object["ImageData"];
-		if (json_imageData)
-		{
-			for (uint i = 0; i < m_Width * m_Height * m_Channels; i++)
-			{
-				m_ImageData[i] = json_imageData[i];
-			}
-		}
+
+		byte* data = stbi_load(m_TexturePath.c_str(), &m_Width, &m_Height, &m_Channels, STBI_rgb_alpha);
+		m_Format = m_Channels == 3 ? TextureFormat::RGB : TextureFormat::RGBA;
+
+		CreateTexture(data);
 	}
 
-	bool OpenGLTexture2D::Reload(const string& filePath)
+	void OpenGLTexture2D::CreateTexture(byte* data)
 	{
-		if (filePath != "")
-			m_FilePath = filePath;
-		std::ifstream inFile(m_FilePath);
-		json json_object;
-		inFile >> json_object;
-		if (!json_object.is_null())
-		{
-			Deserialize(json_object);
-		}
-		else
-		{
-			int width, height, channels;
-			IN_CORE_INFO("Loading texture {0}", m_FilePath);
-			stbi_set_flip_vertically_on_load(false);
-			m_ImageData = stbi_load(m_FilePath.c_str(), &width, &height, &channels, STBI_rgb_alpha);
-			IN_CORE_INFO("Ready reading data {0}", m_FilePath);
-
-			m_Width = width;
-			m_Height = height;
-			m_Channels = channels;
-			m_Format = TextureFormat::RGBA;
-
-			IN_RENDER_S({
+		IN_RENDER_S1(data, {
 
 					glGenTextures(1, &self->m_RendererID);
 					glBindTexture(GL_TEXTURE_2D, self->m_RendererID);
@@ -128,11 +90,45 @@ namespace Infinit {
 					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-					glTexImage2D(GL_TEXTURE_2D, 0, InfinitToOpenGLTextureFormat(self->m_Format), self->m_Width, self->m_Height, 0, InfinitToOpenGLTextureFormat(self->m_Format), GL_UNSIGNED_BYTE, self->m_ImageData);
+					glTexImage2D(GL_TEXTURE_2D, 0, InfinitToOpenGLTextureFormat(self->m_Format), self->m_Width, self->m_Height, 0, InfinitToOpenGLTextureFormat(self->m_Format), GL_UNSIGNED_BYTE, data);
 					glGenerateMipmap(GL_TEXTURE_2D);
 
 					glBindTexture(GL_TEXTURE_2D, 0);
-				})
+					stbi_image_free(data);
+			})
+	}
+
+	bool OpenGLTexture2D::Reload(const string& filePath)
+	{
+		if (filePath != "")
+			m_FilePath = filePath;
+		std::ifstream inFile(m_FilePath);
+		json json_object;
+
+
+		size_t dotPos = m_FilePath.find_last_of(".");
+		if (dotPos == string::npos) return Resource::Type::FOLDER;
+
+		string fileEnding = m_FilePath.substr(dotPos + 1, m_FilePath.size());
+
+		if (fileEnding == ".inm")
+		{
+			IN_CORE_ERROR(m_FilePath);
+			inFile >> json_object;
+		}
+		
+		if (!json_object.is_null())
+		{
+			Deserialize(json_object);
+		}
+		else
+		{
+			int width, height, channels;
+			stbi_set_flip_vertically_on_load(false);
+			byte* data = stbi_load(m_FilePath.c_str(), &m_Width, &m_Height, &m_Channels, STBI_rgb_alpha);
+
+
+			m_Format = m_Channels == 3 ? TextureFormat::RGB : TextureFormat::RGBA;
 		}
 		return true;
 	}
@@ -143,7 +139,7 @@ namespace Infinit {
 		IN_RENDER_S({
 				glDeleteTextures(1, &self->m_RendererID);
 			})
-		stbi_image_free(self->m_ImageData);
+		
 	}
 
 	void OpenGLTexture2D::Bind(uint slot) const
@@ -188,19 +184,23 @@ namespace Infinit {
 		{
 			int width, height, channels;
 				stbi_set_flip_vertically_on_load(false);
-				m_ImageData = stbi_load(filePath.c_str(), &width, &height, &channels, STBI_rgb);
+				stbi_uc* data = stbi_load(filePath.c_str(), &width, &height, &channels, STBI_rgb);
+
+				//m_ImageData.resize(width * height * channels);
 
 				m_Width = width;
 				m_Height = height;
 				m_Format = TextureFormat::RGB;
 				m_FilePath = filePath;
 
-				CreateCubeMap();
+				CreateCubeMap(data);
+
+				
 			}
 		return true;
 	}
 
-	void OpenGLTextureCube::CreateCubeMap()
+	void OpenGLTextureCube::CreateCubeMap(byte* data)
 	{
 		unsigned int faceWidth = m_Width / 4;
 		unsigned int faceHeight = m_Height / 3;
@@ -220,9 +220,9 @@ namespace Infinit {
 				for (size_t x = 0; x < faceWidth; x++)
 				{
 					size_t xOffset = x + i * faceWidth;
-					faces[faceIndex][(x + y * faceWidth) * 3 + 0] = m_ImageData[(xOffset + yOffset * m_Width) * 3 + 0];
-					faces[faceIndex][(x + y * faceWidth) * 3 + 1] = m_ImageData[(xOffset + yOffset * m_Width) * 3 + 1];
-					faces[faceIndex][(x + y * faceWidth) * 3 + 2] = m_ImageData[(xOffset + yOffset * m_Width) * 3 + 2];
+					faces[faceIndex][(x + y * faceWidth) * 3 + 0] = data[(xOffset + yOffset * m_Width) * 3 + 0];
+					faces[faceIndex][(x + y * faceWidth) * 3 + 1] = data[(xOffset + yOffset * m_Width) * 3 + 1];
+					faces[faceIndex][(x + y * faceWidth) * 3 + 2] = data[(xOffset + yOffset * m_Width) * 3 + 2];
 				}
 			}
 			faceIndex++;
@@ -240,15 +240,18 @@ namespace Infinit {
 				for (size_t x = 0; x < faceWidth; x++)
 				{
 					size_t xOffset = x + faceWidth;
-					faces[faceIndex][(x + y * faceWidth) * 3 + 0] = m_ImageData[(xOffset + yOffset * m_Width) * 3 + 0];
-					faces[faceIndex][(x + y * faceWidth) * 3 + 1] = m_ImageData[(xOffset + yOffset * m_Width) * 3 + 1];
-					faces[faceIndex][(x + y * faceWidth) * 3 + 2] = m_ImageData[(xOffset + yOffset * m_Width) * 3 + 2];
+					faces[faceIndex][(x + y * faceWidth) * 3 + 0] = data[(xOffset + yOffset * m_Width) * 3 + 0];
+					faces[faceIndex][(x + y * faceWidth) * 3 + 1] = data[(xOffset + yOffset * m_Width) * 3 + 1];
+					faces[faceIndex][(x + y * faceWidth) * 3 + 2] = data[(xOffset + yOffset * m_Width) * 3 + 2];
 				}
 			}
 			faceIndex++;
 		}
 
-		IN_RENDER_S3(faces, faceWidth, faceHeight, {
+		IN_RENDER_S2(faces, data, {
+
+			unsigned int faceWidth = self->m_Width / 4;
+			unsigned int faceHeight = self->m_Height / 3;
 
 			glGenTextures(1, &self->m_RendererID);
 			glBindTexture(GL_TEXTURE_CUBE_MAP, self->m_RendererID);
@@ -274,6 +277,8 @@ namespace Infinit {
 
 			for (size_t i = 0; i < faces.size(); i++)
 				delete[] faces[i];
+
+			stbi_image_free(data);
 
 			})
 	}
@@ -301,9 +306,6 @@ namespace Infinit {
 		m_Format = json_object["Format"];
 		m_Channels = json_object["Channels"];
 
-		if (m_ImageData)
-			delete[] m_ImageData;
-		m_ImageData = (byte*)malloc(m_Width * m_Height * m_Channels);
 		json json_imageData = json_object["ImageData"];
 		if (json_imageData)
 		{
@@ -320,7 +322,6 @@ namespace Infinit {
 		IN_RENDER_S({
 				glDeleteTextures(1, &self->m_RendererID);
 			})
-		stbi_image_free(self->m_ImageData);
 	}
 
 	void OpenGLTextureCube::Bind(uint slot) const

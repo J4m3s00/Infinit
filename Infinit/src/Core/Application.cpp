@@ -88,7 +88,7 @@ namespace Infinit {
 		ImGuiInit();
 
 		std::filesystem::path resourcePath("res/");
-		if (std::filesystem::exists(resourcePath))
+		if (!std::filesystem::exists(resourcePath))
 		{
 			std::filesystem::create_directory(resourcePath);
 		}

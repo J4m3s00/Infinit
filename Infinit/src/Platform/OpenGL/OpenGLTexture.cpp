@@ -74,6 +74,7 @@ namespace Infinit {
 
 		byte* data = stbi_load(m_TexturePath.c_str(), &m_Width, &m_Height, &m_Channels, STBI_rgb_alpha);
 		m_Format = m_Channels == 3 ? TextureFormat::RGB : TextureFormat::RGBA;
+		IN_CORE_ERROR("Image \"{0}\" has {1} Channels", m_TexturePath, m_Channels);
 
 		CreateTexture(data);
 	}
@@ -90,7 +91,7 @@ namespace Infinit {
 					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-					glTexImage2D(GL_TEXTURE_2D, 0, InfinitToOpenGLTextureFormat(self->m_Format), self->m_Width, self->m_Height, 0, InfinitToOpenGLTextureFormat(self->m_Format), GL_UNSIGNED_BYTE, data);
+					glTexImage2D(GL_TEXTURE_2D, 0, InfinitToOpenGLTextureFormat(self->m_Format), self->m_Width, self->m_Height, 0, InfinitToOpenGLTextureFormat(TextureFormat::RGBA), GL_UNSIGNED_BYTE, data);
 					glGenerateMipmap(GL_TEXTURE_2D);
 
 					glBindTexture(GL_TEXTURE_2D, 0);
@@ -107,7 +108,6 @@ namespace Infinit {
 
 
 		size_t dotPos = m_FilePath.find_last_of(".");
-		if (dotPos == string::npos) return Resource::Type::FOLDER;
 
 		string fileEnding = m_FilePath.substr(dotPos + 1, m_FilePath.size());
 
@@ -129,6 +129,8 @@ namespace Infinit {
 
 
 			m_Format = m_Channels == 3 ? TextureFormat::RGB : TextureFormat::RGBA;
+			IN_CORE_ERROR("Image \"{0}\" has {1} Channels", m_TexturePath, m_Channels);
+			CreateTexture(data);
 		}
 		return true;
 	}
@@ -175,7 +177,6 @@ namespace Infinit {
 	{
 		std::ifstream inFile(filePath);
 		json json_object;
-		inFile >> json_object;
 		if (!json_object.is_null())
 		{
 			Deserialize(json_object);

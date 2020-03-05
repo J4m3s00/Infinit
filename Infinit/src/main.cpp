@@ -12,7 +12,6 @@ public:
 
 	virtual void OnAttach() override
 	{
-		SetupRayMarchingTest();
 	}
 
 	void SetupCubeWithBasicMaterial()
@@ -234,6 +233,7 @@ Infinit::Application* Infinit::CreateApplication()
 {
 	return new Sandbox();
 }
+
 
 int main(int argc, char** argv)
 {

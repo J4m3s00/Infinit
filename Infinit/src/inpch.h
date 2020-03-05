@@ -1,8 +1,5 @@
 #pragma once
-
-
-
-//
+#pragma comment(lib, "rpcrt4.lib")  // UuidCreate - Minimum supported OS Win 2000
 
 
 #ifdef IN_PLATFORM_WINDOWS
@@ -45,16 +42,23 @@ using json = nlohmann::json;
 
 //////INFINIT HEADER/////////
 #include "Core/Core.h"
+#include "Core/Log.h"
+
+
+#include "Core/UUID.h"
 #include "Serialization/Serializable.h"	//REMOVE THIS
 
 #include "Util/StringUtil.h"
 
-#include "Core/Log.h"
 #include "Core/KeyCodes.h"
+#include "Core/Property/JsonHelper.h"
+#include "Core/Property/Property.h"
 #include "Core/Input.h"
 #include "Core/Transform.h"
 #include "Events/Events.h"
 #include "graphics/Window.h"
+#include "Core/ECS/Object.h"
+
 #include "Core/Resource.h"
 #include "Core/ResourceLoader.h"
 #include "graphics/RendererAPI.h"

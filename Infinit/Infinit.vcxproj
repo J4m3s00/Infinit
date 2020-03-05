@@ -173,6 +173,7 @@
     <ClCompile Include="src\Core\Log.cpp" />
     <ClCompile Include="src\Core\Material.cpp" />
     <ClCompile Include="src\Core\Property\JsonHelper.cpp" />
+    <ClCompile Include="src\Core\Property\Property.cpp" />
     <ClCompile Include="src\Core\Resource.cpp" />
     <ClCompile Include="src\Core\ResourceLoader.cpp" />
     <ClCompile Include="src\Core\Transform.cpp" />

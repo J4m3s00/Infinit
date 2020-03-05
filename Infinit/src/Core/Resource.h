@@ -1,7 +1,7 @@
 #pragma once
 namespace Infinit {
 
-    class Resource : public Serializable
+    class Resource : public Object
     {
         friend class ResourceLoader;
     public:
@@ -20,8 +20,8 @@ namespace Infinit {
         Resource(const string& filePath, Type resourceType, const string& name = "Unknown") : m_FilePath(filePath), m_Name(name), m_ResourceType(resourceType) {}
         virtual ~Resource() {}
 
-        virtual json Serialize() const override { return { {"Name", m_Name}, {"FilePath", m_FilePath}, {"Type", m_ResourceType} }; }
-        virtual void Deserialize(const json& json_object) override { m_FilePath = json_object["FilePath"]; m_Name = json_object["Name"]; m_ResourceType = json_object["Type"]; }
+        virtual void OnSerialize(json& js_object) const override;
+        virtual void OnDeserialize(const json& json_object) override;
 
 		inline const string& GetFilePath() const { return m_FilePath; }
         inline const string& GetName() const { return m_Name; }

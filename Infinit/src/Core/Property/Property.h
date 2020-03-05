@@ -1,18 +1,31 @@
 #pragma once
 
 namespace Infinit {
+	
+	class Object;
 
-	template <typename T>
-	class Property
+	class Property : public Serializable
 	{
 	public:
-		Property(const string& name, const T& defaultValue)
-			: m_PropertyName(name), m_DefaultValue(defaultValue), m_Value(defaultValue)
-		{
+		Property(const string& name, Object* attachedTo);
 
+		const string& GetPropertyName() const { return m_PropertyName; }
+
+	private:
+		string m_PropertyName;
+		Object* m_AttachedObject;
+	};
+
+	template <typename T>
+	class ValueProperty : public Property
+	{
+	public:
+		Property(const string& name, Object* attachedTo, const T& defaultValue)
+			: Property(name, attachedTo), m_DefaultValue(defaultValue), m_Value(defaultValue)
+		{
 		}
 
-		void Serialize(json& json)
+		void Serialize(json& json) const
 		{
 			json[m_PropertyName + "_Default"] = JsonHelper::ConvertValue(m_DefaultValue);
 			json[m_PropertyName] = JsonHelper::ConvertValue(m_Value);
@@ -25,7 +38,6 @@ namespace Infinit {
 		}
 
 	private:
-		string m_PropertyName;
 		T m_DefaultValue;
 		T m_Value;
 	};

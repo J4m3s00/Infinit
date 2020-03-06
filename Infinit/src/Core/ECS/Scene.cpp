@@ -125,6 +125,9 @@ namespace Infinit {
 		Application::Get().DrawResourceLoaderImGui();
 
 
+		ImGui::Begin("Resource View##ResourceView");
+		ImGui::End();
+
 		ImGui::Begin("Components##ComponentView");
 		ImGui::End();
 

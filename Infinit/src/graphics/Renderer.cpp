@@ -340,15 +340,14 @@ void main()
 		s_Instance->m_LightMap = lightMap;
 	}
 
-	void Renderer::End()
-	{
+	void Renderer::End(){
 	}
 
 
-	void Renderer::Draw(MeshInstance* mesh, MaterialInstance* material, const glm::mat4& modelMatrix)
+	void Renderer::Draw(std::weak_ptr<Mesh> mesh, MaterialInstance* material, const glm::mat4& modelMatrix)
 	{
 		IN_CORE_ASSERT(s_Instance, "No Renderer instance set!"); //Forgot to call Renderer::Init(); ?
-		IN_CORE_ASSERT(mesh, "Mesh not valid");
+		IN_CORE_ASSERT(!mesh.expired(), "Mesh not valid");
 		IN_CORE_ASSERT(s_Instance->m_LightMap.size() > 0, "No lights set for the scene!");
 		//IN_CORE_ASSERT(mesh->UsedMaterial, "Pls provide a Material for the model!");
 		if (!material)
@@ -363,18 +362,22 @@ void main()
 		//Clean this up!
 
 		std::weak_ptr<Shader> shader = material->GetShaderProgram();
-		if (shader.expired()) return;
+		if (shader.expired())
+		{
+			IN_CORE_WARN("Cant render mesh with invalid shader from Material \"{0}\"!");
+			return;
+		}
 
 		shader.lock()->SetUniformBuffer("u_ViewProjectionMatrix", (byte*)&s_Instance->m_ViewProjectionMatrix[0][0], sizeof(float) * 4 * 4);
 		shader.lock()->SetUniformBuffer("u_ModelMatrix", (byte*)&modelMatrix[0][0], sizeof(float) * 4 * 4);
 		shader.lock()->SetUniformBuffer("lights", (byte*) &s_Instance->m_LightMap[0], sizeof(Light));
 		shader.lock()->SetUniformBuffer("u_CameraPosition", (byte*)&s_Instance->m_CameraPosition, sizeof(glm::vec3));
 		
-		shader.lock()->SetUniform3f("lights.Direction", s_Instance->m_LightMap[0].Direction * TO_RADIANS);
+		//shader.lock()->SetUniform3f("lights.Direction", s_Instance->m_LightMap[0].Direction * TO_RADIANS);
 		material->Bind();
 
-		mesh->GetVertexArray()->Bind();
-		uint vertexCount = mesh->GetVertexCount();
+		mesh.lock()->GetVertexArray()->Bind();
+		uint vertexCount = mesh.lock()->GetVertexArray()->GetIndexBuffer()->GetCount();
 		IN_RENDER1(vertexCount, {
 				RendererAPI::s_Instance->DrawIndexed(vertexCount);
 			})
@@ -382,6 +385,7 @@ void main()
 
 	void Renderer::WaitAndRender()
 	{
+
 		m_CommandQueue.Execute();
 	}
 

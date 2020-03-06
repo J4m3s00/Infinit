@@ -7,9 +7,9 @@ namespace Infinit {
 	{
 		if (e.GetEventType() == EventType::AppRender)
 		{
-			if (m_Instance)
+			if (m_Mesh)
 			{
-				Infinit::Renderer::Draw(m_Instance, UsedMaterial, m_GameObject->GetWorldTransform().GetTransformMatrix());
+				Infinit::Renderer::Draw(m_Mesh, UsedMaterial, m_GameObject->GetWorldTransform().GetTransformMatrix());
 			}
 		}
 	}
@@ -25,9 +25,9 @@ namespace Infinit {
 	
 		if (ImGui::CollapsingHeader(GetTypeName().c_str()))
 		{
-			if (m_Instance)
+			if (m_Mesh)
 			{
-				m_Instance->DrawImGui();
+				ImGui::Text(m_Mesh->GetName().c_str());
 				ImGui::SameLine();
 			}
 			ImGui::Text("Mesh:");
@@ -38,10 +38,9 @@ namespace Infinit {
 				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("RESOURCE_NODE"))
 				{
 					ResourceNode* node = (ResourceNode*)payload->Data;
-					if (node->GetType() == ResourceNode::Type::MESH)
+					if (node->GetResource<Resource>() && node->GetResource<Resource>()->GetType() == Resource::Type::MESH)
 					{
-						if (m_Instance) delete m_Instance;
-						m_Instance = new MeshInstance(node->GetResource<Mesh>());
+						m_Mesh = node->GetResource<Mesh>();
 					}
 				}
 				ImGui::EndDragDropTarget();
@@ -63,7 +62,7 @@ namespace Infinit {
 				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("RESOURCE_NODE"))
 				{
 					ResourceNode* node = (ResourceNode*)payload->Data;
-					if (node->GetType() == ResourceNode::Type::MATERIAL)
+					if (node->GetResource<Resource>() && node->GetResource<Resource>()->GetType() == Resource::Type::MATERIAL)
 					{
 						if (UsedMaterial) delete UsedMaterial;
 						UsedMaterial = new MaterialInstance(node->GetResource<Material>());
@@ -74,9 +73,8 @@ namespace Infinit {
 			bool open = true;
 			if (ImGui::BeginPopupModal("Create Material##NewMatrial", &open, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_AlwaysAutoResize))
 			{
-				char* materialName = new char[512]; // 512 chars long name
-				memset(materialName, 0, 512);
-				ImGui::InputText("Name", materialName, 512);
+				static string materialName;
+				ImGui::InputText("Name", &materialName[0], 512);
 				if (ImGui::Button("Ok"))
 				{
 					std::shared_ptr<Material> material = std::make_shared<Material>(materialName);

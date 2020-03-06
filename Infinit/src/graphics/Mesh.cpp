@@ -38,14 +38,20 @@ namespace Infinit {
 		}
 	};
 	
+	Mesh::Mesh()
+		: Resource("", Resource::Type::MESH)
+	{
+	}
+
+
 	Mesh::Mesh(const string& filename)
-		: Resource(filename)
+		: Resource(filename, Resource::Type::MESH)
 	{
 		Reload(filename);
 	}
 
 	Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<Index>& indices)
-		: Resource(""), m_Vertices(vertices), m_Indices(indices)
+		: Resource("", Resource::Type::MESH), m_Vertices(vertices), m_Indices(indices)
 	{
 		m_VertexArray.reset(VertexArray::Create());
 		std::shared_ptr<VertexBuffer> vertexBuffer;
@@ -59,16 +65,14 @@ namespace Infinit {
 		m_VertexArray->AddVertexBuffer(vertexBuffer);
 
 		std::shared_ptr<IndexBuffer> indexBuffer;
-		indexBuffer.reset(IndexBuffer::Create((const uint*)m_Indices.data(), 3));
+		indexBuffer.reset(IndexBuffer::Create((const uint*)m_Indices.data(), indices.size() * 3));
 		m_VertexArray->SetIndexBuffer(indexBuffer);
 	}
 
 	bool Mesh::Reload(const string& filePath)
 	{
 		LogStream::Initialize();
-
-		IN_CORE_INFO("Loading mesh: {0}", filePath.c_str());
-
+		
 		Assimp::Importer importer;
 
 		const aiScene* scene = importer.ReadFile(filePath, ImportFlags);
@@ -134,17 +138,5 @@ namespace Infinit {
 		IN_CORE_INFO("Deleted Mesh");
 	}
 
-	MeshInstance::MeshInstance(std::shared_ptr<Mesh> instance)
-		: m_FilePath(instance->m_FilePath)
-	{
-		m_VertexArray = instance->GetVertexArray();
-		m_VertexCount = m_VertexArray->GetIndexBuffer()->GetCount();
-		//UsedMaterial = Material::DefaultMaterial;
-	}
-
-	void MeshInstance::DrawImGui()
-	{
-		ImGui::Text(m_FilePath.c_str());
-	}
 
 }

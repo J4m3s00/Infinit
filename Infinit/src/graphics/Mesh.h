@@ -20,6 +20,7 @@ namespace Infinit {
 			uint V1, V2, V3;
 		};
 
+		Mesh();
 		Mesh(const string& filename);
 		Mesh(const std::vector<Vertex>& vertices, const std::vector<Index>& indices);
 		~Mesh();
@@ -32,21 +33,6 @@ namespace Infinit {
 		std::vector<Index> m_Indices;
 
 		std::shared_ptr<VertexArray> m_VertexArray;
-	};
-
-	class MeshInstance
-	{
-	public:
-		MeshInstance(std::shared_ptr<Mesh> instance);
-
-		inline std::shared_ptr<VertexArray> GetVertexArray() const { return m_VertexArray; }
-		inline uint GetVertexCount() const { return m_VertexCount; }
-
-		void DrawImGui();
-	private:
-		std::shared_ptr<VertexArray> m_VertexArray;
-		uint m_VertexCount;
-		string& m_FilePath;
 	};
 
 }

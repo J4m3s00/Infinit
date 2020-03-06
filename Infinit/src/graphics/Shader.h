@@ -5,7 +5,7 @@ namespace Infinit {
 	class Shader : public Resource
 	{
 	public:
-		Shader(const string& filePath, const string& name = "Unknown") : Resource(filePath, name) {}
+		Shader(const string& filePath, const string& name = "Unknown") : Resource(filePath, Resource::Type::SHADER, name) {}
 
 		virtual ~Shader() {}
 
@@ -33,6 +33,7 @@ namespace Infinit {
 
 		static std::shared_ptr<Shader> Create(const string& filePath);
 		static std::shared_ptr<Shader> Create(const string& vertexSource, const string& fragmentSource);
+		static std::shared_ptr<Shader> Create(const json& json_object);
 	public:
 		static std::shared_ptr<Shader> DefaultShader;
 	};

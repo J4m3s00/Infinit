@@ -105,7 +105,7 @@ namespace Infinit {
 		: Resource(filepath, Resource::Type::MATERIAL, name)
 	{
 		if (filepath != "")
-			Reload(m_FilePath);
+			Reload(m_FilePath.GetValue());
 		//while (isvalid)
 		//{
 		//
@@ -129,39 +129,34 @@ namespace Infinit {
 		std::ifstream inFile(filePath);
 		json json_object;
 		inFile >> json_object;
-		Deserialize(json_object);
+		this->Deserialize(json_object);
 		return true;
 	}
 
-	json Material::Serialize() const
+	void Material::OnSerialize(json& js_object) const
 	{
-		json result;
+		Resource::OnSerialize(js_object);
 		if (m_ShaderProgram)
 		{
-			result["Shader"] = {
-				{"Name", m_ShaderProgram->GetName()},
-				{"Path", m_ShaderProgram->GetFilePath()}
-			};
+			json shaderJson = json::object();
+			m_ShaderProgram->Serialize(shaderJson);
+
+			js_object["Shader"] = shaderJson;
 		}
-		return result;
 	}
 
-	void Material::Deserialize(const json& json_object)
+	void Material::OnDeserialize(const json& json_object)
 	{
 		json shader_json = json_object["Shader"];
-		string path = "";
-		string name = "";
-		if (!shader_json.is_null())
+		if (m_ShaderProgram)
 		{
-			path = shader_json["Path"];
-			name = shader_json["Name"];
+			m_ShaderProgram->Deserialize(shader_json);
 		}
-		std::shared_ptr<Shader> shader;
-		while (!shader && Application::Get().GetResourceLoader().ResourceExist(path, Resource::Type::SHADER))
+		else
 		{
-			shader = Application::Get().GetResourceLoader().GetResource<Shader>(path);
+			m_ShaderProgram = Shader::Create(shader_json);
 		}
-		SetShader(shader);
+		SetShader(m_ShaderProgram);
 	}
 
 	void Material::SetShader(std::shared_ptr<Shader> shader)
@@ -277,7 +272,9 @@ namespace Infinit {
 			{
 
 				std::ofstream o(Instance.lock()->GetFilePath());
-				o << std::setw(4) << Instance.lock()->Serialize() << std::endl;
+				json js = json::object();
+				Instance.lock()->Serialize(js);
+				o << std::setw(4) << js << std::endl;
 			}
 		}
 		if (!Instance.expired())
@@ -294,10 +291,12 @@ namespace Infinit {
 						materialName.append(Instance.lock()->GetName().c_str());
 						materialName.append(".inm");
 
-						Instance.lock()->m_FilePath = materialName;
+						Instance.lock()->m_FilePath.SetValue(materialName);
 
 						std::ofstream o(materialName);
-						o << std::setw(4) << Instance.lock()->Serialize() << std::endl;
+						json js = json::object();
+						Instance.lock()->Serialize(js);
+						o << std::setw(4) << js << std::endl;
 					}
 					else { IN_CORE_ERROR("Returned an invalid node from the file dialog!"); }
 				}

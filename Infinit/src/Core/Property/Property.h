@@ -11,7 +11,7 @@ namespace Infinit {
 
 		const string& GetPropertyName() const { return m_PropertyName; }
 
-	private:
+	protected:
 		string m_PropertyName;
 		Object* m_AttachedObject;
 	};
@@ -20,9 +20,19 @@ namespace Infinit {
 	class ValueProperty : public Property
 	{
 	public:
-		Property(const string& name, Object* attachedTo, const T& defaultValue)
+		ValueProperty(const string& name, Object* attachedTo, const T& defaultValue)
 			: Property(name, attachedTo), m_DefaultValue(defaultValue), m_Value(defaultValue)
 		{
+		}
+
+		void SetValue(const T& value)
+		{
+			m_Value = value;
+		}
+
+		const T& GetValue() const
+		{
+			return m_Value;
 		}
 
 		void Serialize(json& json) const
@@ -33,8 +43,8 @@ namespace Infinit {
 
 		void Deserialize(const json& json)
 		{
-			m_Value = json[m_PropertyName];
-			m_DefaultValue = json[m_PropertyName + "_Default"];
+			JsonHelper::ConvertObject(json[m_PropertyName], m_Value);
+			JsonHelper::ConvertObject(json[m_PropertyName + "_Default"], m_DefaultValue);
 		}
 
 	private:

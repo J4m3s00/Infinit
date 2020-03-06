@@ -72,13 +72,13 @@ namespace Infinit {
 		case Resource::Type::TEXTURE:
 		{
 			result = std::dynamic_pointer_cast<Resource>(Texture2D::Create(absolutePath));
-			result->ChangeName(node->GetName());
+			result->SetName(node->GetName());
 			break;
 		}
 		case Resource::Type::CUBEMAP:
 		{
 			result = std::dynamic_pointer_cast<Resource>(TextureCube::Create(absolutePath));
-			result->ChangeName(node->GetName());
+			result->SetName(node->GetName());
 			break;
 		}
 		case Resource::Type::MATERIAL:
@@ -89,13 +89,13 @@ namespace Infinit {
 		case Resource::Type::MESH:
 		{
 			result = std::dynamic_pointer_cast<Resource>(std::make_shared<Mesh>(absolutePath));
-			result->ChangeName(node->GetName());
+			result->SetName(node->GetName());
 			break;
 		}
 		case Resource::Type::SHADER:
 		{
 			result = std::dynamic_pointer_cast<Resource>(Shader::Create(absolutePath));
-			result->ChangeName(node->GetName());
+			result->SetName(node->GetName());
 			break;
 		}
 		case Resource::Type::ENGINE_RESOURCE:
@@ -179,9 +179,10 @@ namespace Infinit {
 				size_t dotPos = resourcePath.find_last_of(".");
 				resourcePath = resourcePath.substr(0, dotPos);
 				resourcePath += ".inr";
-				resource->m_FilePath = resourcePath;
+				resource->m_FilePath.SetValue(resourcePath);
 			} 
-			json json_resource = resource->Serialize();
+			json json_resource = json::object();
+			resource->Serialize(json_resource);
 
 			std::ofstream o(resourcePath);
 			o << std::setw(4) << json_resource << std::endl;

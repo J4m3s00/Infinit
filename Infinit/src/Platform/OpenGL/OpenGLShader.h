@@ -35,9 +35,7 @@ namespace Infinit {
 
 		virtual bool Reload(const string& filePath) override;
 
-
-		virtual json Serialize() const override;
-		virtual void Deserialize(const json& json_object) override;
+		virtual void OnDeserialize(const json& json_object) override;
 
 		virtual void ImGuiDraw() override;
 	private:
@@ -56,7 +54,7 @@ namespace Infinit {
 		std::vector<ShaderUniform> m_Uniforms;
 		std::vector<ShaderStruct> m_Structs;
 		std::vector<string> m_Resources;
-		string m_ShaderSource;
+		ValueProperty<string> m_ShaderSource;
 		uint m_RendererID;
 	};
 

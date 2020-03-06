@@ -20,7 +20,10 @@ namespace Infinit {
 		bool GetParamVec4Safe(const char* paramName, const json& js_object, glm::vec4& outValue);
 		glm::mat4 GetParamMat4(const char* paramName, const json& js_object);
 		bool GetParamMat4Safe(const char* paramName, const json& js_object, glm::mat4& outValue);
-
+		UUID GetParamUUID(const char* paramName, const json& js_object);
+		bool GetParamUUIDSafe(const char* paramName, const json& js_object, UUID& outValue);
+		string GetParamString(const char* paramName, const json& js_object);
+		bool GetParamStringSafe(const char* paramName, const json& js_object, string& outValue);
 
 		json ConvertValue(int value);
 		json ConvertValue(int* value);
@@ -40,5 +43,29 @@ namespace Infinit {
 		json ConvertValue(glm::mat4* value);
 		json ConvertValue(const string& value);
 		json ConvertValue(string* value);
+		json ConvertValue(const UUID& value);
+		json ConvertValue(UUID* value);
+
+
+		void ConvertObject(const json& ref, int& value);
+		void ConvertObject(const json& ref, int* value);
+		void ConvertObject(const json& ref, float& value);
+		void ConvertObject(const json& ref, float* value);
+		void ConvertObject(const json& ref, double& value);
+		void ConvertObject(const json& ref, double* value);
+		void ConvertObject(const json& ref, long& value);
+		void ConvertObject(const json& ref, long* value);
+		void ConvertObject(const json& ref, glm::vec2& value);
+		void ConvertObject(const json& ref, glm::vec2* value);
+		void ConvertObject(const json& ref, glm::vec3& value);
+		void ConvertObject(const json& ref, glm::vec3* value);
+		void ConvertObject(const json& ref, glm::vec4& value);
+		void ConvertObject(const json& ref, glm::vec4* value);
+		void ConvertObject(const json& ref, glm::mat4& value);
+		void ConvertObject(const json& ref, glm::mat4* value);
+		void ConvertObject(const json& ref, string& value);
+		void ConvertObject(const json& ref, string* value);
+		void ConvertObject(const json& ref, UUID& value);
+		void ConvertObject(const json& ref, UUID* value);
 	}
 }

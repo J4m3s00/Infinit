@@ -11,7 +11,7 @@ namespace Infinit { namespace JsonHelper {
 	{
 		int result = 0;
 		const json& jsParam = js_object[paramName];
-		if (!jsParam.is_number_integer()) { IN_CORE_WARN("Javascript value is not an Integer!"); IN_CORE_WARN("Object: ", jsParam.dump()); return 0; }
+		if (!jsParam.is_number_integer()) { IN_CORE_WARN("Javascript value is not an Integer!"); IN_CORE_WARN("Object: {}", jsParam.dump()); return 0; }
 		result = jsParam.get<int>();
 		return result;
 	}
@@ -31,7 +31,7 @@ namespace Infinit { namespace JsonHelper {
 	{
 		float result = 0;
 		const json& jsParam = js_object[paramName];
-		if (!jsParam.is_number_float()) { IN_CORE_WARN("Javascript value is not a Float!"); IN_CORE_WARN("Object: ", jsParam.dump()); return 0.0; }
+		if (!jsParam.is_number_float()) { IN_CORE_WARN("Javascript value is not a Float!"); IN_CORE_WARN("Object: {}", jsParam.dump()); return 0.0; }
 		result = jsParam.get<float>();
 		return result;
 	}
@@ -51,7 +51,7 @@ namespace Infinit { namespace JsonHelper {
 	{
 		double result = 0;
 		const json& jsParam = js_object[paramName];
-		if (!jsParam.is_number()) { IN_CORE_WARN("Javascript value is not a Number!"); IN_CORE_WARN("Object: ", jsParam.dump()); return 0.0; }
+		if (!jsParam.is_number()) { IN_CORE_WARN("Javascript value is not a Number!"); IN_CORE_WARN("Object: {}", jsParam.dump()); return 0.0; }
 		result = jsParam.get<double>();
 		return result;
 	}
@@ -72,7 +72,7 @@ namespace Infinit { namespace JsonHelper {
 	{
 		long result = 0;
 		const json& jsParam = js_object[paramName];
-		if (!jsParam.is_number()) { IN_CORE_WARN("Javascript value is not a Number!"); IN_CORE_WARN("Object: ", jsParam.dump()); return 0.0; }
+		if (!jsParam.is_number()) { IN_CORE_WARN("Javascript value is not a Number!"); IN_CORE_WARN("Object: {}", jsParam.dump()); return 0.0; }
 		result = jsParam.get<long>();
 		return result;
 	}
@@ -90,9 +90,9 @@ namespace Infinit { namespace JsonHelper {
 
 	glm::vec2 GetParamVec2(const char* paramName, const json& js_object)
 	{
-		glm::vec2 result;
+		glm::vec2 result(0.0f);
 		const json& jsParam = js_object[paramName];
-		if (!jsParam.is_object()) { IN_CORE_WARN("JSON vec2 is not an JsonObject!"); IN_CORE_WARN("Object: ", jsParam.dump()); return result; }
+		if (!jsParam.is_object()) { IN_CORE_WARN("JSON vec2 is not an JsonObject!"); IN_CORE_WARN("Object: {}", jsParam.dump()); return result; }
 		GetParamFloatSafe("X", jsParam, result.x);
 		GetParamFloatSafe("Y", jsParam, result.y);
 		return result;
@@ -111,9 +111,9 @@ namespace Infinit { namespace JsonHelper {
 
 	glm::vec3 GetParamVec3(const char* paramName, const json& js_object)
 	{
-		glm::vec3 result;
+		glm::vec3 result(0.0f);
 		const json& jsParam = js_object[paramName];
-		if (!jsParam.is_object()) { IN_CORE_WARN("JSON vec3 is not an JsonObject!"); IN_CORE_WARN("Object: ", jsParam.dump()); return result; }
+		if (!jsParam.is_object()) { IN_CORE_WARN("JSON vec3 is not an JsonObject!"); IN_CORE_WARN("Object: {}", jsParam.dump()); return result; }
 		GetParamFloatSafe("X", jsParam, result.x);
 		GetParamFloatSafe("Y", jsParam, result.y);
 		GetParamFloatSafe("Z", jsParam, result.z);
@@ -133,9 +133,9 @@ namespace Infinit { namespace JsonHelper {
 
 	glm::vec4 GetParamVec4(const char* paramName, const json& js_object)
 	{
-		glm::vec4 result;
+		glm::vec4 result(0.0f);
 		const json& jsParam = js_object[paramName];
-		if (!jsParam.is_object()) { IN_CORE_WARN("JSON vec4 is not an JsonObject!"); IN_CORE_WARN("Object: ", jsParam.dump()); return result; }
+		if (!jsParam.is_object()) { IN_CORE_WARN("JSON vec4 is not an JsonObject!"); IN_CORE_WARN("Object: {}", jsParam.dump()); return result; }
 		GetParamFloatSafe("X", jsParam, result.x);
 		GetParamFloatSafe("Y", jsParam, result.y);
 		GetParamFloatSafe("Z", jsParam, result.z);
@@ -156,7 +156,7 @@ namespace Infinit { namespace JsonHelper {
 	glm::mat4 GetParamMat4(const char* paramName, const json& js_object)
 	{
 		const json& jsParam = js_object[paramName];
-		if (!jsParam.is_array()) { IN_CORE_WARN("JSON mat4 is not an JsonArray!"); IN_CORE_WARN("Object: ", jsParam.dump()); return glm::mat4(1.0); }
+		if (!jsParam.is_array()) { IN_CORE_WARN("JSON mat4 is not an JsonArray!"); IN_CORE_WARN("Object: {}", jsParam.dump()); return glm::mat4(1.0); }
 		
 		return glm::mat4(jsParam[0].get<float>(),  jsParam[1].get<float>(),  jsParam[2].get<float>(),  jsParam[3].get<float>(),
 						 jsParam[4].get<float>(),  jsParam[5].get<float>(),  jsParam[6].get<float>(),  jsParam[7].get<float>(), 
@@ -172,6 +172,48 @@ namespace Infinit { namespace JsonHelper {
 			return false;
 		}
 		outValue = GetParamMat4(paramName, js_object);
+		return true;
+	}
+
+	UUID GetParamUUID(const char* paramName, const json& js_object)
+	{
+		const json& jsParam = js_object[paramName];
+		if (!jsParam.is_string()) { IN_CORE_WARN("JSON uuid is not an JsonString!"); IN_CORE_WARN("Object: {}", jsParam.dump()); return UUID(); }
+
+		string uuidString = GetParamString(paramName, js_object);
+		UUID result;
+		result.FromString(uuidString);
+		return result;
+	}
+
+	bool GetParamUUIDSafe(const char* paramName, const json& js_object, UUID& outValue)
+	{
+		if (!HasObjectProperty(paramName, js_object))
+		{
+			outValue = UUID();
+			return false;
+		}
+		outValue = GetParamUUID(paramName, js_object);
+		return true;
+	}
+
+	string GetParamString(const char* paramName, const json& js_object)
+	{
+		const json& jsParam = js_object[paramName];
+		if (!jsParam.is_string()) { IN_CORE_WARN("JSON uuid is not an JsonString!"); IN_CORE_WARN("Object: {}", jsParam.dump()); return ""; }
+
+		string result = GetParamString(paramName, js_object);
+		return result;
+	}
+
+	bool GetParamStringSafe(const char* paramName, const json& js_object, string& outValue)
+	{
+		if (!HasObjectProperty(paramName, js_object))
+		{
+			outValue = "";
+			return false;
+		}
+		outValue = GetParamString(paramName, js_object);
 		return true;
 	}
 
@@ -313,5 +355,193 @@ namespace Infinit { namespace JsonHelper {
 	{
 		return *value;
 	}
+
+	json ConvertValue(const UUID& value)
+	{
+		return value.ToString();
+	}
+
+	json ConvertValue(UUID* value)
+	{
+		return value->ToString();
+	}
+
+	void ConvertObject(const json& ref, int& value)
+	{
+		IN_CORE_ASSERT(ref.is_number(), "Json value  {}   is not a number!", ref.dump());
+		if (ref.is_number()) { value = ref.get<int>(); }
+	}
+
+	void ConvertObject(const json& ref, int* value)
+	{
+		IN_CORE_ASSERT(ref.is_number(), "Json value  {}   is not a number!", ref.dump());
+		if (ref.is_number()) { *value = ref.get<int>(); }
+	}
+
+	void ConvertObject(const json& ref, float& value)
+	{
+		IN_CORE_ASSERT(ref.is_number(), "Json value  {}   is not a number!", ref.dump());
+		if (ref.is_number()) { value = ref.get<float>(); }
+	}
+
+	void ConvertObject(const json& ref, float* value)
+	{
+		IN_CORE_ASSERT(ref.is_number(), "Json value  {}   is not a number!", ref.dump());
+		if (ref.is_number()) { *value = ref.get<float>(); }
+	}
+
+	void ConvertObject(const json& ref, double& value)
+	{
+		IN_CORE_ASSERT(ref.is_number(), "Json value  {}   is not a number!", ref.dump());
+		if (ref.is_number()) { value = ref.get<double>(); }
+	}
+
+	void ConvertObject(const json& ref, double* value)
+	{
+		IN_CORE_ASSERT(ref.is_number(), "Json value  {}   is not a number!", ref.dump());
+		if (ref.is_number()) { *value = ref.get<double>(); }
+	}
+
+	void ConvertObject(const json& ref, long& value)
+	{
+		IN_CORE_ASSERT(ref.is_number(), "Json value  {}   is not a number!", ref.dump());
+		if (ref.is_number()) { value = ref.get<long>(); }
+	}
+
+	void ConvertObject(const json& ref, long* value)
+	{
+		IN_CORE_ASSERT(ref.is_number(), "Json value  {}   is not a number!", ref.dump());
+		if (ref.is_number()) { *value = ref.get<long>(); }
+	}
+
+	void ConvertObject(const json& ref, glm::vec2& value)
+	{
+		IN_CORE_ASSERT(ref.is_object(), "Json value  {}   is not a Object!", ref.dump());
+		if (ref.is_object())
+		{ 
+			GetParamFloatSafe("X", ref, value.x);
+			GetParamFloatSafe("Y", ref, value.y);
+		}
+	}
+
+	void ConvertObject(const json& ref, glm::vec2* value)
+	{
+		IN_CORE_ASSERT(ref.is_object(), "Json value  {}   is not a Object!", ref.dump());
+		if (ref.is_object())
+		{
+			GetParamFloatSafe("X", ref, value->x);
+			GetParamFloatSafe("Y", ref, value->y);
+		}
+	}
+
+	void ConvertObject(const json& ref, glm::vec3& value)
+	{
+		IN_CORE_ASSERT(ref.is_object(), "Json value  {}   is not a Object!", ref.dump());
+		if (ref.is_object())
+		{
+			GetParamFloatSafe("X", ref, value.x);
+			GetParamFloatSafe("Y", ref, value.y);
+			GetParamFloatSafe("Z", ref, value.z);
+		}
+	}
+
+	void ConvertObject(const json& ref, glm::vec3* value)
+	{
+		IN_CORE_ASSERT(ref.is_object(), "Json value  {}   is not a Object!", ref.dump());
+		if (ref.is_object())
+		{
+			GetParamFloatSafe("X", ref, value->x);
+			GetParamFloatSafe("Y", ref, value->y);
+			GetParamFloatSafe("Z", ref, value->z);
+		}
+	}
+
+	void ConvertObject(const json& ref, glm::vec4& value)
+	{
+		IN_CORE_ASSERT(ref.is_object(), "Json value  {}   is not a Object!", ref.dump());
+		if (ref.is_object())
+		{
+			GetParamFloatSafe("X", ref, value.x);
+			GetParamFloatSafe("Y", ref, value.y);
+			GetParamFloatSafe("Z", ref, value.z);
+			GetParamFloatSafe("W", ref, value.w);
+		}
+	}
+
+	void ConvertObject(const json& ref, glm::vec4* value)
+	{
+		IN_CORE_ASSERT(ref.is_object(), "Json value  {}   is not a Object!", ref.dump());
+		if (ref.is_object())
+		{
+			GetParamFloatSafe("X", ref, value->x);
+			GetParamFloatSafe("Y", ref, value->y);
+			GetParamFloatSafe("Z", ref, value->z);
+			GetParamFloatSafe("W", ref, value->w);
+		}
+	}
+
+	void ConvertObject(const json& ref, glm::mat4& value)
+	{
+		IN_CORE_ASSERT(ref.is_array(), "Json value  {}   is not a Matrix!", ref.dump());
+		if (ref.is_array())
+		{
+			value = glm::mat4(ref[0].get<float>(), ref[1].get<float>(), ref[2].get<float>(), ref[3].get<float>(),
+				ref[4].get<float>(), ref[5].get<float>(), ref[6].get<float>(), ref[7].get<float>(),
+				ref[8].get<float>(), ref[9].get<float>(), ref[10].get<float>(), ref[11].get<float>(),
+				ref[12].get<float>(), ref[13].get<float>(), ref[14].get<float>(), ref[15].get<float>());
+		}
+	}
+
+	void ConvertObject(const json& ref, glm::mat4* value)
+	{
+		IN_CORE_ASSERT(ref.is_array(), "Json value  {}   is not a Matrix!", ref.dump());
+		if (ref.is_array())
+		{
+			*value = glm::mat4(ref[0].get<float>(), ref[1].get<float>(), ref[2].get<float>(), ref[3].get<float>(),
+				ref[4].get<float>(), ref[5].get<float>(), ref[6].get<float>(), ref[7].get<float>(),
+				ref[8].get<float>(), ref[9].get<float>(), ref[10].get<float>(), ref[11].get<float>(),
+				ref[12].get<float>(), ref[13].get<float>(), ref[14].get<float>(), ref[15].get<float>());
+		}
+	}
+
+	void ConvertObject(const json& ref, string& value)
+	{
+		IN_CORE_ASSERT(ref.is_string(), "Json value  {}   is not a String!", ref.dump());
+		if (ref.is_string())
+		{
+			value = ref.get<string>();
+		}
+	}
+
+	void ConvertObject(const json& ref, string* value)
+	{
+		IN_CORE_ASSERT(ref.is_string(), "Json value  {}   is not a String!", ref.dump());
+		if (ref.is_string())
+		{
+			*value = ref.get<string>();
+		}
+	}
+
+	void ConvertObject(const json& ref, UUID& value)
+	{
+		IN_CORE_ASSERT(ref.is_string(), "Json value  {}   is not a String!", ref.dump());
+		if (ref.is_string())
+		{
+			string uuidString = ref.get<string>();
+			(value).FromString(uuidString);
+		}
+	}
+
+	void ConvertObject(const json& ref, UUID* value)
+	{
+		IN_CORE_ASSERT(ref.is_string(), "Json value  {}   is not a String!", ref.dump());
+		if (ref.is_string())
+		{
+			string uuidString = ref.get<string>();
+			(*value).FromString(uuidString);
+		}
+	}
+
+
 
 } }

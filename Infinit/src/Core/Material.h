@@ -147,7 +147,7 @@ namespace Infinit {
 		std::shared_ptr<TextureCube> Texture;
 	};
 
-	class Material : public Resource, Serializable
+	class Material : public Resource
 	{
 		friend class MaterialInstance;
 	public:
@@ -156,8 +156,8 @@ namespace Infinit {
 		Material(const std::shared_ptr<Shader>& shader);
 		virtual ~Material();
 
-		virtual json Serialize() const override;
-		virtual void Deserialize(const json& json_object) override;
+		virtual void OnSerialize(json& js_object) const override;
+		virtual void OnDeserialize(const json& json_object) override;
 
 		void SetShader(std::shared_ptr<Shader> shader);
 

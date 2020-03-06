@@ -27,19 +27,36 @@ namespace Infinit {
 	//Remove srgb??
 
 	OpenGLTexture2D::OpenGLTexture2D()
-		: Texture2D(""), m_Format(TextureFormat::None), m_Width(0), m_Height(0), m_RendererID(0), m_Channels(0)
+		: Texture2D(""), m_Format("Format", this, (int) TextureFormat::None),
+		m_Width("Width", this, 0),
+		m_Height("Height", this, 0),
+		m_RendererID(0),
+		m_Channels("Channels", this, 0),
+		m_TexturePath("TexturePath", this, "")
 	{
 
 	}
 
 	OpenGLTexture2D::OpenGLTexture2D(const string& path, bool srgb)
-		: Texture2D(path), m_Format(TextureFormat::None), m_Width(0), m_Height(0), m_RendererID(0), m_Channels(0), m_TexturePath(path)
+		: Texture2D(path), 
+		m_Format("Format", this, (int) TextureFormat::None),
+		m_Width("Width", this, 0),
+		m_Height("Height", this, 0),
+		m_RendererID(0),
+		m_Channels("Channels", this, 0),
+		m_TexturePath("TexturePath", this, "")
 	{
 		Reload(path);
 	}
 
 	OpenGLTexture2D::OpenGLTexture2D(TextureFormat format, uint width, uint height)
-		: Texture2D(""), m_Format(format), m_Width(width), m_Height(height), m_RendererID(0), m_Channels(0)
+		: Texture2D(""), 
+		m_Format("Format", this, (int)format),
+		m_Width("Width", this, width), 
+		m_Height("Height", this, height), 
+		m_RendererID(0), 
+		m_Channels("Channels", this, 0),
+		m_TexturePath("TexturePath", this, "")
 	{
 		IN_RENDER_S({
 			glGenTextures(1, &self->m_RendererID);
@@ -50,7 +67,7 @@ namespace Infinit {
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-			glTexImage2D(GL_TEXTURE_2D, 0, InfinitToOpenGLTextureFormat(self->m_Format), self->m_Width, self->m_Height, 0, InfinitToOpenGLTextureFormat(self->m_Format), GL_UNSIGNED_BYTE, NULL);
+			glTexImage2D(GL_TEXTURE_2D, 0, InfinitToOpenGLTextureFormat(self->GetFormat()), self->GetWidth(), self->GetHeight(), 0, InfinitToOpenGLTextureFormat(TextureFormat::RGBA), GL_UNSIGNED_BYTE, NULL);
 			glGenerateMipmap(GL_TEXTURE_2D);
 
 			glBindTexture(GL_TEXTURE_2D, 0);
@@ -58,23 +75,18 @@ namespace Infinit {
 	}
 
 
-	json OpenGLTexture2D::Serialize() const
+	void OpenGLTexture2D::OnDeserialize(const json& json_object)
 	{
-		json result = Texture2D::Serialize();
+		Texture::OnDeserialize(json_object);
+		int width;
+		int height;
+		int channels;
+		byte* data = stbi_load(GetFilePath().c_str(), &width, &height, &channels, STBI_rgb_alpha);
+		m_Width.SetValue(width);
+		m_Height.SetValue(height);
+		m_Channels.SetValue(channels);
 
-		result["TexturePath"] = m_TexturePath;
-
-		return result;
-	}
-
-	void OpenGLTexture2D::Deserialize(const json& json_object)
-	{
-		m_TexturePath = json_object["TexturePath"];
-
-
-		byte* data = stbi_load(m_TexturePath.c_str(), &m_Width, &m_Height, &m_Channels, STBI_rgb_alpha);
-		m_Format = m_Channels == 3 ? TextureFormat::RGB : TextureFormat::RGBA;
-		IN_CORE_ERROR("Image \"{0}\" has {1} Channels", m_TexturePath, m_Channels);
+		m_Format.SetValue((int)(m_Channels.GetValue() == 3 ? TextureFormat::RGB : TextureFormat::RGBA));
 
 		CreateTexture(data);
 	}
@@ -91,7 +103,7 @@ namespace Infinit {
 					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 					glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-					glTexImage2D(GL_TEXTURE_2D, 0, InfinitToOpenGLTextureFormat(self->m_Format), self->m_Width, self->m_Height, 0, InfinitToOpenGLTextureFormat(TextureFormat::RGBA), GL_UNSIGNED_BYTE, data);
+					glTexImage2D(GL_TEXTURE_2D, 0, InfinitToOpenGLTextureFormat(self->GetFormat()), self->GetWidth(), self->GetHeight(), 0, InfinitToOpenGLTextureFormat(TextureFormat::RGBA), GL_UNSIGNED_BYTE, data);
 					glGenerateMipmap(GL_TEXTURE_2D);
 
 					glBindTexture(GL_TEXTURE_2D, 0);
@@ -102,18 +114,18 @@ namespace Infinit {
 	bool OpenGLTexture2D::Reload(const string& filePath)
 	{
 		if (filePath != "")
-			m_FilePath = filePath;
-		std::ifstream inFile(m_FilePath);
+			m_FilePath.SetValue(filePath);
+		std::ifstream inFile(GetFilePath());
 		json json_object;
 
 
-		size_t dotPos = m_FilePath.find_last_of(".");
+		size_t dotPos = GetFilePath().find_last_of(".");
 
-		string fileEnding = m_FilePath.substr(dotPos + 1, m_FilePath.size());
+		string fileEnding = GetFilePath().substr(dotPos + 1, GetFilePath().size());
 
 		if (fileEnding == ".inm")
 		{
-			IN_CORE_ERROR(m_FilePath);
+			IN_CORE_ERROR(GetFilePath());
 			inFile >> json_object;
 		}
 		
@@ -123,13 +135,16 @@ namespace Infinit {
 		}
 		else
 		{
-			int width, height, channels;
 			stbi_set_flip_vertically_on_load(false);
-			byte* data = stbi_load(m_FilePath.c_str(), &m_Width, &m_Height, &m_Channels, STBI_rgb_alpha);
+			int width;
+			int height;
+			int channels;
+			byte* data = stbi_load(GetFilePath().c_str(), &width, &height, &channels, STBI_rgb_alpha);
+			m_Width.SetValue(width);
+			m_Height.SetValue(height);
+			m_Channels.SetValue(channels);
 
-
-			m_Format = m_Channels == 3 ? TextureFormat::RGB : TextureFormat::RGBA;
-			IN_CORE_ERROR("Image \"{0}\" has {1} Channels", m_TexturePath, m_Channels);
+			m_Format.SetValue((int) (m_Channels.GetValue() == 3 ? TextureFormat::RGB : TextureFormat::RGBA));
 			CreateTexture(data);
 		}
 		return true;
@@ -162,13 +177,22 @@ namespace Infinit {
 //REMOVE srgb??
 
 	OpenGLTextureCube::OpenGLTextureCube()
-		: TextureCube(""), m_Width(0), m_Height(0), m_ImageData(NULL), m_Format(TextureFormat::None)
+		: TextureCube(""), m_Width("Width", this, 0), 
+		m_Height("Height", this, 0),
+		m_Format("Format", this, (int) TextureFormat::None),
+		m_TexturePath("TexturePath", this, ""), 
+		m_Channels("Channels", this, 0)
 	{
 
 	}
 
 	OpenGLTextureCube::OpenGLTextureCube(const string& path, bool srgb)
-		: TextureCube(path), m_Width(0), m_Height(0), m_Format(TextureFormat::None)
+		: TextureCube(path), 
+		m_Width("Width", this, 0),
+		m_Height("Height", this, 0),
+		m_Format("Format", this, (int)TextureFormat::None),
+		m_TexturePath("TexturePath", this, ""), 
+		m_Channels("Channels", this, 0)
 	{
 		Reload(path);
 	}
@@ -187,12 +211,11 @@ namespace Infinit {
 				stbi_set_flip_vertically_on_load(false);
 				stbi_uc* data = stbi_load(filePath.c_str(), &width, &height, &channels, STBI_rgb);
 
-				//m_ImageData.resize(width * height * channels);
 
-				m_Width = width;
-				m_Height = height;
-				m_Format = TextureFormat::RGB;
-				m_FilePath = filePath;
+				m_Width.SetValue(width);
+				m_Height.SetValue(height);
+				m_Format.SetValue((int)TextureFormat::RGB);
+				m_FilePath.SetValue(filePath);
 
 				CreateCubeMap(data);
 
@@ -203,8 +226,8 @@ namespace Infinit {
 
 	void OpenGLTextureCube::CreateCubeMap(byte* data)
 	{
-		unsigned int faceWidth = m_Width / 4;
-		unsigned int faceHeight = m_Height / 3;
+		unsigned int faceWidth = GetWidth() / 4;
+		unsigned int faceHeight = GetHeight() / 3;
 		IN_CORE_ASSERT(faceWidth == faceHeight, "Non-square faces!");
 
 		std::array<unsigned char*, 6> faces;
@@ -221,9 +244,9 @@ namespace Infinit {
 				for (size_t x = 0; x < faceWidth; x++)
 				{
 					size_t xOffset = x + i * faceWidth;
-					faces[faceIndex][(x + y * faceWidth) * 3 + 0] = data[(xOffset + yOffset * m_Width) * 3 + 0];
-					faces[faceIndex][(x + y * faceWidth) * 3 + 1] = data[(xOffset + yOffset * m_Width) * 3 + 1];
-					faces[faceIndex][(x + y * faceWidth) * 3 + 2] = data[(xOffset + yOffset * m_Width) * 3 + 2];
+					faces[faceIndex][(x + y * faceWidth) * 3 + 0] = data[(xOffset + yOffset * GetWidth()) * 3 + 0];
+					faces[faceIndex][(x + y * faceWidth) * 3 + 1] = data[(xOffset + yOffset * GetWidth()) * 3 + 1];
+					faces[faceIndex][(x + y * faceWidth) * 3 + 2] = data[(xOffset + yOffset * GetWidth()) * 3 + 2];
 				}
 			}
 			faceIndex++;
@@ -241,9 +264,9 @@ namespace Infinit {
 				for (size_t x = 0; x < faceWidth; x++)
 				{
 					size_t xOffset = x + faceWidth;
-					faces[faceIndex][(x + y * faceWidth) * 3 + 0] = data[(xOffset + yOffset * m_Width) * 3 + 0];
-					faces[faceIndex][(x + y * faceWidth) * 3 + 1] = data[(xOffset + yOffset * m_Width) * 3 + 1];
-					faces[faceIndex][(x + y * faceWidth) * 3 + 2] = data[(xOffset + yOffset * m_Width) * 3 + 2];
+					faces[faceIndex][(x + y * faceWidth) * 3 + 0] = data[(xOffset + yOffset * GetWidth()) * 3 + 0];
+					faces[faceIndex][(x + y * faceWidth) * 3 + 1] = data[(xOffset + yOffset * GetWidth()) * 3 + 1];
+					faces[faceIndex][(x + y * faceWidth) * 3 + 2] = data[(xOffset + yOffset * GetWidth()) * 3 + 2];
 				}
 			}
 			faceIndex++;
@@ -251,8 +274,8 @@ namespace Infinit {
 
 		IN_RENDER_S2(faces, data, {
 
-			unsigned int faceWidth = self->m_Width / 4;
-			unsigned int faceHeight = self->m_Height / 3;
+			unsigned int faceWidth = self->GetWidth() / 4;
+			unsigned int faceHeight = self->GetHeight() / 3;
 
 			glGenTextures(1, &self->m_RendererID);
 			glBindTexture(GL_TEXTURE_CUBE_MAP, self->m_RendererID);
@@ -262,15 +285,15 @@ namespace Infinit {
 			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-			auto format = InfinitToOpenGLTextureFormat(self->m_Format);
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, format, faceWidth, faceHeight, 0, format, GL_UNSIGNED_BYTE, faces[2]);
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, format, faceWidth, faceHeight, 0, format, GL_UNSIGNED_BYTE, faces[0]);
+			auto format = InfinitToOpenGLTextureFormat(self->GetFormat());
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, format, faceWidth, faceHeight, 0, InfinitToOpenGLTextureFormat(TextureFormat::RGBA), GL_UNSIGNED_BYTE, faces[2]);
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, format, faceWidth, faceHeight, 0, InfinitToOpenGLTextureFormat(TextureFormat::RGBA), GL_UNSIGNED_BYTE, faces[0]);
 
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, format, faceWidth, faceHeight, 0, format, GL_UNSIGNED_BYTE, faces[4]);
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, format, faceWidth, faceHeight, 0, format, GL_UNSIGNED_BYTE, faces[5]);
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, format, faceWidth, faceHeight, 0, InfinitToOpenGLTextureFormat(TextureFormat::RGBA), GL_UNSIGNED_BYTE, faces[4]);
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, format, faceWidth, faceHeight, 0, InfinitToOpenGLTextureFormat(TextureFormat::RGBA), GL_UNSIGNED_BYTE, faces[5]);
 
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, format, faceWidth, faceHeight, 0, format, GL_UNSIGNED_BYTE, faces[1]);
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, format, faceWidth, faceHeight, 0, format, GL_UNSIGNED_BYTE, faces[3]);
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, format, faceWidth, faceHeight, 0, InfinitToOpenGLTextureFormat(TextureFormat::RGBA), GL_UNSIGNED_BYTE, faces[1]);
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, format, faceWidth, faceHeight, 0, InfinitToOpenGLTextureFormat(TextureFormat::RGBA), GL_UNSIGNED_BYTE, faces[3]);
 
 			glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 
@@ -284,37 +307,21 @@ namespace Infinit {
 			})
 	}
 
-	json OpenGLTextureCube::Serialize() const
+	void OpenGLTextureCube::OnDeserialize(const json& json_object)
 	{
-		json result = TextureCube::Serialize();
-		result["Width"] = m_Width;
-		result["Height"] = m_Height;
-		result["Format"] = m_Format;
-		result["Channles"] = m_Channels;
+		OpenGLTextureCube::OnDeserialize(json_object);
 
-		json pixelArray = json::array();
-		for (uint i = 0; i < m_Width * m_Height * m_Channels; i++) {
-			pixelArray.push_back(m_ImageData[i]);
-		}
-		result["ImageData"] = pixelArray;
-		return result;
-	}
+		int width;
+		int height;
+		int channels;
+		byte* data = stbi_load(GetFilePath().c_str(), &width, &height, &channels, STBI_rgb_alpha);
+		m_Width.SetValue(width);
+		m_Height.SetValue(height);
+		m_Channels.SetValue(channels);
 
-	void OpenGLTextureCube::Deserialize(const json& json_object)
-	{
-		m_Width = json_object["Width"];
-		m_Height = json_object["Height"];
-		m_Format = json_object["Format"];
-		m_Channels = json_object["Channels"];
+		m_Format.SetValue((int) (m_Channels.GetValue() == 3 ? TextureFormat::RGB : TextureFormat::RGBA));
 
-		json json_imageData = json_object["ImageData"];
-		if (json_imageData)
-		{
-			for (uint i = 0; i < m_Width * m_Height * m_Channels; i++)
-			{
-				m_ImageData[i] = json_imageData[i];
-			}
-		}
+		CreateCubeMap(data);
 	}
 
 	OpenGLTextureCube::~OpenGLTextureCube()

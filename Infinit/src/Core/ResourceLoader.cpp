@@ -104,7 +104,7 @@ namespace Infinit {
 			json json_object;
 			i >> json_object;
 
-			Resource::Type loadingType = json_object["Type"];
+			Resource::Type loadingType = json_object["ResourceType"];
 
 			switch (loadingType)
 			{

@@ -173,14 +173,14 @@ public:
 
 	void SetupRayMarchingTest()
 	{
-		static std::vector<Infinit::Mesh::Vertex> planeVertex = {
+		static std::vector<Infinit::MeshVertex> planeVertex = {
 		{{-100.0f, -100.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 0.0f}, {}, {}},
 		{{-100.0f,  100.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f}, {}, {}},
 		{{ 100.0f,  100.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 1.0f}, {}, {}},
 		{{ 100.0f, -100.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, {1.0f, 0.0f}, {}, {}}
 		};
 
-		static std::vector<Infinit::Mesh::Index> planeIndices = {
+		static std::vector<Infinit::MeshIndex> planeIndices = {
 			{0, 1, 2},
 			{2, 3, 0}
 		};

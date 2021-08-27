@@ -81,7 +81,7 @@ namespace Infinit {
 		int width;
 		int height;
 		int channels;
-		byte* data = stbi_load(GetFilePath().c_str(), &width, &height, &channels, STBI_rgb_alpha);
+		byte* data = stbi_load(m_TexturePath.GetValue().c_str(), &width, &height, &channels, STBI_rgb_alpha);
 		m_Width.SetValue(width);
 		m_Height.SetValue(height);
 		m_Channels.SetValue(channels);
@@ -123,9 +123,8 @@ namespace Infinit {
 
 		string fileEnding = GetFilePath().substr(dotPos + 1, GetFilePath().size());
 
-		if (fileEnding == ".inm")
+		if (fileEnding == "inr")
 		{
-			IN_CORE_ERROR(GetFilePath());
 			inFile >> json_object;
 		}
 		
@@ -143,6 +142,7 @@ namespace Infinit {
 			m_Width.SetValue(width);
 			m_Height.SetValue(height);
 			m_Channels.SetValue(channels);
+			m_TexturePath.SetValue(GetFilePath());
 
 			m_Format.SetValue((int) (m_Channels.GetValue() == 3 ? TextureFormat::RGB : TextureFormat::RGBA));
 			CreateTexture(data);
@@ -215,6 +215,7 @@ namespace Infinit {
 				m_Width.SetValue(width);
 				m_Height.SetValue(height);
 				m_Format.SetValue((int)TextureFormat::RGB);
+				m_TexturePath.SetValue(filePath);
 				m_FilePath.SetValue(filePath);
 
 				CreateCubeMap(data);
@@ -286,14 +287,14 @@ namespace Infinit {
 			glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
 			auto format = InfinitToOpenGLTextureFormat(self->GetFormat());
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, format, faceWidth, faceHeight, 0, InfinitToOpenGLTextureFormat(TextureFormat::RGBA), GL_UNSIGNED_BYTE, faces[2]);
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, format, faceWidth, faceHeight, 0, InfinitToOpenGLTextureFormat(TextureFormat::RGBA), GL_UNSIGNED_BYTE, faces[0]);
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X, 0, format, faceWidth, faceHeight, 0, InfinitToOpenGLTextureFormat(TextureFormat::RGB), GL_UNSIGNED_BYTE, faces[2]);
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_X, 0, format, faceWidth, faceHeight, 0, InfinitToOpenGLTextureFormat(TextureFormat::RGB), GL_UNSIGNED_BYTE, faces[0]);
 
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, format, faceWidth, faceHeight, 0, InfinitToOpenGLTextureFormat(TextureFormat::RGBA), GL_UNSIGNED_BYTE, faces[4]);
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, format, faceWidth, faceHeight, 0, InfinitToOpenGLTextureFormat(TextureFormat::RGBA), GL_UNSIGNED_BYTE, faces[5]);
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Y, 0, format, faceWidth, faceHeight, 0, InfinitToOpenGLTextureFormat(TextureFormat::RGB), GL_UNSIGNED_BYTE, faces[4]);
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Y, 0, format, faceWidth, faceHeight, 0, InfinitToOpenGLTextureFormat(TextureFormat::RGB), GL_UNSIGNED_BYTE, faces[5]);
 
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, format, faceWidth, faceHeight, 0, InfinitToOpenGLTextureFormat(TextureFormat::RGBA), GL_UNSIGNED_BYTE, faces[1]);
-			glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, format, faceWidth, faceHeight, 0, InfinitToOpenGLTextureFormat(TextureFormat::RGBA), GL_UNSIGNED_BYTE, faces[3]);
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_Z, 0, format, faceWidth, faceHeight, 0, InfinitToOpenGLTextureFormat(TextureFormat::RGB), GL_UNSIGNED_BYTE, faces[1]);
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_NEGATIVE_Z, 0, format, faceWidth, faceHeight, 0, InfinitToOpenGLTextureFormat(TextureFormat::RGB), GL_UNSIGNED_BYTE, faces[3]);
 
 			glGenerateMipmap(GL_TEXTURE_CUBE_MAP);
 

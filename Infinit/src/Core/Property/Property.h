@@ -4,13 +4,14 @@ namespace Infinit {
 	
 	class Object;
 
-	class Property : public Serializable
+	class Property
 	{
 	public:
 		Property(const string& name, Object* attachedTo);
 
 		const string& GetPropertyName() const { return m_PropertyName; }
-
+		virtual void Serialize(json& json, bool writeDefaults = false) const = 0;
+		virtual void Deserialize(const json& json) = 0;
 	protected:
 		string m_PropertyName;
 		Object* m_AttachedObject;
@@ -35,16 +36,27 @@ namespace Infinit {
 			return m_Value;
 		}
 
-		void Serialize(json& json) const
+		void Serialize(json& json, bool writeDefaults = false) const
 		{
-			json[m_PropertyName + "_Default"] = JsonHelper::ConvertValue(m_DefaultValue);
+			if (writeDefaults)
+			{
+				json[m_PropertyName + "_Default"] = JsonHelper::ConvertValue(m_DefaultValue);
+			}
 			json[m_PropertyName] = JsonHelper::ConvertValue(m_Value);
 		}
 
 		void Deserialize(const json& json)
 		{
 			JsonHelper::ConvertObject(json[m_PropertyName], m_Value);
-			JsonHelper::ConvertObject(json[m_PropertyName + "_Default"], m_DefaultValue);
+			if (JsonHelper::HasObjectProperty((m_PropertyName + "_Default").c_str(), json))
+			{
+				JsonHelper::ConvertObject(json[m_PropertyName + "_Default"], m_DefaultValue);
+			}
+		}
+
+		T* operator -> ()
+		{
+			return &m_Value;
 		}
 
 	private:

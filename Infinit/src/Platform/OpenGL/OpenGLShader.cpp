@@ -43,7 +43,6 @@ namespace Infinit {
 		if (m_UniformBuffer)
 			delete[] m_UniformBuffer;
 		m_UniformBuffer = nullptr;
-		m_ShaderSource.SetValue("");
 		////////
 		if (m_RendererID != 0) {
 			glDeleteProgram(m_RendererID);
@@ -67,9 +66,18 @@ namespace Infinit {
 		m_ShaderSource.SetValue("");
 		////////
 		if (filepath != "") m_FilePath.SetValue(filepath);
-		std::ifstream inFile(m_FilePath.GetValue());
+		std::ifstream inFile(GetFilePath());
 		json json_object;
-		inFile >> json_object;
+
+
+		size_t dotPos = GetFilePath().find_last_of(".");
+
+		string fileEnding = GetFilePath().substr(dotPos + 1, GetFilePath().size());
+
+		if (fileEnding == "inr")
+		{
+			inFile >> json_object;
+		}
 		if (!json_object.is_null())
 		{
 			Deserialize(json_object);

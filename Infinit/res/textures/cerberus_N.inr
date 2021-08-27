@@ -1,0 +1,11 @@
+{
+    "Channels": 3,
+    "FilePath": "res/textures/cerberus_N.inr",
+    "Format": 1,
+    "Height": 4096,
+    "Name": "cerberus_N.png",
+    "ResourceType": 5,
+    "TexturePath": "res/textures/cerberus_N.png",
+    "UUID": "{F1A96495-6008-11EA-8925-18568071B000}",
+    "Width": 4096
+}

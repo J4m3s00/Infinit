@@ -7,6 +7,7 @@ namespace Infinit {
 	class OpenGLShader : public Shader
 	{
 	public:
+		OpenGLShader();
 		OpenGLShader(const string& path);
 		OpenGLShader(const string& vertexSource, const string& fragmentSource);
 		virtual ~OpenGLShader();
@@ -33,6 +34,10 @@ namespace Infinit {
 		virtual const std::vector<ShaderStruct>& GetStructs() const override;
 
 		virtual bool Reload(const string& filePath) override;
+
+		virtual void OnDeserialize(const json& json_object) override;
+
+		virtual void ImGuiDraw() override;
 	private:
 		int GetUniformLocation(const string& name);
 		void LoadShaderFromFile(const string& path);
@@ -49,7 +54,7 @@ namespace Infinit {
 		std::vector<ShaderUniform> m_Uniforms;
 		std::vector<ShaderStruct> m_Structs;
 		std::vector<string> m_Resources;
-		string m_ShaderSource;
+		ValueProperty<string> m_ShaderSource;
 		uint m_RendererID;
 	};
 

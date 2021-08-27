@@ -38,18 +38,28 @@ namespace Infinit {
 		}
 	};
 	
+	Mesh::Mesh()
+		: Resource("", Resource::Type::MESH),
+		m_Vertices("Vertices", this, {}),
+		m_Indices("Indicies", this, {})
+	{
+	}
+
+
 	Mesh::Mesh(const string& filename)
-		: Resource(filename)
+		: Resource(filename, Resource::Type::MESH),
+		m_Vertices("Vertices", this, {}),
+		m_Indices("Indicies", this, {})
 	{
 		Reload(filename);
 	}
 
-	Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<Index>& indices)
-		: Resource(""), m_Vertices(vertices), m_Indices(indices)
+	Mesh::Mesh(const std::vector<MeshVertex>& vertices, const std::vector<MeshIndex>& indices)
+		: Resource("", Resource::Type::MESH), m_Vertices("Vertices", this, vertices), m_Indices("Indices", this, indices)
 	{
 		m_VertexArray.reset(VertexArray::Create());
 		std::shared_ptr<VertexBuffer> vertexBuffer;
-		vertexBuffer.reset(VertexBuffer::Create(m_Vertices.data(), m_Vertices.size() * sizeof(Vertex)));
+		vertexBuffer.reset(VertexBuffer::Create(m_Vertices->data(), m_Vertices->size() * sizeof(MeshVertex)));
 
 		vertexBuffer->SetLayout({ {ShaderDataType::Float3, "position"},
 									{ShaderDataType::Float3, "normal"},
@@ -59,73 +69,79 @@ namespace Infinit {
 		m_VertexArray->AddVertexBuffer(vertexBuffer);
 
 		std::shared_ptr<IndexBuffer> indexBuffer;
-		indexBuffer.reset(IndexBuffer::Create((const uint*)m_Indices.data(), 3));
+		indexBuffer.reset(IndexBuffer::Create((const uint*)m_Indices->data(), m_Indices->size() * 3));
 		m_VertexArray->SetIndexBuffer(indexBuffer);
 	}
 
 	bool Mesh::Reload(const string& filePath)
 	{
-		LogStream::Initialize();
+		if (filePath != "")
+			m_FilePath.SetValue(filePath);
+		std::ifstream inFile(GetFilePath());
+		json json_object;
 
-		IN_CORE_INFO("Loading mesh: {0}", filePath.c_str());
 
-		Assimp::Importer importer;
+		size_t dotPos = GetFilePath().find_last_of(".");
 
-		const aiScene* scene = importer.ReadFile(filePath, ImportFlags);
-		if (!scene || !scene->HasMeshes())
+		string fileEnding = GetFilePath().substr(dotPos + 1, GetFilePath().size());
+
+		if (fileEnding == "inr")
 		{
-			IN_CORE_ERROR("Failed to load mesh file: {0}", filePath);
-			return false;
+			inFile >> json_object;
 		}
-			
-		aiMesh* mesh = scene->mMeshes[0];
 
-		IN_CORE_ASSERT(mesh->HasPositions(), "Meshes require positions.");
-		IN_CORE_ASSERT(mesh->HasNormals(), "Meshes require normals.");
-
-		m_Vertices.reserve(mesh->mNumVertices);
-
-		// Extract vertices from model
-		for (size_t i = 0; i < m_Vertices.capacity(); i++)
+		if (!json_object.is_null())
 		{
-			Vertex vertex;
-			vertex.Position = { mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z };
-			vertex.Normal = { mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z };
+			Deserialize(json_object);
+		}
+		else
+		{
+			LogStream::Initialize();
 
-			if (mesh->HasTangentsAndBitangents())
+			Assimp::Importer importer;
+
+			const aiScene* scene = importer.ReadFile(filePath, ImportFlags);
+			if (!scene || !scene->HasMeshes())
 			{
-				vertex.Tangent = { mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z };
-				vertex.Binormal = { mesh->mBitangents[i].x, mesh->mBitangents[i].y, mesh->mBitangents[i].z };
+				IN_CORE_ERROR("Failed to load mesh file: {0}", filePath);
+				return false;
 			}
 
-			if (mesh->HasTextureCoords(0))
-				vertex.Texcoord = { mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y };
-			m_Vertices.push_back(vertex);
+			aiMesh* mesh = scene->mMeshes[0];
+
+			IN_CORE_ASSERT(mesh->HasPositions(), "Meshes require positions.");
+			IN_CORE_ASSERT(mesh->HasNormals(), "Meshes require normals.");
+
+			m_Vertices->reserve(mesh->mNumVertices);
+
+			// Extract vertices from model
+			for (size_t i = 0; i < m_Vertices->capacity(); i++)
+			{
+				MeshVertex vertex;
+				vertex.Position = { mesh->mVertices[i].x, mesh->mVertices[i].y, mesh->mVertices[i].z };
+				vertex.Normal = { mesh->mNormals[i].x, mesh->mNormals[i].y, mesh->mNormals[i].z };
+
+				if (mesh->HasTangentsAndBitangents())
+				{
+					vertex.Tangent = { mesh->mTangents[i].x, mesh->mTangents[i].y, mesh->mTangents[i].z };
+					vertex.Binormal = { mesh->mBitangents[i].x, mesh->mBitangents[i].y, mesh->mBitangents[i].z };
+				}
+
+				if (mesh->HasTextureCoords(0))
+					vertex.Texcoord = { mesh->mTextureCoords[0][i].x, mesh->mTextureCoords[0][i].y };
+				m_Vertices->push_back(vertex);
+			}
+
+
+			m_Indices->reserve(mesh->mNumFaces);
+			for (size_t i = 0; i < m_Indices->capacity(); i++)
+			{
+				IN_CORE_ASSERT(mesh->mFaces[i].mNumIndices == 3, "Must have 3 indices.");
+				m_Indices->push_back({ mesh->mFaces[i].mIndices[0], mesh->mFaces[i].mIndices[1], mesh->mFaces[i].mIndices[2] });
+			}
 		}
 
-		m_VertexArray.reset(VertexArray::Create());
-		std::shared_ptr<VertexBuffer> vertexBuffer;
-		vertexBuffer.reset(VertexBuffer::Create(m_Vertices.data(), m_Vertices.size() * sizeof(Vertex)));
-
-		vertexBuffer->SetLayout({ {ShaderDataType::Float3, "position"},
-									{ShaderDataType::Float3, "normal"},
-									{ShaderDataType::Float2, "texCoord"},
-									{ShaderDataType::Float3, "tangent"},
-									{ShaderDataType::Float3, "binormal"} });
-		m_VertexArray->AddVertexBuffer(vertexBuffer);
-
-
-		m_Indices.reserve(mesh->mNumFaces);
-		for (size_t i = 0; i < m_Indices.capacity(); i++)
-		{
-			IN_CORE_ASSERT(mesh->mFaces[i].mNumIndices == 3, "Must have 3 indices.");
-			m_Indices.push_back({ mesh->mFaces[i].mIndices[0], mesh->mFaces[i].mIndices[1], mesh->mFaces[i].mIndices[2] });
-		}
-
-
-		std::shared_ptr<IndexBuffer> indexBuffer;
-		indexBuffer.reset(IndexBuffer::Create((const uint*)&m_Indices[0], m_Indices.size() * 3));
-		m_VertexArray->SetIndexBuffer(indexBuffer);
+		
 		return true;
 	}
 
@@ -134,17 +150,31 @@ namespace Infinit {
 		IN_CORE_INFO("Deleted Mesh");
 	}
 
-	MeshInstance::MeshInstance(std::shared_ptr<Mesh> instance)
-		: m_FilePath(instance->m_FilePath)
+	void Mesh::CreateBuffers()
 	{
-		m_VertexArray = instance->GetVertexArray();
-		m_VertexCount = m_VertexArray->GetIndexBuffer()->GetCount();
-		//UsedMaterial = Material::DefaultMaterial;
+		m_VertexArray.reset(VertexArray::Create());
+		std::shared_ptr<VertexBuffer> vertexBuffer;
+		vertexBuffer.reset(VertexBuffer::Create(m_Vertices->data(), m_Vertices->size() * sizeof(MeshVertex)));
+
+		vertexBuffer->SetLayout({ {ShaderDataType::Float3, "position"},
+									{ShaderDataType::Float3, "normal"},
+									{ShaderDataType::Float2, "texCoord"},
+									{ShaderDataType::Float3, "tangent"},
+									{ShaderDataType::Float3, "binormal"} });
+		m_VertexArray->AddVertexBuffer(vertexBuffer);
+
+
+
+
+		std::shared_ptr<IndexBuffer> indexBuffer;
+		indexBuffer.reset(IndexBuffer::Create((const uint*)&m_Indices.GetValue()[0], m_Indices->size() * 3));
+		m_VertexArray->SetIndexBuffer(indexBuffer);
 	}
 
-	void MeshInstance::DrawImGui()
+	void Mesh::OnDeserialize(const json& ref)
 	{
-		ImGui::Text(m_FilePath.c_str());
+		Resource::OnDeserialize(ref);
+		CreateBuffers();
 	}
 
 }

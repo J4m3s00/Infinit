@@ -162,6 +162,7 @@
     <ClCompile Include="src\Core\ECS\Component\Component.cpp" />
     <ClCompile Include="src\Core\ECS\Component\MeshComponent.cpp" />
     <ClCompile Include="src\Core\ECS\GameObject.cpp" />
+    <ClCompile Include="src\Core\ECS\Object.cpp" />
     <ClCompile Include="src\Core\ECS\Scene.cpp" />
     <ClCompile Include="src\Core\ImGui\ImGuiBuild.cpp" />
     <ClCompile Include="src\Core\ImGui\ImGuiHelper.cpp" />
@@ -171,8 +172,12 @@
     <ClCompile Include="src\Core\Layer\LayerStack.cpp" />
     <ClCompile Include="src\Core\Log.cpp" />
     <ClCompile Include="src\Core\Material.cpp" />
+    <ClCompile Include="src\Core\Property\JsonHelper.cpp" />
+    <ClCompile Include="src\Core\Property\Property.cpp" />
+    <ClCompile Include="src\Core\Resource.cpp" />
     <ClCompile Include="src\Core\ResourceLoader.cpp" />
     <ClCompile Include="src\Core\Transform.cpp" />
+    <ClCompile Include="src\Core\UUID.cpp" />
     <ClCompile Include="src\graphics\Buffer.cpp" />
     <ClCompile Include="src\graphics\Camera.cpp" />
     <ClCompile Include="src\graphics\FrameBuffer.cpp" />
@@ -260,6 +265,7 @@
     <ClInclude Include="src\Core\ECS\Component\Components.h" />
     <ClInclude Include="src\Core\ECS\Component\MeshComponent.h" />
     <ClInclude Include="src\Core\ECS\GameObject.h" />
+    <ClInclude Include="src\Core\ECS\Object.h" />
     <ClInclude Include="src\Core\ECS\Scene.h" />
     <ClInclude Include="src\Core\ImGui\ImGuiHelper.h" />
     <ClInclude Include="src\Core\Input.h" />
@@ -270,9 +276,12 @@
     <ClInclude Include="src\Core\Light.h" />
     <ClInclude Include="src\Core\Log.h" />
     <ClInclude Include="src\Core\Material.h" />
+    <ClInclude Include="src\Core\Property\JsonHelper.h" />
+    <ClInclude Include="src\Core\Property\Property.h" />
     <ClInclude Include="src\Core\Resource.h" />
     <ClInclude Include="src\Core\ResourceLoader.h" />
     <ClInclude Include="src\Core\Transform.h" />
+    <ClInclude Include="src\Core\UUID.h" />
     <ClInclude Include="src\Events\AppEvents.h" />
     <ClInclude Include="src\Events\Event.h" />
     <ClInclude Include="src\Events\Events.h" />
@@ -300,6 +309,7 @@
     <ClInclude Include="src\Platform\OpenGL\OpenGLShader.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLTexture.h" />
     <ClInclude Include="src\Platform\OpenGL\OpenGLVertexArray.h" />
+    <ClInclude Include="src\Serialization\Serializable.h" />
     <ClInclude Include="src\Util\StringUtil.h" />
     <ClInclude Include="vendor\Glad\include\glad\glad.h" />
     <ClInclude Include="vendor\Glad\include\KHR\khrplatform.h" />

@@ -5,31 +5,36 @@ namespace Infinit {
 	static ResourceNode* AddPathToResourceTree(ResourceNode* tree, const string& path);
 	std::atomic_bool CancleLoading = false;
 
-	static ResourceNode::Type GetResourceTypeByPath(const string& path)
+	static Resource::Type GetResourceTypeByPath(const string& path)
 	{
 		size_t dotPos = path.find_last_of(".");
-		if (dotPos == string::npos) return ResourceNode::Type::FOLDER;
+		if (dotPos == string::npos) return Resource::Type::FOLDER;
 
 		string fileEnding = path.substr(dotPos + 1, path.size());
 
-		if (fileEnding == "png" || fileEnding == "tga") return ResourceNode::Type::TEXTURE;
+		if (fileEnding == "png" || fileEnding == "tga" || fileEnding == "jpg") return Resource::Type::TEXTURE;
 		//Cubemaps
-		else if (fileEnding == "cubemap")return ResourceNode::Type::CUBEMAP;
+		else if (fileEnding == "cubemap")return Resource::Type::CUBEMAP;
 		//Materials
-		else if (fileEnding == "inm")return ResourceNode::Type::MATERIAL;
+		else if (fileEnding == "inm")return Resource::Type::MATERIAL;
 		//Meshes
-		else if (fileEnding == "fbx")return ResourceNode::Type::MESH;
+		else if (fileEnding == "fbx")return Resource::Type::MESH;
 		//Shadersm_Futures
-		else if (fileEnding == "shader")return ResourceNode::Type::SHADER;
+		else if (fileEnding == "shader")return Resource::Type::SHADER;
 
-		return ResourceNode::Type::UNKNOWN;
+
+		//engine intern resource file
+		else if (fileEnding == "inr") return Resource::Type::ENGINE_RESOURCE;
+
+		return Resource::Type::UNKNOWN;
 	}
 
 	ResourceLoader::ResourceLoader()
 	{
 		m_ResourceTree = new ResourceNode("res");
-		m_ResourceTree->SetType(ResourceNode::Type::FOLDER);
+		m_ResourceTree->SetType(Resource::Type::FOLDER);
 		m_CurrentNode = m_ResourceTree;
+		m_CurrentFileDialogNode = m_ResourceTree;
 	}
 
 	ResourceLoader::~ResourceLoader()
@@ -58,43 +63,79 @@ namespace Infinit {
 
 		ResourceNode* node = resourceTree->Find(relativPath);
 		if (node && node->GetResource<Resource>()) return;
-		
-		IN_CORE_TRACE("Save resource {0}", filePath);
 
-		ResourceNode::Type resourceType = GetResourceTypeByPath(relativPath);
+		Resource::Type resourceType = GetResourceTypeByPath(relativPath);
 		//Textures
 		std::shared_ptr<Resource> result;
 		switch (resourceType)
 		{
-		case ResourceNode::Type::TEXTURE: 
+		case Resource::Type::TEXTURE:
 		{
 			result = std::dynamic_pointer_cast<Resource>(Texture2D::Create(absolutePath));
-			result->ChangeName(relativPath);
+			result->SetName(node->GetName());
 			break;
 		}
-		case ResourceNode::Type::CUBEMAP:
+		case Resource::Type::CUBEMAP:
 		{
 			result = std::dynamic_pointer_cast<Resource>(TextureCube::Create(absolutePath));
-			result->ChangeName(relativPath);
+			result->SetName(node->GetName());
 			break;
 		}
-		case ResourceNode::Type::MATERIAL:
+		case Resource::Type::MATERIAL:
 		{
-			result = std::dynamic_pointer_cast<Resource>(std::shared_ptr <Material>(new Material(absolutePath)));
-			result->ChangeName(relativPath);
+			result = std::dynamic_pointer_cast<Resource>(std::make_shared<Material>("", absolutePath));
 			break;
 		}
-		case ResourceNode::Type::MESH:
+		case Resource::Type::MESH:
 		{
-			result = std::dynamic_pointer_cast<Resource>(std::shared_ptr<Mesh>(new Mesh(absolutePath)));
-			result->ChangeName(relativPath);
+			result = std::dynamic_pointer_cast<Resource>(std::make_shared<Mesh>(absolutePath));
+			result->SetName(node->GetName());
 			break;
 		}
-		case ResourceNode::Type::SHADER:
+		case Resource::Type::SHADER:
 		{
 			result = std::dynamic_pointer_cast<Resource>(Shader::Create(absolutePath));
-			result->ChangeName(relativPath);
+			result->SetName(node->GetName());
 			break;
+		}
+		case Resource::Type::ENGINE_RESOURCE:
+		{
+			std::ifstream i(absolutePath);
+			json json_object;
+			i >> json_object;
+
+			Resource::Type loadingType = json_object["ResourceType"];
+
+			switch (loadingType)
+			{
+			case Resource::Type::TEXTURE:
+			{
+				result = Texture2D::Create(json_object);
+				break;
+			}
+			case Resource::Type::CUBEMAP:
+			{
+				result = TextureCube::Create(json_object);
+				break;
+			}
+			case Resource::Type::MATERIAL:
+			{
+				result = std::make_shared<Material>();
+				result->Deserialize(json_object);
+				break;
+			}
+			case Resource::Type::MESH:
+			{
+				result = std::make_shared<Mesh>();
+				result->Deserialize(json_object);
+				break;
+			}
+			case Resource::Type::SHADER:
+			{
+				result = Shader::Create(json_object);
+				break;
+			}
+			}
 		}
 		}
 		if (!CancleLoading)
@@ -109,8 +150,53 @@ namespace Infinit {
 
 	void ResourceLoader::AddResourceToLoad(const string& path, bool bottom)
 	{
+		//Check if engine resource exist
+		Resource::Type resType = GetResourceTypeByPath(path);
+		if (resType != Resource::Type::ENGINE_RESOURCE && resType != Resource::Type::UNKNOWN && resType != Resource::Type::FOLDER)
+		{
+			string engineResourcePath = ChangeFileEnding(path, ".inr");
+			if (std::filesystem::exists(std::filesystem::path(engineResourcePath)))
+			{
+				//Dont add the resource if an engine resource exist
+				return;
+			}
+		}
+
 		//Make check that path is relativ to res folder
 		AddPathToResourceTree(m_ResourceTree, path);
+	}
+
+	void ResourceLoader::SaveResource(Resource* resource)
+	{
+
+		if (GetResource<Resource>(resource->GetFilePath()))
+		{
+			//Change filepath with propper ending
+			string resourcePath = resource->GetFilePath();
+			Resource::Type resourcePathType = GetResourceTypeByPath(resourcePath);
+			if (resourcePathType != Resource::Type::ENGINE_RESOURCE)
+			{
+				size_t dotPos = resourcePath.find_last_of(".");
+				resourcePath = resourcePath.substr(0, dotPos);
+				resourcePath += ".inr";
+				resource->m_FilePath.SetValue(resourcePath);
+			} 
+			json json_resource = json::object();
+			resource->Serialize(json_resource);
+
+			std::ofstream o(resourcePath);
+			o << std::setw(4) << json_resource << std::endl;
+			resource->Reload(resourcePath);
+		}
+	}
+
+	string ResourceLoader::ChangeFileEnding(const string& path, const string& fileEnding)
+	{
+		string resourcePath = path;
+		size_t dotPos = resourcePath.find_last_of(".");
+		resourcePath = resourcePath.substr(0, dotPos);
+		resourcePath += fileEnding; 
+		return resourcePath;
 	}
 
 	void ResourceLoader::LoadCompleteResourceTree()
@@ -118,14 +204,26 @@ namespace Infinit {
 		m_ResourceTree->ForEach([this](ResourceNode* node) 
 			{ 
 				IN_CORE_INFO("Loading node \"{0}\" from type {1}", node->GetName(), node->GetType()); 
-				if (node->GetType() != ResourceNode::Type::FOLDER && node->GetType() != ResourceNode::Type::UNKNOWN) 
+				if (node->GetType() != Resource::Type::FOLDER && node->GetType() != Resource::Type::UNKNOWN)
 				{ 
-					m_Futures.push_back(std::async(std::launch::async, LoadResource, m_ResourceTree, node->GetFullPath())); 
+					if (node->GetType() != Resource::Type::ENGINE_RESOURCE)
+					{
+						string engineResourcePath = ChangeFileEnding(node->GetFullPath(), ".inr");
+						if (!ResourceExist(engineResourcePath, Resource::Type::ENGINE_RESOURCE))
+						{
+							m_Futures.push_back(std::async(std::launch::async, LoadResource, m_ResourceTree, node->GetFullPath()));
+						}
+					}
+					else
+					{
+						m_Futures.push_back(std::async(std::launch::async, LoadResource, m_ResourceTree, node->GetFullPath()));
+					}
+					
 				}
 			});
 	}
 
-	bool ResourceLoader::ResourceExist(const string& path, ResourceNode::Type resourceType)
+	bool ResourceLoader::ResourceExist(const string& path, Resource::Type resourceType)
 	{
 		if (GetResourceTypeByPath(path) != resourceType) { return false; }
 		return m_ResourceTree->Find(path);
@@ -134,6 +232,68 @@ namespace Infinit {
 	void ResourceLoader::AddNotSavedResource(std::shared_ptr<Resource> resource)
 	{
 		m_NotSaved.push_back(resource);
+	}
+
+	bool ResourceLoader::ShowFileDialog(Resource::Type filter, ResourceNode** currentDirectory, bool* open)
+	{
+		if (ImGui::BeginPopupModal("Open File##FileDialog", open))
+		{
+			ResourceNode* displayNode = m_CurrentFileDialogNode;
+			if (displayNode)
+			{
+				if (displayNode->GetParent())
+				{
+					if (ImGui::Button("Back##bbutton"))
+					{
+						m_CurrentFileDialogNode = displayNode->GetParent();
+						while (m_CurrentFileDialogNode->GetPreviues())
+						{
+							m_CurrentFileDialogNode = m_CurrentFileDialogNode->GetPreviues();
+						}
+						displayNode = m_CurrentFileDialogNode;
+					}
+				}
+
+				do
+				{
+					if (displayNode->GetType() != filter)
+					{
+						displayNode = displayNode->GetNext();
+						continue;
+					}
+
+					if (ImGui::Button(displayNode->GetName().c_str(), { 64, 32 }))
+					{
+						*currentDirectory = m_CurrentFileDialogNode;
+
+						m_CurrentFileDialogNode = displayNode->GetChild();
+
+						if (!m_CurrentFileDialogNode) {
+							m_CurrentFileDialogNode = new ResourceNode("..");
+							m_CurrentFileDialogNode->m_Parent = displayNode;
+						}
+
+						ImGui::EndPopup();
+						return false;
+					}
+
+					displayNode = displayNode->GetNext();
+				} while (displayNode);
+			}
+
+
+			if (ImGui::Button("Ok##FileDialog_OK"))
+			{
+				*currentDirectory = m_CurrentFileDialogNode->GetParent();
+				ImGui::CloseCurrentPopup();
+				ImGui::EndPopup();
+				return true;
+			}
+
+
+			ImGui::EndPopup();
+		}
+		return false;
 	}
 
 	void ResourceLoader::ImGuiDraw()
@@ -166,7 +326,9 @@ namespace Infinit {
 					return;
 				}
 			}
-			ImGui::Selectable(displayNode->GetName().c_str());
+			if (ImGui::Selectable(displayNode->GetName().c_str())) {
+				m_LastClickedResource = displayNode;
+			}
 
 			if (ImGui::BeginDragDropSource())
 			{
@@ -179,6 +341,14 @@ namespace Infinit {
 
 
 		ImGui::End();
+
+		if (m_LastClickedResource && m_LastClickedResource->GetResource<Resource>() && (m_LastClickedResource->GetType() != Resource::Type::FOLDER || m_LastClickedResource->GetType() != Resource::Type::UNKNOWN))
+		{
+
+			ImGui::Begin("Resource View##ResourceView");
+			m_LastClickedResource->GetResource<Resource>().get()->ImGuiDraw();
+			ImGui::End();
+		}
 	}
 
 
@@ -298,6 +468,8 @@ namespace Infinit {
 				ResourceNode* temp = new ResourceNode(current);
 				temp->SetType(GetResourceTypeByPath(current));
 				pointer->AddChild(temp);
+
+
 				pointer = temp;
 			}
 			else

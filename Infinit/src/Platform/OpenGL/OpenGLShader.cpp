@@ -4,16 +4,21 @@
 
 namespace Infinit {
 
+	OpenGLShader::OpenGLShader()
+		: Shader(""), m_RendererID(0), m_UniformBufferSize(0), m_UniformBuffer(nullptr), m_ShaderSource("ShaderSource", this, "")
+	{
+	}
+
 	OpenGLShader::OpenGLShader(const string& path)
-		: Shader(path), m_RendererID(0), m_UniformBufferSize(0)
+		: Shader(path), m_RendererID(0), m_UniformBufferSize(0), m_ShaderSource("ShaderSource", this, "")
 	{
 		Reload(path);
 	}
 
 	OpenGLShader::OpenGLShader(const string& vertexSource, const string& fragmentSource)
-		: Shader("", "Default Shader"), m_UniformBufferSize(0)
+		: Shader("", "Default Shader"), m_UniformBufferSize(0), m_ShaderSource("ShaderSource", this, "")
 	{
-		m_ShaderSource = "#shader vertex\n" + vertexSource + "#shader fragment\n" + fragmentSource;
+		m_ShaderSource.SetValue("#shader vertex\n" + vertexSource + "#shader fragment\n" + fragmentSource);
 		CompileShader();
 	}
 
@@ -26,13 +31,68 @@ namespace Infinit {
 			})
 	}
 
-	bool OpenGLShader::Reload(const string& filepath)
+	void OpenGLShader::OnDeserialize(const json& json_object)
 	{
-		if (filepath != "") m_FilePath = filepath;
-		if (m_RendererID) glDeleteProgram(m_RendererID);
-		LoadShaderFromFile(filepath);
+		Shader::OnDeserialize(json_object);
+		//Init all to zero
+		m_UniformBufferSize = 0;
+		m_UniformCache.clear();
+		m_Uniforms.clear();
+		m_Structs.clear();
+		m_Resources.clear();
+		if (m_UniformBuffer)
+			delete[] m_UniformBuffer;
+		m_UniformBuffer = nullptr;
+		////////
+		if (m_RendererID != 0) {
+			glDeleteProgram(m_RendererID);
+			m_RendererID = 0;
+		}
 
 		CompileShader();
+	}
+
+
+	bool OpenGLShader::Reload(const string& filepath)
+	{
+		//Init all to zero
+		m_UniformBufferSize = 0;
+		m_UniformCache.clear();
+		delete[] m_UniformBuffer;
+		m_UniformBuffer = nullptr;
+		m_Uniforms.clear();
+		m_Structs.clear();
+		m_Resources.clear();
+		m_ShaderSource.SetValue("");
+		////////
+		if (filepath != "") m_FilePath.SetValue(filepath);
+		std::ifstream inFile(GetFilePath());
+		json json_object;
+
+
+		size_t dotPos = GetFilePath().find_last_of(".");
+
+		string fileEnding = GetFilePath().substr(dotPos + 1, GetFilePath().size());
+
+		if (fileEnding == "inr")
+		{
+			inFile >> json_object;
+		}
+		if (!json_object.is_null())
+		{
+			Deserialize(json_object);
+		}
+		else
+		{
+			if (m_RendererID != 0) {
+				glDeleteProgram(m_RendererID);
+				m_RendererID = 0;
+			}
+			if (GetFilePath() != "")
+				LoadShaderFromFile(m_FilePath.GetValue());
+
+			CompileShader();
+		}
 		return true;
 	}
 
@@ -42,18 +102,19 @@ namespace Infinit {
 
 		const char* typeToken = "#shader";
 		size_t typeTokenLength = strlen(typeToken);
-		size_t pos = m_ShaderSource.find(typeToken, 0);
+		const string& shaderSource = m_ShaderSource.GetValue();
+		size_t pos = shaderSource.find(typeToken, 0);
 		while (pos != std::string::npos)
 		{
-			size_t eol = m_ShaderSource.find_first_of("\r\n", pos);
+			size_t eol = shaderSource.find_first_of("\r\n", pos);
 			IN_CORE_ASSERT(eol != std::string::npos, "Syntax error");
 			size_t begin = pos + typeTokenLength + 1;
-			std::string type = m_ShaderSource.substr(begin, eol - begin);
+			std::string type = shaderSource.substr(begin, eol - begin);
 			IN_CORE_ASSERT(type == "vertex" || type == "fragment", "Invalid shader type specified");
 
-			size_t nextLinePos = m_ShaderSource.find_first_not_of("\r\n", eol);
-			pos = m_ShaderSource.find(typeToken, nextLinePos);
-			shaderSources[ShaderTypeFromString(type)] = m_ShaderSource.substr(nextLinePos, pos - (nextLinePos == std::string::npos ? m_ShaderSource.size() - 1 : nextLinePos));
+			size_t nextLinePos = shaderSource.find_first_not_of("\r\n", eol);
+			pos = shaderSource.find(typeToken, nextLinePos);
+			shaderSources[ShaderTypeFromString(type)] = shaderSource.substr(nextLinePos, pos - (nextLinePos == std::string::npos ? shaderSource.size() - 1 : nextLinePos));
 		}
 
 
@@ -175,10 +236,12 @@ namespace Infinit {
 		if (in)
 		{
 			in.seekg(0, std::ios::end);
-			m_ShaderSource.resize(in.tellg());
+			string shaderSource;
+			shaderSource.resize(in.tellg());
 			in.seekg(0, std::ios::beg);
-			in.read(&m_ShaderSource[0], m_ShaderSource.size());
+			in.read(&shaderSource[0], shaderSource.size());
 			in.close();
+			m_ShaderSource.SetValue(shaderSource);
 		}
 		else
 			IN_CORE_WARN("Could not read sahder file {0}", path);
@@ -187,12 +250,12 @@ namespace Infinit {
 	void OpenGLShader::ProcessResources()
 	{
 		const char* token;
-		const char* source = m_ShaderSource.c_str();
+		const char* source = m_ShaderSource.GetValue().c_str();
 
 		while (token = FindToken(source, "struct"))
 			ParseUniformStruct(GetBlock(token, &source));
 
-		source = m_ShaderSource.c_str();
+		source = m_ShaderSource.GetValue().c_str();
 		while (token = FindToken(source, "uniform"))
 			ParseUniform(GetStatement(token, &source));
 
@@ -463,5 +526,11 @@ namespace Infinit {
 		if (it == m_Resources.end())
 			return -1;
 		return std::distance(m_Resources.begin(), it);
+	}
+
+	void OpenGLShader::ImGuiDraw()
+	{
+		Shader::ImGuiDraw();
+		ImGui::Text("%s\n", m_ShaderSource.GetValue().c_str());
 	}
 }

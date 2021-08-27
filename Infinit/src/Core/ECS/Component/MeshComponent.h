@@ -6,13 +6,13 @@ namespace Infinit {
 	{
 		IN_COMPONENT(MeshComponent, Component)
 	public:
-		MeshComponent() : m_Instance(nullptr), UsedMaterial(nullptr){}
-		virtual ~MeshComponent() { if (m_Instance) delete m_Instance; }
+		MeshComponent() : m_Mesh(nullptr), UsedMaterial(nullptr){}
+		virtual ~MeshComponent() { if (UsedMaterial) { delete UsedMaterial; UsedMaterial = nullptr; } }
 
 		virtual void OnEvent(Event& e);
 		virtual void DrawImGui();
 	public:
-		MeshInstance* m_Instance;
+		std::shared_ptr<Mesh> m_Mesh;
 		MaterialInstance* UsedMaterial;
 	private:
 	};
